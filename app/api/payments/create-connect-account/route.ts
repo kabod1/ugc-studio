@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe/client"
 
@@ -8,13 +8,19 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { data: creator } = await supabase
+    const serviceClient = createServiceClient()
+    const { data: creator, error: creatorError } = await serviceClient
       .from("creator_profiles")
       .select("id, stripe_connect_id")
       .eq("user_id", user.id)
       .single()
 
-    if (!creator) return NextResponse.json({ error: "Creator not found" }, { status: 403 })
+    if (!creator) {
+      return NextResponse.json(
+        { error: creatorError?.message || "Creator profile not found" },
+        { status: 403 }
+      )
+    }
 
     let accountId = creator.stripe_connect_id
 
@@ -28,7 +34,7 @@ export async function POST(request: NextRequest) {
       })
       accountId = account.id
 
-      await supabase
+      await serviceClient
         .from("creator_profiles")
         .update({ stripe_connect_id: accountId })
         .eq("id", creator.id)
