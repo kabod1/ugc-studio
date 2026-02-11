@@ -35,32 +35,39 @@ function LoginForm() {
 
   async function onSubmit(data: LoginFormData) {
     setLoading(true)
-    const supabase = createClient()
+    try {
+      const supabase = createClient()
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    })
+      const { error, data: authData } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      })
 
-    if (error) {
-      toast.error(error.message)
+      if (error) {
+        toast.error(error.message)
+        setLoading(false)
+        return
+      }
+
+      const userId = authData.user?.id
+      let destination = redirect || "/dashboard"
+
+      if (userId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", userId)
+          .single()
+
+        if (profile?.role === "creator") destination = redirect || "/creator"
+        else if (profile?.role === "admin") destination = redirect || "/admin"
+      }
+
+      window.location.href = destination
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.")
       setLoading(false)
-      return
     }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .single()
-
-    const destination = redirect || (
-      profile?.role === "creator" ? "/creator" :
-      profile?.role === "admin" ? "/admin" :
-      "/dashboard"
-    )
-
-    router.push(destination)
-    router.refresh()
   }
 
   return (
