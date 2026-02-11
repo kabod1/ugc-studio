@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, Suspense } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -19,7 +19,6 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get("redirect")
   const [showPassword, setShowPassword] = useState(false)
@@ -49,23 +48,29 @@ function LoginForm() {
         return
       }
 
+      toast.success("Login successful! Redirecting...")
+
       const userId = authData.user?.id
       let destination = redirect || "/dashboard"
 
       if (userId) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", userId)
           .single()
+
+        if (profileError) {
+          toast.error("Profile error: " + profileError.message)
+        }
 
         if (profile?.role === "creator") destination = redirect || "/creator"
         else if (profile?.role === "admin") destination = redirect || "/admin"
       }
 
       window.location.href = destination
-    } catch (err) {
-      toast.error("Something went wrong. Please try again.")
+    } catch (err: any) {
+      toast.error("Error: " + (err?.message || "Unknown error"))
       setLoading(false)
     }
   }
