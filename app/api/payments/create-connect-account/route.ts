@@ -51,9 +51,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: accountLink.url })
   } catch (error: any) {
     const message = error?.raw?.message || error?.message || "Connect setup failed"
-    const code = error?.raw?.code || error?.code || "unknown"
+    const code = error?.raw?.code || error?.code || error?.type || "unknown"
+    const keyPrefix = process.env.STRIPE_SECRET_KEY?.substring(0, 8) || "NOT_SET"
     return NextResponse.json(
-      { error: `${message} (code: ${code})` },
+      { error: `${message} (code: ${code}, key: ${keyPrefix}...)` },
       { status: 500 }
     )
   }
