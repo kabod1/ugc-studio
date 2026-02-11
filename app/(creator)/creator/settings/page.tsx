@@ -28,6 +28,7 @@ export default function CreatorSettingsPage() {
         setProfile(data || {})
       } catch (err) {
         console.error("Settings load error:", err)
+        setProfile({})
       }
       setLoading(false)
     }
@@ -72,6 +73,7 @@ export default function CreatorSettingsPage() {
   }
 
   if (loading) return <div className="flex justify-center p-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
+  if (!profile) return <div className="p-6 text-muted-foreground">Unable to load profile. Please try refreshing.</div>
 
   return (
     <div className="max-w-2xl space-y-6">
