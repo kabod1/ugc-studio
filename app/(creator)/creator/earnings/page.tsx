@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DollarSign, Clock, CreditCard, TrendingUp, Loader2, ExternalLink } from "lucide-react"
+import { toast } from "sonner"
 
 export default function EarningsPage() {
   const [payments, setPayments] = useState<any[]>([])
@@ -45,8 +46,14 @@ export default function EarningsPage() {
     try {
       const res = await fetch("/api/payments/create-connect-account", { method: "POST" })
       const data = await res.json()
-      if (data.url) window.location.href = data.url
-    } catch {}
+      if (data.url) {
+        window.location.href = data.url
+        return
+      }
+      toast.error(data.error || "Failed to set up Stripe Connect")
+    } catch (err: any) {
+      toast.error("Connection error: " + (err?.message || "Unknown error"))
+    }
     setSettingUp(false)
   }
 
