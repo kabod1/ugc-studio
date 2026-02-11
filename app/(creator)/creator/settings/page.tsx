@@ -14,17 +14,21 @@ export default function CreatorSettingsPage() {
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { setLoading(false); return }
 
-      const { data } = await supabase
-        .from("creator_profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .single()
+        const { data } = await supabase
+          .from("creator_profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single()
 
-      setProfile(data || {})
+        setProfile(data || {})
+      } catch (err) {
+        console.error("Settings load error:", err)
+      }
       setLoading(false)
     }
     load()

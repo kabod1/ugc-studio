@@ -12,24 +12,28 @@ export default function EarningsPage() {
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { setLoading(false); return }
 
-      const { data: c } = await supabase
-        .from("creator_profiles")
-        .select("id, stripe_connect_id")
-        .eq("user_id", user.id)
-        .single()
-      setCreator(c)
+        const { data: c } = await supabase
+          .from("creator_profiles")
+          .select("id, stripe_connect_id")
+          .eq("user_id", user.id)
+          .single()
+        setCreator(c)
 
-      if (c) {
-        const { data: p } = await supabase
-          .from("payments")
-          .select("*, campaigns(title)")
-          .eq("creator_id", c.id)
-          .order("created_at", { ascending: false })
-        setPayments(p || [])
+        if (c) {
+          const { data: p } = await supabase
+            .from("payments")
+            .select("*, campaigns(title)")
+            .eq("creator_id", c.id)
+            .order("created_at", { ascending: false })
+          setPayments(p || [])
+        }
+      } catch (err) {
+        console.error("Earnings load error:", err)
       }
       setLoading(false)
     }
