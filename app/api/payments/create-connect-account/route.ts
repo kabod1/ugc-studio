@@ -1,6 +1,32 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
-import { stripe } from "@/lib/stripe/client"
+
+async function stripeRequest(endpoint: string, body: Record<string, any>) {
+  const key = process.env.STRIPE_SECRET_KEY!
+  const params = new URLSearchParams()
+
+  function flatten(obj: any, prefix = "") {
+    for (const [k, v] of Object.entries(obj)) {
+      const key = prefix ? `${prefix}[${k}]` : k
+      if (typeof v === "object" && v !== null) flatten(v, key)
+      else params.append(key, String(v))
+    }
+  }
+  flatten(body)
+
+  const res = await fetch(`https://api.stripe.com/v1/${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${key}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: params.toString(),
+  })
+
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error?.message || "Stripe API error")
+  return data
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,12 +51,10 @@ export async function POST(request: NextRequest) {
     let accountId = creator.stripe_connect_account_id
 
     if (!accountId) {
-      const account = await stripe.accounts.create({
+      const account = await stripeRequest("accounts", {
         type: "express",
         email: user.email,
-        capabilities: {
-          transfers: { requested: true },
-        },
+        capabilities: { transfers: { requested: true } },
       })
       accountId = account.id
 
@@ -41,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || ""
-    const accountLink = await stripe.accountLinks.create({
+    const accountLink = await stripeRequest("account_links", {
       account: accountId,
       refresh_url: `${origin}/creator/earnings`,
       return_url: `${origin}/creator/earnings?setup=complete`,
@@ -50,11 +74,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: accountLink.url })
   } catch (error: any) {
-    const message = error?.raw?.message || error?.message || "Connect setup failed"
-    const code = error?.raw?.code || error?.code || error?.type || "unknown"
-    const keyPrefix = process.env.STRIPE_SECRET_KEY?.substring(0, 8) || "NOT_SET"
     return NextResponse.json(
-      { error: `${message} (code: ${code}, key: ${keyPrefix}...)` },
+      { error: error?.message || "Connect setup failed" },
       { status: 500 }
     )
   }
