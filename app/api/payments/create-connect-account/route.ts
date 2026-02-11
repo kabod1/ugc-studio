@@ -49,9 +49,11 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ url: accountLink.url })
-  } catch (error) {
+  } catch (error: any) {
+    const message = error?.raw?.message || error?.message || "Connect setup failed"
+    const code = error?.raw?.code || error?.code || "unknown"
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Connect setup failed" },
+      { error: `${message} (code: ${code})` },
       { status: 500 }
     )
   }
