@@ -55,7 +55,11 @@ export function useUser() {
   }, [])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch {
+      // Sign out even if API call fails
+    }
     setUser(null)
     setProfile(null)
     window.location.href = "/login"
