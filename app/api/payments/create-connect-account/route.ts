@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     const serviceClient = createServiceClient()
     const { data: creator, error: creatorError } = await serviceClient
       .from("creator_profiles")
-      .select("id, stripe_connect_id")
+      .select("id, stripe_connect_account_id")
       .eq("user_id", user.id)
       .single()
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let accountId = creator.stripe_connect_id
+    let accountId = creator.stripe_connect_account_id
 
     if (!accountId) {
       const account = await stripe.accounts.create({
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
       await serviceClient
         .from("creator_profiles")
-        .update({ stripe_connect_id: accountId })
+        .update({ stripe_connect_account_id: accountId })
         .eq("id", creator.id)
     }
 

@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const { data: application } = await supabase
       .from("campaign_applications")
-      .select("creator_id, creator_profiles(stripe_connect_id)")
+      .select("creator_id, creator_profiles(stripe_connect_account_id)")
       .eq("id", application_id)
       .single()
 
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       intentParams.customer = brand.stripe_customer_id
     }
 
-    const connectId = (application?.creator_profiles as any)?.stripe_connect_id
+    const connectId = (application?.creator_profiles as any)?.stripe_connect_account_id
     if (connectId) {
       intentParams.transfer_data = {
         destination: connectId,

@@ -20,7 +20,7 @@ export default function EarningsPage() {
 
         const { data: c } = await supabase
           .from("creator_profiles")
-          .select("id, stripe_connect_id")
+          .select("id, stripe_connect_account_id")
           .eq("user_id", user.id)
           .single()
         setCreator(c)
@@ -83,7 +83,7 @@ export default function EarningsPage() {
         <p className="text-muted-foreground">Track your income and payouts</p>
       </div>
 
-      {!creator?.stripe_connect_id && (
+      {!creator?.stripe_connect_account_id && (
         <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
           <h2 className="font-semibold text-lg mb-2">Set Up Payouts</h2>
           <p className="text-sm text-muted-foreground mb-4">Connect your Stripe account to receive payments from brands.</p>
@@ -110,7 +110,7 @@ export default function EarningsPage() {
         </div>
         <div className="bg-card border rounded-lg p-4">
           <div className="flex items-center gap-2 text-muted-foreground text-sm"><CreditCard className="h-4 w-4" /> Payouts</div>
-          <p className="text-2xl font-bold mt-1">{creator?.stripe_connect_id ? "Active" : "Not set up"}</p>
+          <p className="text-2xl font-bold mt-1">{creator?.stripe_connect_account_id ? "Active" : "Not set up"}</p>
         </div>
       </div>
 

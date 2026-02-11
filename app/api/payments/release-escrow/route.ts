@@ -15,14 +15,14 @@ export async function POST(request: NextRequest) {
 
     const { data: payment } = await supabase
       .from("payments")
-      .select("*, creator_profiles(stripe_connect_id)")
+      .select("*, creator_profiles(stripe_connect_account_id)")
       .eq("id", payment_id)
       .single()
 
     if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 })
     if (payment.status !== "escrow") return NextResponse.json({ error: "Payment not in escrow" }, { status: 400 })
 
-    const connectId = (payment.creator_profiles as any)?.stripe_connect_id
+    const connectId = (payment.creator_profiles as any)?.stripe_connect_account_id
     if (!connectId) return NextResponse.json({ error: "Creator has no Stripe Connect account" }, { status: 400 })
 
     const transferAmount = payment.amount_cents - payment.platform_fee_cents
