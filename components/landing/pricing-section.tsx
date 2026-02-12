@@ -9,7 +9,7 @@ const businessTiers = {
     {
       name: "Starter",
       description: "For small businesses",
-      price: "€79",
+      price: "€69",
       period: "/month",
       features: [
         "1 active campaign",
@@ -23,7 +23,7 @@ const businessTiers = {
     {
       name: "Growth",
       description: "For growing businesses",
-      price: "€199",
+      price: "€189",
       period: "/month",
       features: [
         "Everything in Starter",
@@ -38,7 +38,7 @@ const businessTiers = {
     {
       name: "Scale",
       description: "For enterprises and agencies",
-      price: "€399",
+      price: "€379",
       period: "/month",
       features: [
         "Everything in Growth",
@@ -55,7 +55,7 @@ const businessTiers = {
     {
       name: "Starter",
       description: "For small businesses",
-      price: "€47",
+      price: "€37",
       period: "/month",
       features: [
         "1 active campaign",
@@ -69,7 +69,7 @@ const businessTiers = {
     {
       name: "Growth",
       description: "For growing businesses",
-      price: "€125",
+      price: "€115",
       period: "/month",
       features: [
         "Everything in Starter",
@@ -84,7 +84,7 @@ const businessTiers = {
     {
       name: "Scale",
       description: "For enterprises and agencies",
-      price: "€239",
+      price: "€229",
       period: "/month",
       features: [
         "Everything in Growth",
@@ -98,6 +98,39 @@ const businessTiers = {
     },
   ],
 }
+
+const faqs = [
+  {
+    question: "Can I start with a free plan?",
+    answer:
+      "Both businesses and creators can start with our free plan. You'll get access to core features and can upgrade anytime when you're ready to unlock more capabilities.",
+  },
+  {
+    question: "Can I cancel my subscription anytime?",
+    answer:
+      "You can cancel your subscription at any time. You'll continue to have access to premium features until the end of your billing period, then automatically revert to the free plan.",
+  },
+  {
+    question: "Is there a discount for annual billing?",
+    answer:
+      "Yes! Annual plans save you approximately 40% compared to monthly billing. Simply toggle to annual pricing above to see the discounted rates.",
+  },
+  {
+    question: "Do you offer refunds?",
+    answer:
+      "We offer a 7-day money-back guarantee for all premium plans. If you're not satisfied within the first 7 days, contact us for a full refund, no questions asked.",
+  },
+  {
+    question: "What's the difference between Pro and Elite for creators?",
+    answer:
+      "Pro includes unlimited applications, priority search ranking, and advanced analytics. Elite adds featured homepage placement, verified elite status, custom profile URL, and 24-hour priority support.",
+  },
+  {
+    question: "What payment methods do you accept?",
+    answer:
+      "We accept all major credit and debit cards, PayPal, and bank transfers. Payments are processed securely through Stripe.",
+  },
+]
 
 const creatorTiers = {
   monthly: [
@@ -283,6 +316,19 @@ export function PricingSection() {
             View full pricing details
           </Link>
         </p>
+
+        {/* FAQ */}
+        <div className="mt-20">
+          <h3 className="text-2xl sm:text-3xl font-bold text-center mb-10">Frequently Asked Questions</h3>
+          <div className="max-w-3xl mx-auto space-y-4">
+            {faqs.map((faq) => (
+              <div key={faq.question} className="bg-card border rounded-xl p-5">
+                <h4 className="font-semibold mb-1.5">{faq.question}</h4>
+                <p className="text-sm text-muted-foreground">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   )

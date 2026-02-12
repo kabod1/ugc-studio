@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 const businessTiers = [
   {
     name: "Starter",
-    monthlyPrice: "€79",
-    annualPrice: "€47",
+    monthlyPrice: "€69",
+    annualPrice: "€37",
     period: "/mo",
     description: "For small businesses starting with UGC.",
     features: [
@@ -26,8 +26,8 @@ const businessTiers = [
   },
   {
     name: "Growth",
-    monthlyPrice: "€199",
-    annualPrice: "€125",
+    monthlyPrice: "€189",
+    annualPrice: "€115",
     period: "/mo",
     description: "For growing businesses scaling their UGC.",
     features: [
@@ -44,8 +44,8 @@ const businessTiers = [
   },
   {
     name: "Scale",
-    monthlyPrice: "€399",
-    annualPrice: "€239",
+    monthlyPrice: "€379",
+    annualPrice: "€229",
     period: "/mo",
     description: "For enterprises and agencies at scale.",
     features: [
