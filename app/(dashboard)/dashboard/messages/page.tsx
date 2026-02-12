@@ -30,13 +30,13 @@ export default function BrandMessagesPage() {
 
   useEffect(() => {
     async function init() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setCurrentUserId(user.id)
-      }
-
       try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setCurrentUserId(user.id)
+        }
+
         const res = await fetch("/api/messages")
         if (res.ok) {
           const data = await res.json()
