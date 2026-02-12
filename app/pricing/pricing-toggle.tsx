@@ -110,7 +110,7 @@ export function PricingToggle({
           />
         </button>
         <span className={`text-sm font-medium ${annual ? "text-foreground" : "text-muted-foreground"}`}>
-          Annual (Save up to 40%)
+          Annual (Save up to 37%)
         </span>
       </div>
 

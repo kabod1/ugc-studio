@@ -60,6 +60,7 @@ const businessTiers = {
       period: "/month",
       savings: "Save €198 (25%) with annual billing",
       billedYearly: "Billed €606 per year",
+      monthlyPrice: "€67",
       features: [
         "5 campaigns per month",
         "Up to 20 seats per campaign",
@@ -77,6 +78,7 @@ const businessTiers = {
       period: "/month",
       savings: "Save €888 (40%) with annual billing",
       billedYearly: "Billed €1,356 per year",
+      monthlyPrice: "€187",
       features: [
         "10 campaigns per month",
         "Up to 50 seats per campaign",
@@ -94,6 +96,7 @@ const businessTiers = {
       period: "/month",
       savings: "Save €1,288 (28%) with annual billing",
       billedYearly: "Billed €3,356 per year",
+      monthlyPrice: "€387",
       features: [
         "Unlimited campaigns",
         "Unlimited seats per campaign",
@@ -311,7 +314,7 @@ export function PricingSection() {
               />
             </button>
             <span className={`text-sm font-medium ${annual ? "text-foreground" : "text-muted-foreground"}`}>
-              Annual (Save up to 40%)
+              Annual (Save up to 37%)
             </span>
           </div>
         </div>
