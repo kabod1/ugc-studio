@@ -144,6 +144,51 @@ const faqs = [
     answer:
       "We accept all major credit and debit cards, PayPal, and bank transfers. Payments are processed securely through Stripe.",
   },
+  {
+    question: "How does the platform fee work?",
+    answer:
+      "UGC Studio charges a small platform fee on each transaction between brands and creators. Higher-tier plans enjoy reduced fees — Scale plan users get the lowest rate, and Elite creators pay 0% on their first €1,000/month in earnings.",
+  },
+  {
+    question: "Can I switch plans at any time?",
+    answer:
+      "Yes! You can upgrade or downgrade your plan at any time. When upgrading, you'll be charged the prorated difference. When downgrading, the change takes effect at the end of your current billing cycle.",
+  },
+  {
+    question: "How many team members can I add?",
+    answer:
+      "The Growth plan includes 3 team seats. The Scale plan offers unlimited team seats. Starter plan users can manage their account with a single seat. Additional seats can be purchased separately on the Growth plan.",
+  },
+  {
+    question: "Who owns the content created through UGC Studio?",
+    answer:
+      "Content rights are defined in each campaign brief. By default, brands receive full usage rights for approved content. Creators retain portfolio rights unless otherwise specified. The Content Rights Management feature on Growth and Scale plans helps manage licensing terms.",
+  },
+  {
+    question: "What countries and currencies do you support?",
+    answer:
+      "UGC Studio is available worldwide. We support creators and brands from over 50 countries. Payments are processed in EUR, with automatic currency conversion for international users via Stripe.",
+  },
+  {
+    question: "How does AI-powered creator matching work?",
+    answer:
+      "Available on Growth and Scale plans, our AI analyzes your campaign brief, target audience, and past performance data to recommend the best-fit creators. It considers factors like content style, engagement rates, audience demographics, and category expertise.",
+  },
+  {
+    question: "Is my data secure on UGC Studio?",
+    answer:
+      "Absolutely. We use industry-standard encryption, secure cloud infrastructure, and comply with GDPR. All payments are processed through Stripe with PCI DSS compliance. Your data is never shared with third parties.",
+  },
+  {
+    question: "Do creators need a paid plan to get started?",
+    answer:
+      "No. Creators can join for free, build their profile, and apply to up to 5 campaigns per month. The Creator Pro plan unlocks unlimited applications, priority search ranking, and advanced analytics for creators ready to grow.",
+  },
+  {
+    question: "What happens to my campaigns if I downgrade?",
+    answer:
+      "Active campaigns will continue running until completion. However, you won't be able to create new campaigns beyond your new plan's limit. We recommend completing or pausing excess campaigns before downgrading.",
+  },
 ]
 
 function TierIcon({ tier }: { tier: string }) {
