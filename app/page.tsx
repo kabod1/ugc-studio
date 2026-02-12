@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Sparkles, Users, FileVideo, CreditCard, Shield, BarChart3, ArrowRight, Check, Star, Zap, Globe, Video } from "lucide-react"
+import { PricingSection } from "@/components/landing/pricing-section"
 
 const features = [
   { icon: Users, title: "Creator Discovery & AI Matching", description: "Find perfect creators with AI-powered matching. Analyze audience demographics, predict content performance, and get smart recommendations." },
@@ -19,11 +20,6 @@ const steps = [
   { num: "06", title: "Analyze Results", description: "Track performance, ROI, and optimize future campaigns" },
 ]
 
-const tiers = [
-  { name: "Starter", price: "€79", period: "/month", features: ["1 active campaign", "Browse creator marketplace", "Basic creator search", "Direct messaging", "Email support"], popular: false },
-  { name: "Growth", price: "€199", period: "/month", features: ["10 active campaigns", "Unlimited creator searches", "AI-powered creator matching", "Advanced analytics", "Priority support", "Team management"], popular: true },
-  { name: "Scale", price: "€399", period: "/month", features: ["Unlimited campaigns", "Unlimited creator searches", "AI video generation", "Dedicated account manager", "API access", "White-label option", "Custom integrations"], popular: false },
-]
 
 export default function LandingPage() {
   return (
@@ -123,43 +119,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-lg text-muted-foreground">No credit card required. Free to get started. Cancel anytime.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {tiers.map((t) => (
-              <div key={t.name} className={`bg-card border rounded-xl p-6 relative ${t.popular ? "border-primary shadow-lg ring-2 ring-primary/20" : ""}`}>
-                {t.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium">
-                    Most Popular
-                  </div>
-                )}
-                <h3 className="font-semibold text-lg">{t.name}</h3>
-                <div className="mt-4 mb-6">
-                  <span className="text-4xl font-bold">{t.price}</span>
-                  <span className="text-muted-foreground">{t.period}</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {t.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-primary shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/signup" className={`block text-center px-4 py-2 rounded-md text-sm font-medium ${
-                  t.popular ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border hover:bg-muted"
-                }`}>
-                  Get Started
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PricingSection />
 
       {/* Testimonials */}
       <section className="py-20 px-4 bg-muted/30">
