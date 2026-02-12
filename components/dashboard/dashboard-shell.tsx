@@ -23,6 +23,7 @@ const brandNavItems = [
   { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
   { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: "Team", href: "/dashboard/settings/team", icon: Users },
 ]
 
 const creatorNavItems = [

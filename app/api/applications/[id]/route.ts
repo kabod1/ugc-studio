@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { canAddSeat } from "@/lib/subscription-limits"
 
 export async function GET(
   request: NextRequest,
@@ -37,6 +38,28 @@ export async function PATCH(
 
     if (!["accepted", "rejected"].includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 })
+    }
+
+    // Check seat limit when accepting
+    if (status === "accepted") {
+      const { data: application } = await supabase
+        .from("campaign_applications")
+        .select("campaign_id, campaigns(brand_id)")
+        .eq("id", params.id)
+        .single()
+
+      if (application?.campaigns) {
+        const brandId = (application.campaigns as any).brand_id
+        const seatCheck = await canAddSeat(supabase, brandId, application.campaign_id)
+        if (!seatCheck.allowed) {
+          return NextResponse.json({
+            error: seatCheck.reason,
+            current: seatCheck.current,
+            limit: seatCheck.limit,
+            upgradeUrl: "/dashboard/settings/billing",
+          }, { status: 403 })
+        }
+      }
     }
 
     const { data, error } = await supabase

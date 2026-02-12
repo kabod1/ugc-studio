@@ -54,6 +54,17 @@ export async function POST(request: NextRequest) {
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const subscription = event.data.object as any
+        const priceId = subscription.items?.data?.[0]?.price?.id
+
+        // Map Stripe price ID to tier name
+        const PRICE_TO_TIER: Record<string, string> = {
+          [process.env.STRIPE_PRICE_STARTER || ""]: "starter",
+          [process.env.STRIPE_PRICE_GROWTH || ""]: "growth",
+          [process.env.STRIPE_PRICE_SCALE || ""]: "scale",
+          [process.env.STRIPE_PRICE_CREATOR_PRO || ""]: "pro",
+        }
+        const tier = PRICE_TO_TIER[priceId] || null
+
         await supabase
           .from("subscriptions")
           .upsert({
@@ -64,15 +75,55 @@ export async function POST(request: NextRequest) {
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
             updated_at: new Date().toISOString(),
           }, { onConflict: "stripe_subscription_id" })
+
+        // Update brand or creator tier based on subscription
+        if (tier && subscription.status === "active") {
+          const customerId = subscription.customer
+          if (tier === "pro") {
+            // Creator subscription
+            await supabase
+              .from("creator_profiles")
+              .update({
+                subscription_tier: "pro",
+                subscription_stripe_id: subscription.id,
+                subscription_expires_at: new Date(subscription.current_period_end * 1000).toISOString(),
+              })
+              .eq("stripe_customer_id", customerId)
+          } else {
+            // Brand subscription
+            await supabase
+              .from("brands")
+              .update({
+                subscription_tier: tier,
+                subscription_stripe_id: subscription.id,
+                subscription_expires_at: new Date(subscription.current_period_end * 1000).toISOString(),
+              })
+              .eq("stripe_customer_id", customerId)
+          }
+        }
         break
       }
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as any
+        const customerId = subscription.customer
+
         await supabase
           .from("subscriptions")
           .update({ status: "cancelled", updated_at: new Date().toISOString() })
           .eq("stripe_subscription_id", subscription.id)
+
+        // Revert brand to free tier
+        await supabase
+          .from("brands")
+          .update({ subscription_tier: "free", subscription_stripe_id: null })
+          .eq("stripe_customer_id", customerId)
+
+        // Revert creator to free tier
+        await supabase
+          .from("creator_profiles")
+          .update({ subscription_tier: "free", subscription_stripe_id: null })
+          .eq("stripe_customer_id", customerId)
         break
       }
     }

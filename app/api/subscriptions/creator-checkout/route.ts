@@ -2,42 +2,37 @@ import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe/client"
 
-const PRICE_IDS: Record<string, string> = {
-  starter: process.env.STRIPE_PRICE_STARTER || "",
-  growth: process.env.STRIPE_PRICE_GROWTH || "",
-  scale: process.env.STRIPE_PRICE_SCALE || "",
-}
-
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const body = await request.json()
-    const { tier } = body
+    const priceId = process.env.STRIPE_PRICE_CREATOR_PRO
+    if (!priceId) return NextResponse.json({ error: "Creator Pro price not configured" }, { status: 500 })
 
-    const priceId = PRICE_IDS[tier]
-    if (!priceId) return NextResponse.json({ error: "Invalid tier" }, { status: 400 })
-
-    const { data: brand } = await supabase
-      .from("brands")
+    const { data: creatorProfile } = await supabase
+      .from("creator_profiles")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
       .single()
+
+    if (!creatorProfile) {
+      return NextResponse.json({ error: "Creator profile not found" }, { status: 404 })
+    }
 
     const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || ""
 
     const sessionParams: any = {
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}/dashboard/settings/billing?success=true`,
-      cancel_url: `${origin}/dashboard/settings/billing?cancelled=true`,
+      success_url: `${origin}/creator/settings?success=true`,
+      cancel_url: `${origin}/creator/settings?cancelled=true`,
       metadata: { user_id: user.id },
     }
 
-    if (brand?.stripe_customer_id) {
-      sessionParams.customer = brand.stripe_customer_id
+    if (creatorProfile.stripe_customer_id) {
+      sessionParams.customer = creatorProfile.stripe_customer_id
     } else {
       sessionParams.customer_email = user.email
     }

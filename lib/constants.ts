@@ -24,11 +24,20 @@ export const PLATFORMS = [
 ] as const
 
 export const SUBSCRIPTION_TIERS = {
-  free: { name: "Free", price: 0, campaigns: 1, creators: 5 },
-  brand: { name: "Brand", price: 19900, campaigns: 5, creators: 50 },
-  agency: { name: "Agency", price: 49900, campaigns: 25, creators: -1 },
-  enterprise: { name: "Enterprise", price: 199900, campaigns: -1, creators: -1 },
+  free: { name: "Free", price: 0, campaigns: 1, seatsPerCampaign: 5, teamSeats: 1 },
+  starter: { name: "Starter", price: 6700, campaigns: 5, seatsPerCampaign: 20, teamSeats: 1 },
+  growth: { name: "Growth", price: 18700, campaigns: 10, seatsPerCampaign: 50, teamSeats: 3 },
+  scale: { name: "Scale", price: 38700, campaigns: -1, seatsPerCampaign: -1, teamSeats: -1 },
 } as const
+
+export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS
+
+export const CREATOR_TIERS = {
+  free: { name: "Free", price: 0, applicationsPerMonth: 1 },
+  pro: { name: "Creator Pro", price: 1999, applicationsPerMonth: -1 },
+} as const
+
+export type CreatorTier = keyof typeof CREATOR_TIERS
 
 export const CAMPAIGN_STATUSES = {
   draft: { label: "Draft", color: "bg-gray-100 text-gray-800" },

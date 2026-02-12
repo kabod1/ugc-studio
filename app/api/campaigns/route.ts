@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { campaignSchema } from "@/lib/validations/campaign"
+import { canCreateCampaign } from "@/lib/subscription-limits"
 
 export async function GET(request: NextRequest) {
   try {
@@ -88,6 +89,17 @@ export async function POST(request: NextRequest) {
 
     if (!brand) {
       return NextResponse.json({ error: "Brand not found" }, { status: 404 })
+    }
+
+    // Check subscription limit
+    const limitCheck = await canCreateCampaign(supabase, brand.id)
+    if (!limitCheck.allowed) {
+      return NextResponse.json({
+        error: limitCheck.reason,
+        current: limitCheck.current,
+        limit: limitCheck.limit,
+        upgradeUrl: "/dashboard/settings/billing",
+      }, { status: 403 })
     }
 
     const { data: campaign, error } = await supabase

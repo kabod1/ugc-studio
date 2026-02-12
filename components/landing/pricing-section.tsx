@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Check } from "lucide-react"
+import { Check, ChevronDown } from "lucide-react"
 
 const businessTiers = {
   monthly: [
@@ -258,6 +258,7 @@ const creatorTiers = {
 export function PricingSection() {
   const [tab, setTab] = useState<"business" | "creator">("business")
   const [annual, setAnnual] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   const tiers = tab === "business"
     ? (annual ? businessTiers.annual : businessTiers.monthly)
@@ -379,11 +380,27 @@ export function PricingSection() {
         {/* FAQ */}
         <div className="mt-20">
           <h3 className="text-2xl sm:text-3xl font-bold text-center mb-10">Frequently Asked Questions</h3>
-          <div className="max-w-3xl mx-auto space-y-4">
-            {faqs.map((faq) => (
-              <div key={faq.question} className="bg-card border rounded-xl p-5">
-                <h4 className="font-semibold mb-1.5">{faq.question}</h4>
-                <p className="text-sm text-muted-foreground">{faq.answer}</p>
+          <div className="max-w-3xl mx-auto space-y-3">
+            {faqs.map((faq, index) => (
+              <div key={faq.question} className="bg-card border rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/50 transition-colors"
+                >
+                  <h4 className="font-semibold pr-4">{faq.question}</h4>
+                  <ChevronDown
+                    className={`h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 ${
+                      openFaq === index ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`overflow-hidden transition-all duration-200 ${
+                    openFaq === index ? "max-h-96 pb-5" : "max-h-0"
+                  }`}
+                >
+                  <p className="text-sm text-muted-foreground px-5">{faq.answer}</p>
+                </div>
               </div>
             ))}
           </div>

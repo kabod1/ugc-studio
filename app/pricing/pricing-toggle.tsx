@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Check, Sparkles, Crown, Star } from "lucide-react"
+import { Check, Sparkles, Crown, Star, ChevronDown } from "lucide-react"
 
 function TierIcon({ tier }: { tier: string }) {
   if (tier === "Scale" || tier === "Elite") return <Crown className="h-5 w-5 text-primary" />
@@ -89,6 +89,7 @@ export function PricingToggle({
   faqs: FAQ[]
 }) {
   const [annual, setAnnual] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   return (
     <>
@@ -163,11 +164,27 @@ export function PricingToggle({
               Everything you need to know about our pricing and plans.
             </p>
           </div>
-          <div className="space-y-6">
-            {faqs.map((faq) => (
-              <div key={faq.question} className="bg-card border rounded-xl p-6">
-                <h3 className="font-semibold mb-2">{faq.question}</h3>
-                <p className="text-sm text-muted-foreground">{faq.answer}</p>
+          <div className="space-y-3">
+            {faqs.map((faq, index) => (
+              <div key={faq.question} className="bg-card border rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/50 transition-colors"
+                >
+                  <h3 className="font-semibold pr-4">{faq.question}</h3>
+                  <ChevronDown
+                    className={`h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 ${
+                      openFaq === index ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`overflow-hidden transition-all duration-200 ${
+                    openFaq === index ? "max-h-96 pb-5" : "max-h-0"
+                  }`}
+                >
+                  <p className="text-sm text-muted-foreground px-5">{faq.answer}</p>
+                </div>
               </div>
             ))}
           </div>

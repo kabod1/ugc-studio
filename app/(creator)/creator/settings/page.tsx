@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Loader2, Save } from "lucide-react"
+import { Loader2, Save, Check, Crown } from "lucide-react"
 
 const CATEGORIES = ["Beauty", "Fashion", "Tech", "Food", "Fitness", "Travel", "Lifestyle", "Gaming", "Education", "Finance"]
 
@@ -11,6 +11,8 @@ export default function CreatorSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [subscriptionTier, setSubscriptionTier] = useState<string>("free")
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -26,6 +28,7 @@ export default function CreatorSettingsPage() {
           .single()
 
         setProfile(data || {})
+        setSubscriptionTier(data?.subscription_tier || "free")
       } catch (err) {
         console.error("Settings load error:", err)
         setProfile({})
@@ -151,6 +154,87 @@ export default function CreatorSettingsPage() {
           {saved ? "Saved!" : "Save Settings"}
         </button>
       </form>
+
+      {/* Subscription Section */}
+      <div className="bg-card border rounded-lg p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Crown className="h-5 w-5 text-yellow-500" />
+          <h2 className="font-semibold">Subscription</h2>
+        </div>
+
+        {subscriptionTier === "free" ? (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              You are currently on the <span className="font-medium text-foreground">Free</span> plan.
+            </p>
+            <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+              <p className="text-sm font-medium">Upgrade to Creator Pro and unlock:</p>
+              <ul className="space-y-2">
+                {[
+                  "Unlimited applications to campaigns",
+                  "Priority ranking in creator search",
+                  "Pro badge on your profile",
+                  "Advanced analytics & insights",
+                ].map((benefit) => (
+                  <li key={benefit} className="flex items-center gap-2 text-sm">
+                    <Check className="h-4 w-4 text-green-500 shrink-0" />
+                    {benefit}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button
+              type="button"
+              disabled={subscriptionLoading}
+              onClick={async () => {
+                setSubscriptionLoading(true)
+                try {
+                  const res = await fetch("/api/subscriptions/creator-checkout", { method: "POST" })
+                  const data = await res.json()
+                  if (data.url) window.location.href = data.url
+                } catch (err) {
+                  console.error("Checkout error:", err)
+                } finally {
+                  setSubscriptionLoading(false)
+                }
+              }}
+              className="inline-flex items-center gap-2 px-6 py-2 rounded-md bg-yellow-500 text-white text-sm font-medium hover:bg-yellow-600 disabled:opacity-50"
+            >
+              {subscriptionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
+              Upgrade to Creator Pro - &euro;19.99/mo
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                <Crown className="h-3 w-3" /> Pro
+              </span>
+              <p className="text-sm text-muted-foreground">You&apos;re on Creator Pro</p>
+            </div>
+            <button
+              type="button"
+              disabled={subscriptionLoading}
+              onClick={async () => {
+                setSubscriptionLoading(true)
+                try {
+                  const res = await fetch("/api/subscriptions/manage", { method: "POST" })
+                  const data = await res.json()
+                  if (data.url) window.location.href = data.url
+                } catch (err) {
+                  console.error("Manage subscription error:", err)
+                } finally {
+                  setSubscriptionLoading(false)
+                }
+              }}
+              className="inline-flex items-center gap-2 px-6 py-2 rounded-md border border-input bg-background text-sm font-medium hover:bg-muted disabled:opacity-50"
+            >
+              {subscriptionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Manage Subscription
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

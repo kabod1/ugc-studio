@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { canApplyToCampaign } from "@/lib/subscription-limits"
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,6 +29,17 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (existing) return NextResponse.json({ error: "Already applied" }, { status: 409 })
+
+    // Check creator application limit
+    const limitCheck = await canApplyToCampaign(supabase, creator.id)
+    if (!limitCheck.allowed) {
+      return NextResponse.json({
+        error: limitCheck.reason,
+        current: limitCheck.current,
+        limit: limitCheck.limit,
+        upgradeUrl: "/creator/settings",
+      }, { status: 403 })
+    }
 
     const { data, error } = await supabase
       .from("campaign_applications")
