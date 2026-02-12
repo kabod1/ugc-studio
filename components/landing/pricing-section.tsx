@@ -340,10 +340,10 @@ export function PricingSection() {
               <div className="mb-6">
                 <span className="text-4xl font-bold">{tier.price}</span>
                 {tier.period && <span className="text-muted-foreground ml-1">{tier.period}</span>}
-                {"savings" in tier && tier.savings && (
+                {annual && "savings" in tier && (
                   <div className="mt-1">
-                    <p className="text-xs font-semibold text-green-600">{tier.savings}</p>
-                    <p className="text-xs text-muted-foreground">{"billedYearly" in tier && tier.billedYearly}</p>
+                    <p className="text-xs font-semibold text-green-600">{(tier as any).savings}</p>
+                    <p className="text-xs text-muted-foreground">{(tier as any).billedYearly}</p>
                   </div>
                 )}
               </div>
