@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { DollarSign, Clock, CreditCard, TrendingUp, Loader2, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 
@@ -14,24 +13,11 @@ export default function EarningsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) { setLoading(false); return }
-
-        const { data: c } = await supabase
-          .from("creator_profiles")
-          .select("id, stripe_connect_account_id")
-          .eq("user_id", user.id)
-          .single()
-        setCreator(c)
-
-        if (c) {
-          const { data: p } = await supabase
-            .from("payments")
-            .select("*, campaigns(title)")
-            .eq("creator_id", c.id)
-            .order("created_at", { ascending: false })
-          setPayments(p || [])
+        const res = await fetch("/api/creator/earnings")
+        if (res.ok) {
+          const data = await res.json()
+          setCreator(data.creator)
+          setPayments(data.payments || [])
         }
       } catch (err) {
         console.error("Earnings load error:", err)

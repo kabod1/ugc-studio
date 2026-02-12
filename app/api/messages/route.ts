@@ -81,6 +81,7 @@ export async function GET() {
 
     return NextResponse.json({
       conversations: conversationsWithLastMessage,
+      userId: user.id,
       userBrandId: brand?.id || null,
       userCreatorId: creatorProfile?.id || null,
     })

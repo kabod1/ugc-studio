@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { MessageThread } from "@/components/shared/message-thread"
 import { MessageSquare, Search, Loader2 } from "lucide-react"
 
@@ -31,16 +30,11 @@ export default function BrandMessagesPage() {
   useEffect(() => {
     async function init() {
       try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          setCurrentUserId(user.id)
-        }
-
         const res = await fetch("/api/messages")
         if (res.ok) {
           const data = await res.json()
           setConversations(data.conversations || [])
+          if (data.userId) setCurrentUserId(data.userId)
         }
       } catch (error) {
         console.error("Failed to fetch conversations:", error)

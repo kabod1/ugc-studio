@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Loader2, Save, Check, Crown } from "lucide-react"
 
 const CATEGORIES = ["Beauty", "Fashion", "Tech", "Food", "Fitness", "Travel", "Lifestyle", "Gaming", "Education", "Finance"]
@@ -17,18 +16,14 @@ export default function CreatorSettingsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) { setLoading(false); return }
-
-        const { data } = await supabase
-          .from("creator_profiles")
-          .select("*")
-          .eq("user_id", user.id)
-          .single()
-
-        setProfile(data || {})
-        setSubscriptionTier(data?.subscription_tier || "free")
+        const res = await fetch("/api/creator/settings")
+        if (res.ok) {
+          const data = await res.json()
+          setProfile(data.profile || {})
+          setSubscriptionTier(data.profile?.subscription_tier || "free")
+        } else {
+          setProfile({})
+        }
       } catch (err) {
         console.error("Settings load error:", err)
         setProfile({})
