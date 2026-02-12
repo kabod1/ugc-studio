@@ -8,45 +8,46 @@ const businessTiers = {
   monthly: [
     {
       name: "Starter",
-      description: "For small businesses",
-      price: "€69",
+      description: "For small businesses getting started with UGC",
+      price: "€67",
       period: "/month",
       features: [
-        "1 active campaign",
-        "Browse creator marketplace",
-        "Basic creator search",
-        "Direct messaging",
+        "5 campaigns per month",
+        "Up to 20 seats per campaign",
+        "AI-powered creator search",
+        "Advanced search filters",
+        "Content approval workflow",
         "Email support",
       ],
       recommended: false,
     },
     {
       name: "Growth",
-      description: "For growing businesses",
-      price: "€189",
+      description: "For growing businesses scaling their content",
+      price: "€187",
       period: "/month",
       features: [
+        "10 campaigns per month",
+        "Up to 50 seats per campaign",
         "Everything in Starter",
-        "10 active campaigns",
-        "AI-powered creator matching",
-        "Advanced analytics",
         "Priority support",
-        "Team management (3 seats)",
+        "Analytics dashboard",
+        "Team collaboration",
       ],
       recommended: true,
     },
     {
       name: "Scale",
-      description: "For enterprises and agencies",
-      price: "€379",
+      description: "For enterprises with unlimited content needs",
+      price: "€387",
       period: "/month",
       features: [
-        "Everything in Growth",
         "Unlimited campaigns",
+        "Unlimited seats per campaign",
+        "Everything in Growth",
         "Dedicated account manager",
-        "API access",
-        "White-label option",
         "Custom integrations",
+        "SLA guarantee",
       ],
       recommended: false,
     },
@@ -54,45 +55,52 @@ const businessTiers = {
   annual: [
     {
       name: "Starter",
-      description: "For small businesses",
-      price: "€37",
+      description: "For small businesses getting started with UGC",
+      price: "€50.50",
       period: "/month",
+      savings: "Save €198 (25%) with annual billing",
+      billedYearly: "Billed €606 per year",
       features: [
-        "1 active campaign",
-        "Browse creator marketplace",
-        "Basic creator search",
-        "Direct messaging",
+        "5 campaigns per month",
+        "Up to 20 seats per campaign",
+        "AI-powered creator search",
+        "Advanced search filters",
+        "Content approval workflow",
         "Email support",
       ],
       recommended: false,
     },
     {
       name: "Growth",
-      description: "For growing businesses",
-      price: "€115",
+      description: "For growing businesses scaling their content",
+      price: "€113",
       period: "/month",
+      savings: "Save €888 (40%) with annual billing",
+      billedYearly: "Billed €1,356 per year",
       features: [
+        "10 campaigns per month",
+        "Up to 50 seats per campaign",
         "Everything in Starter",
-        "10 active campaigns",
-        "AI-powered creator matching",
-        "Advanced analytics",
         "Priority support",
-        "Team management (3 seats)",
+        "Analytics dashboard",
+        "Team collaboration",
       ],
       recommended: true,
     },
     {
       name: "Scale",
-      description: "For enterprises and agencies",
-      price: "€229",
+      description: "For enterprises with unlimited content needs",
+      price: "€279.67",
       period: "/month",
+      savings: "Save €1,288 (28%) with annual billing",
+      billedYearly: "Billed €3,356 per year",
       features: [
-        "Everything in Growth",
         "Unlimited campaigns",
+        "Unlimited seats per campaign",
+        "Everything in Growth",
         "Dedicated account manager",
-        "API access",
-        "White-label option",
         "Custom integrations",
+        "SLA guarantee",
       ],
       recommended: false,
     },
@@ -303,10 +311,7 @@ export function PricingSection() {
               />
             </button>
             <span className={`text-sm font-medium ${annual ? "text-foreground" : "text-muted-foreground"}`}>
-              Annual
-            </span>
-            <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-              Save up to 40%
+              Annual (Save up to 40%)
             </span>
           </div>
         </div>
@@ -332,6 +337,12 @@ export function PricingSection() {
               <div className="mb-6">
                 <span className="text-4xl font-bold">{tier.price}</span>
                 {tier.period && <span className="text-muted-foreground ml-1">{tier.period}</span>}
+                {"savings" in tier && tier.savings && (
+                  <div className="mt-1">
+                    <p className="text-xs font-semibold text-green-600">{tier.savings}</p>
+                    <p className="text-xs text-muted-foreground">{"billedYearly" in tier && tier.billedYearly}</p>
+                  </div>
+                )}
               </div>
               <ul className="space-y-3 mb-8 flex-1">
                 {tier.features.map((f) => (

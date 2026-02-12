@@ -47,9 +47,13 @@ function PricingCard({ tier, annual }: { tier: Tier; annual: boolean }) {
         <span className="text-4xl font-bold">{price}</span>
         <span className="text-muted-foreground">{tier.period}</span>
         {annual && tier.monthlyPrice !== "€0" && (
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-muted-foreground line-through">{tier.monthlyPrice}/mo</span>
-            <span className="text-xs font-medium text-green-600 bg-green-50 px-1.5 py-0.5 rounded">Save ~40%</span>
+          <div className="mt-1">
+            <p className="text-xs font-semibold text-green-600">
+              Save with annual billing
+            </p>
+            <p className="text-xs text-muted-foreground">
+              <span className="line-through">{tier.monthlyPrice}/mo</span> — billed annually
+            </p>
           </div>
         )}
       </div>
@@ -106,13 +110,8 @@ export function PricingToggle({
           />
         </button>
         <span className={`text-sm font-medium ${annual ? "text-foreground" : "text-muted-foreground"}`}>
-          Annual
+          Annual (Save up to 40%)
         </span>
-        {annual && (
-          <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-            Save ~40%
-          </span>
-        )}
       </div>
 
       {/* For Businesses */}
