@@ -20,9 +20,9 @@ const steps = [
 ]
 
 const tiers = [
-  { name: "Brand", price: "$199", period: "/month", features: ["5 campaigns", "50 creators", "Basic analytics", "Email support", "Standard matching"], popular: false },
-  { name: "Agency", price: "$499", period: "/month", features: ["25 campaigns", "Unlimited creators", "Advanced analytics", "Team management", "Priority matching", "API access"], popular: true },
-  { name: "Enterprise", price: "$1,999", period: "/month", features: ["Unlimited campaigns", "Unlimited creators", "Custom analytics", "Dedicated support", "AI video generation", "White-label option", "Custom integrations"], popular: false },
+  { name: "Starter", price: "€79", period: "/month", features: ["1 active campaign", "Browse creator marketplace", "Basic creator search", "Direct messaging", "Email support"], popular: false },
+  { name: "Growth", price: "€199", period: "/month", features: ["10 active campaigns", "Unlimited creator searches", "AI-powered creator matching", "Advanced analytics", "Priority support", "Team management"], popular: true },
+  { name: "Scale", price: "€399", period: "/month", features: ["Unlimited campaigns", "Unlimited creator searches", "AI video generation", "Dedicated account manager", "API access", "White-label option", "Custom integrations"], popular: false },
 ]
 
 export default function LandingPage() {
@@ -127,7 +127,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-lg text-muted-foreground">Start free, scale as you grow. Plus 10-15% commission on creator payments.</p>
+            <p className="text-lg text-muted-foreground">No credit card required. Free to get started. Cancel anytime.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {tiers.map((t) => (
