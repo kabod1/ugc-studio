@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Megaphone, Users, FileVideo, FileText,
   CreditCard, BarChart3, Settings, Menu, X, Sparkles,
   Bell, ChevronLeft, Video, LogOut, Building2, Palette,
-  Shield, UserCheck, Eye, Sliders
+  Shield, UserCheck, Eye, Sliders, MessageSquare
 } from "lucide-react"
 import { useUser } from "@/hooks/use-user"
 
@@ -20,6 +20,7 @@ const brandNavItems = [
   { label: "UGC Videos", href: "/dashboard/ugc-videos", icon: Video },
   { label: "Contracts", href: "/dashboard/contracts", icon: FileText },
   { label: "Payments", href: "/dashboard/payments", icon: CreditCard },
+  { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
   { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
@@ -32,6 +33,7 @@ const creatorNavItems = [
   { label: "My Content", href: "/creator/content", icon: Video },
   { label: "Contracts", href: "/creator/contracts", icon: FileText },
   { label: "Earnings", href: "/creator/earnings", icon: CreditCard },
+  { label: "Messages", href: "/creator/messages", icon: MessageSquare },
   { label: "Settings", href: "/creator/settings", icon: Settings },
 ]
 

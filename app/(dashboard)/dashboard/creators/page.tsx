@@ -1,7 +1,29 @@
 import { createClient } from "@/lib/supabase/server"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
-import { Search, Star, Users } from "lucide-react"
+import { Search, Star, Users, BadgeCheck, Crown, Sparkles } from "lucide-react"
+
+function CreatorBadge({ tier, isVerified }: { tier?: string; isVerified?: boolean }) {
+  return (
+    <span className="flex items-center gap-1">
+      {isVerified && (
+        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-semibold">
+          <BadgeCheck className="h-3 w-3" /> Verified
+        </span>
+      )}
+      {tier === "elite" && (
+        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold">
+          <Crown className="h-3 w-3" /> Elite
+        </span>
+      )}
+      {tier === "pro" && (
+        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[10px] font-semibold">
+          <Sparkles className="h-3 w-3" /> Pro
+        </span>
+      )}
+    </span>
+  )
+}
 
 export default async function CreatorsPage({
   searchParams,
@@ -58,7 +80,10 @@ export default async function CreatorsPage({
                   {creator.display_name?.[0] || "?"}
                 </div>
                 <div>
-                  <h3 className="font-semibold">{creator.display_name}</h3>
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-semibold">{creator.display_name}</h3>
+                    <CreatorBadge tier={creator.subscription_tier} isVerified={creator.is_verified} />
+                  </div>
                   <p className="text-sm text-muted-foreground">{creator.location || "Remote"}</p>
                 </div>
               </div>

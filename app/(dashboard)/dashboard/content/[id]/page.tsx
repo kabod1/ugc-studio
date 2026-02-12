@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
-import { ArrowLeft, Check, X, RotateCcw } from "lucide-react"
+import { ArrowLeft, Check, X, RotateCcw, Download } from "lucide-react"
 
 export default async function ContentDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient()
@@ -59,19 +59,31 @@ export default async function ContentDetailPage({ params }: { params: { id: stri
               )}
             </div>
 
-            {submission.status === "pending" && (
-              <div className="flex gap-3">
-                <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700">
-                  <Check className="h-4 w-4" /> Approve
-                </button>
-                <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-orange-600 text-white text-sm font-medium hover:bg-orange-700">
-                  <RotateCcw className="h-4 w-4" /> Request Revision
-                </button>
-                <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md border text-sm font-medium hover:bg-muted">
-                  <X className="h-4 w-4" /> Reject
-                </button>
-              </div>
-            )}
+            <div className="flex gap-3">
+              {submission.status === "pending" && (
+                <>
+                  <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700">
+                    <Check className="h-4 w-4" /> Approve
+                  </button>
+                  <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-orange-600 text-white text-sm font-medium hover:bg-orange-700">
+                    <RotateCcw className="h-4 w-4" /> Request Revision
+                  </button>
+                  <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md border text-sm font-medium hover:bg-muted">
+                    <X className="h-4 w-4" /> Reject
+                  </button>
+                </>
+              )}
+              {submission.status === "approved" && submission.file_url && (
+                <a
+                  href={`/api/content/${params.id}/download`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
+                >
+                  <Download className="h-4 w-4" /> Download Content
+                </a>
+              )}
+            </div>
           </div>
 
           <div className="bg-card border rounded-lg p-6">

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
-import { ArrowLeft, Star, Users, Globe, MapPin } from "lucide-react"
+import { ArrowLeft, Star, Users, Globe, MapPin, BadgeCheck, Crown, Sparkles } from "lucide-react"
 
 export default async function CreatorDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient()
@@ -29,7 +29,24 @@ export default async function CreatorDetailPage({ params }: { params: { id: stri
             {creator.display_name?.[0] || "?"}
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold">{creator.display_name}</h2>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-xl font-bold">{creator.display_name}</h2>
+              {creator.is_verified && (
+                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                  <BadgeCheck className="h-3.5 w-3.5" /> Verified
+                </span>
+              )}
+              {creator.subscription_tier === "elite" && (
+                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                  <Crown className="h-3.5 w-3.5" /> Elite
+                </span>
+              )}
+              {creator.subscription_tier === "pro" && (
+                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
+                  <Sparkles className="h-3.5 w-3.5" /> Pro
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
               {creator.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{creator.location}</span>}
               <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 text-yellow-500" />{creator.avg_rating || "N/A"} ({creator.total_reviews || 0} reviews)</span>
