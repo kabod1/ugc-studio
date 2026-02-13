@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import {
   Video, Loader2, CheckCircle2, XCircle,
-  Clock, Play, Download, RefreshCw, Sparkles, Image
+  Clock, Play, Download, RefreshCw, Sparkles, Image,
+  MoreVertical, Trash2, RotateCcw, Copy, ExternalLink
 } from "lucide-react"
 import { formatDate } from "@/lib/utils"
 
@@ -100,6 +101,40 @@ export default function UGCVideosPage() {
     } finally {
       setGenerating(false)
     }
+  }
+
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+
+  async function handleDelete(jobId: string) {
+    if (!confirm("Are you sure you want to delete this video job?")) return
+    try {
+      const res = await fetch("/api/ugc-videos", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ job_id: jobId }),
+      })
+      if (res.ok) {
+        setJobs((prev) => prev.filter((j) => j.id !== jobId))
+        toast.success("Video job deleted")
+      } else {
+        toast.error("Failed to delete video job")
+      }
+    } catch {
+      toast.error("Failed to delete video job")
+    }
+    setOpenMenuId(null)
+  }
+
+  async function handleRetry(job: UGCVideoJob) {
+    setOpenMenuId(null)
+    setProductImageUrl(job.product_image_url)
+    toast.info("Product image URL loaded. Click 'Generate Video' to retry.")
+  }
+
+  function handleCopyUrl(url: string) {
+    navigator.clipboard.writeText(url)
+    toast.success("URL copied to clipboard")
+    setOpenMenuId(null)
   }
 
   const statusConfig: Record<string, { icon: any; color: string; label: string }> = {
@@ -261,9 +296,64 @@ export default function UGCVideosPage() {
                         <StatusIcon className={`h-3 w-3 ${job.status === "processing" ? "animate-spin" : ""}`} />
                         {status.label}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(job.created_at)}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(job.created_at)}
+                        </span>
+                        {/* Actions Menu */}
+                        <div className="relative">
+                          <button
+                            onClick={() => setOpenMenuId(openMenuId === job.id ? null : job.id)}
+                            className="p-1 rounded hover:bg-muted"
+                          >
+                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                          {openMenuId === job.id && (
+                            <>
+                              <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                              <div className="absolute right-0 top-8 z-20 w-48 bg-popover border rounded-md shadow-lg py-1">
+                                {job.video_url && (
+                                  <>
+                                    <a
+                                      href={job.video_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted w-full"
+                                      onClick={() => setOpenMenuId(null)}
+                                    >
+                                      <ExternalLink className="h-4 w-4" />
+                                      Open video
+                                    </a>
+                                    <button
+                                      onClick={() => handleCopyUrl(job.video_url!)}
+                                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted w-full text-left"
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                      Copy video URL
+                                    </button>
+                                  </>
+                                )}
+                                {(job.status === "failed" || job.status === "pending") && (
+                                  <button
+                                    onClick={() => handleRetry(job)}
+                                    className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted w-full text-left"
+                                  >
+                                    <RotateCcw className="h-4 w-4" />
+                                    Retry generation
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDelete(job.id)}
+                                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted w-full text-left text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  Delete
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
                     {job.caption && (
