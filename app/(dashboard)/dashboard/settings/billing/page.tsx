@@ -92,7 +92,7 @@ export default function BillingPage() {
           .eq("status", "accepted")
 
         const tierLimits: Record<string, { campaigns: number; seats: number; ugcVideos: number }> = {
-          free: { campaigns: 1, seats: 5, ugcVideos: 1 },
+          free: { campaigns: 1, seats: 5, ugcVideos: 2 },
           starter: { campaigns: 5, seats: 20, ugcVideos: 10 },
           growth: { campaigns: 10, seats: 50, ugcVideos: 50 },
           scale: { campaigns: -1, seats: -1, ugcVideos: -1 },

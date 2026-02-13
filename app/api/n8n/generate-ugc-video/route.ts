@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Enforce UGC video generation limit
     const tier = (brand.subscription_tier || "free") as SubscriptionTier
     const tierConfig = SUBSCRIPTION_TIERS[tier] || SUBSCRIPTION_TIERS.free
-    const limit = tierConfig.ugcVideosPerMonth
+    const limit = tierConfig.ugcVideosPerMonth as number
 
     if (limit !== -1) {
       const now = new Date()
