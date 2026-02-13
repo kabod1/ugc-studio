@@ -102,12 +102,21 @@ export async function POST(request: NextRequest) {
       }, { status: 403 })
     }
 
+    // Convert empty strings to null for timestamp fields
+    const cleanData = { ...parsed.data }
+    const dateFields = ["application_deadline", "content_deadline", "start_date", "end_date"] as const
+    for (const field of dateFields) {
+      if (field in cleanData && !(cleanData as any)[field]) {
+        (cleanData as any)[field] = null
+      }
+    }
+
     const { data: campaign, error } = await supabase
       .from("campaigns")
       .insert({
         brand_id: brand.id,
-        ...parsed.data,
-        status: parsed.data.status || "draft",
+        ...cleanData,
+        status: cleanData.status || "draft",
       })
       .select()
       .single()
