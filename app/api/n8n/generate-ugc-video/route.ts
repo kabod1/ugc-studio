@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { generateUGCVideo } from "@/lib/n8n/workflows"
+import { SUBSCRIPTION_TIERS, type SubscriptionTier } from "@/lib/constants"
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,9 +18,36 @@ export async function POST(request: NextRequest) {
 
     const { data: brand } = await supabase
       .from("brands")
-      .select("id")
+      .select("id, subscription_tier")
       .eq("user_id", user.id)
       .single()
+
+    if (!brand) return NextResponse.json({ error: "Brand not found" }, { status: 404 })
+
+    // Enforce UGC video generation limit
+    const tier = (brand.subscription_tier || "free") as SubscriptionTier
+    const tierConfig = SUBSCRIPTION_TIERS[tier] || SUBSCRIPTION_TIERS.free
+    const limit = tierConfig.ugcVideosPerMonth
+
+    if (limit !== -1) {
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+
+      const { count } = await supabase
+        .from("ugc_video_jobs")
+        .select("id", { count: "exact", head: true })
+        .eq("brand_id", brand.id)
+        .gte("created_at", startOfMonth)
+
+      if ((count ?? 0) >= limit) {
+        return NextResponse.json({
+          error: `You've reached your monthly limit of ${limit} UGC video${limit === 1 ? "" : "s"}. Upgrade your plan for more.`,
+          current: count,
+          limit,
+          upgradeUrl: "/dashboard/settings/billing",
+        }, { status: 403 })
+      }
+    }
 
     const { data: job, error } = await supabase
       .from("ugc_video_jobs")

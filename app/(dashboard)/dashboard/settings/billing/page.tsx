@@ -13,8 +13,8 @@ const tiers = [
     features: [
       "5 campaigns per month",
       "Up to 20 seats per campaign",
+      "10 AI UGC videos/month",
       "AI-powered creator search",
-      "Advanced search filters",
       "Content approval workflow",
       "Email support",
     ],
@@ -27,8 +27,8 @@ const tiers = [
     features: [
       "10 campaigns per month",
       "Up to 50 seats per campaign",
+      "50 AI UGC videos/month",
       "Everything in Starter",
-      "Priority support",
       "Analytics dashboard",
       "Team collaboration (3 seats)",
     ],
@@ -42,9 +42,9 @@ const tiers = [
     features: [
       "Unlimited campaigns",
       "Unlimited seats per campaign",
+      "Unlimited AI UGC videos",
       "Everything in Growth",
       "Dedicated account manager",
-      "Custom integrations",
       "SLA guarantee",
     ],
   },
@@ -56,6 +56,8 @@ interface UsageData {
   campaignsLimit: number
   seatsUsed: number
   seatsLimit: number
+  ugcVideosUsed: number
+  ugcVideosLimit: number
 }
 
 export default function BillingPage() {
@@ -89,15 +91,24 @@ export default function BillingPage() {
           .eq("campaigns.brand_id", brand.id)
           .eq("status", "accepted")
 
-        const tierLimits: Record<string, { campaigns: number; seats: number }> = {
-          free: { campaigns: 1, seats: 5 },
-          starter: { campaigns: 5, seats: 20 },
-          growth: { campaigns: 10, seats: 50 },
-          scale: { campaigns: -1, seats: -1 },
+        const tierLimits: Record<string, { campaigns: number; seats: number; ugcVideos: number }> = {
+          free: { campaigns: 1, seats: 5, ugcVideos: 1 },
+          starter: { campaigns: 5, seats: 20, ugcVideos: 10 },
+          growth: { campaigns: 10, seats: 50, ugcVideos: 50 },
+          scale: { campaigns: -1, seats: -1, ugcVideos: -1 },
         }
 
         const tier = brand.subscription_tier || "free"
         const limits = tierLimits[tier] || tierLimits.free
+
+        // Count UGC videos this month
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+        const { count: ugcCount } = await supabase
+          .from("ugc_video_jobs")
+          .select("id", { count: "exact", head: true })
+          .eq("brand_id", brand.id)
+          .gte("created_at", startOfMonth)
 
         setUsage({
           currentTier: tier,
@@ -105,6 +116,8 @@ export default function BillingPage() {
           campaignsLimit: limits.campaigns,
           seatsUsed: seatCount ?? 0,
           seatsLimit: limits.seats,
+          ugcVideosUsed: ugcCount ?? 0,
+          ugcVideosLimit: limits.ugcVideos,
         })
       } catch (error) {
         console.error("Failed to fetch usage:", error)
@@ -172,7 +185,7 @@ export default function BillingPage() {
               {usage.currentTier} Plan
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <div className="flex justify-between text-sm mb-1">
                 <span>Active Campaigns</span>
@@ -197,6 +210,20 @@ export default function BillingPage() {
                   <div
                     className="h-full bg-primary rounded-full transition-all"
                     style={{ width: `${Math.min(100, (usage.seatsUsed / usage.seatsLimit) * 100)}%` }}
+                  />
+                </div>
+              )}
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span>AI UGC Videos</span>
+                <span className="font-medium">{usage.ugcVideosUsed} / {formatLimit(usage.ugcVideosLimit)}/mo</span>
+              </div>
+              {usage.ugcVideosLimit !== -1 && (
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${usage.ugcVideosUsed >= usage.ugcVideosLimit ? "bg-destructive" : "bg-primary"}`}
+                    style={{ width: `${Math.min(100, (usage.ugcVideosUsed / usage.ugcVideosLimit) * 100)}%` }}
                   />
                 </div>
               )}

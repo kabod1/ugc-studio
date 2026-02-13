@@ -8,6 +8,14 @@ import {
   MoreVertical, Trash2, RotateCcw, Copy, ExternalLink
 } from "lucide-react"
 import { formatDate } from "@/lib/utils"
+import { SUBSCRIPTION_TIERS, type SubscriptionTier } from "@/lib/constants"
+import { createClient } from "@/lib/supabase/client"
+
+interface UGCVideoUsage {
+  used: number
+  limit: number
+  tier: string
+}
 
 interface UGCVideoJob {
   id: string
@@ -28,10 +36,47 @@ export default function UGCVideosPage() {
   const [generating, setGenerating] = useState(false)
   const [productImageUrl, setProductImageUrl] = useState("")
   const [pollingJobId, setPollingJobId] = useState<string | null>(null)
+  const [usage, setUsage] = useState<UGCVideoUsage | null>(null)
 
   useEffect(() => {
     fetchJobs()
+    fetchUsage()
   }, [])
+
+  async function fetchUsage() {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: brand } = await supabase
+        .from("brands")
+        .select("id, subscription_tier")
+        .eq("user_id", user.id)
+        .single()
+
+      if (!brand) return
+
+      const tier = (brand.subscription_tier || "free") as SubscriptionTier
+      const tierConfig = SUBSCRIPTION_TIERS[tier] || SUBSCRIPTION_TIERS.free
+
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      const { count } = await supabase
+        .from("ugc_video_jobs")
+        .select("id", { count: "exact", head: true })
+        .eq("brand_id", brand.id)
+        .gte("created_at", startOfMonth)
+
+      setUsage({
+        used: count ?? 0,
+        limit: tierConfig.ugcVideosPerMonth,
+        tier: tierConfig.name,
+      })
+    } catch {
+      // Silently fail
+    }
+  }
 
   // Poll for job completion
   useEffect(() => {
@@ -88,6 +133,13 @@ export default function UGCVideosPage() {
 
       if (!res.ok) {
         const err = await res.json()
+        if (res.status === 403 && err.upgradeUrl) {
+          toast.error(err.error, {
+            action: { label: "Upgrade", onClick: () => window.location.href = err.upgradeUrl },
+            duration: 8000,
+          })
+          return
+        }
         throw new Error(err.error || "Failed to start generation")
       }
 
@@ -96,6 +148,7 @@ export default function UGCVideosPage() {
       setProductImageUrl("")
       toast.success("UGC video generation started! This takes 3-5 minutes.")
       fetchJobs()
+      fetchUsage()
     } catch (err: any) {
       toast.error(err.message)
     } finally {
@@ -199,16 +252,27 @@ export default function UGCVideosPage() {
               </button>
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" /> Takes 3-5 minutes
-              </span>
-              <span className="flex items-center gap-1">
-                <Image className="h-3 w-3" /> 9:16 portrait format
-              </span>
-              <span className="flex items-center gap-1">
-                <Video className="h-3 w-3" /> AI lip-synced speech
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> Takes 3-5 minutes
+                </span>
+                <span className="flex items-center gap-1">
+                  <Image className="h-3 w-3" /> 9:16 portrait format
+                </span>
+                <span className="flex items-center gap-1">
+                  <Video className="h-3 w-3" /> AI lip-synced speech
+                </span>
+              </div>
+              {usage && (
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  usage.limit === -1 ? "bg-green-100 text-green-700" :
+                  usage.used >= usage.limit ? "bg-red-100 text-red-700" :
+                  "bg-muted text-muted-foreground"
+                }`}>
+                  {usage.limit === -1 ? "Unlimited" : `${usage.used}/${usage.limit} this month`}
+                </span>
+              )}
             </div>
           </div>
         </div>
