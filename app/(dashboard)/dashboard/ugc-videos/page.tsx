@@ -3,12 +3,10 @@
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import {
-  Video, Upload, Loader2, CheckCircle2, XCircle,
+  Video, Loader2, CheckCircle2, XCircle,
   Clock, Play, Download, RefreshCw, Sparkles, Image
 } from "lucide-react"
 import { formatDate } from "@/lib/utils"
-import { createClient } from "@/lib/supabase/client"
-import { useUser } from "@/hooks/use-user"
 
 interface UGCVideoJob {
   id: string
@@ -24,7 +22,6 @@ interface UGCVideoJob {
 }
 
 export default function UGCVideosPage() {
-  const { profile } = useUser()
   const [jobs, setJobs] = useState<UGCVideoJob[]>([])
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
@@ -62,21 +59,14 @@ export default function UGCVideosPage() {
   }, [pollingJobId])
 
   async function fetchJobs() {
-    const supabase = createClient()
-    const { data: brand } = await supabase
-      .from("brands")
-      .select("id")
-      .eq("user_id", profile?.id || "")
-      .single()
-
-    if (brand) {
-      const { data } = await supabase
-        .from("ugc_video_jobs")
-        .select("*")
-        .eq("brand_id", brand.id)
-        .order("created_at", { ascending: false })
-
-      setJobs(data || [])
+    try {
+      const res = await fetch("/api/ugc-videos")
+      if (res.ok) {
+        const data = await res.json()
+        setJobs(data.jobs || [])
+      }
+    } catch (err) {
+      console.error("Failed to fetch UGC jobs:", err)
     }
     setLoading(false)
   }
