@@ -39,7 +39,7 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Public routes - no auth needed
-  const publicRoutes = ["/", "/login", "/signup", "/forgot-password", "/reset-password", "/api/stripe/webhook"]
+  const publicRoutes = ["/", "/login", "/signup", "/forgot-password", "/reset-password", "/api/stripe/webhook", "/api/n8n/ugc-video-callback"]
   if (publicRoutes.some((route) => path === route || path.startsWith(route + "/"))) {
     return response
   }
