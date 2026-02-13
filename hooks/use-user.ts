@@ -56,7 +56,7 @@ export function useUser() {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut()
+      await fetch("/api/auth/signout", { method: "POST" })
     } catch {
       // Sign out even if API call fails
     }
