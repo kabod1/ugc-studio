@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
-    const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || ""
-    const callbackUrl = `${origin}/api/n8n/ugc-video-callback`
+    const requestUrl = new URL(request.url)
+    const callbackUrl = `${requestUrl.origin}/api/n8n/ugc-video-callback`
 
     try {
       await generateUGCVideo(product_image_url, job.id, callbackUrl, campaign_id, brand?.id)
