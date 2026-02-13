@@ -17,12 +17,12 @@ import type {
 } from "./types"
 
 export async function scrapeCreators(params: ScrapeParams) {
-  return callN8nWebhook<ScrapeResult>("/webhook/scrape-creators", params)
+  return callN8nWebhook<ScrapeResult>("/scrape-creators", params)
 }
 
 export async function matchCreators(campaignId: string, brief?: string) {
   const params: MatchParams = { campaign_id: campaignId, brief }
-  return callN8nWebhook<MatchResult>("/webhook/match-creators", params)
+  return callN8nWebhook<MatchResult>("/match-creators", params)
 }
 
 export async function sendOutreach(
@@ -35,7 +35,7 @@ export async function sendOutreach(
     creator_ids: creatorIds,
     template,
   }
-  return callN8nWebhook<OutreachResult>("/webhook/outreach", params)
+  return callN8nWebhook<OutreachResult>("/outreach", params)
 }
 
 export async function checkContentQuality(
@@ -49,7 +49,7 @@ export async function checkContentQuality(
     brief,
   }
   return callN8nWebhook<QualityCheckResult>(
-    "/webhook/quality-check",
+    "/quality-check",
     params
   )
 }
@@ -57,7 +57,7 @@ export async function checkContentQuality(
 export async function triggerPayment(event: string, contractId: string) {
   const params: PaymentTriggerParams = { event, contract_id: contractId }
   return callN8nWebhook<PaymentTriggerResult>(
-    "/webhook/trigger-payment",
+    "/trigger-payment",
     params
   )
 }
@@ -77,11 +77,11 @@ export async function generateUGCVideo(
     brand_id: brandId,
   }
   return callN8nWebhook<UGCVideoResult>(
-    "/webhook/ugc-generate-video",
+    "/ugc-generate-video",
     params
   )
 }
 
 export async function triggerAnalytics(params: AnalyticsParams) {
-  return callN8nWebhook<AnalyticsResult>("/webhook/analytics", params)
+  return callN8nWebhook<AnalyticsResult>("/analytics", params)
 }
