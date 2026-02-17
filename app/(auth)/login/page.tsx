@@ -54,18 +54,18 @@ function LoginForm() {
       let destination = redirect || "/dashboard"
 
       if (userId) {
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", userId)
-          .single()
+        try {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", userId)
+            .single()
 
-        if (profileError) {
-          toast.error("Profile error: " + profileError.message)
+          if (profile?.role === "creator") destination = redirect || "/creator"
+          else if (profile?.role === "admin") destination = redirect || "/admin"
+        } catch {
+          // Profile fetch may get aborted during navigation — ignore and use default destination
         }
-
-        if (profile?.role === "creator") destination = redirect || "/creator"
-        else if (profile?.role === "admin") destination = redirect || "/admin"
       }
 
       window.location.href = destination
