@@ -43,7 +43,7 @@ function LoginForm() {
       })
 
       if (error) {
-        toast.error(error.message)
+        toast.error(`${error.message} (email: ${data.email}, pw length: ${data.password.length})`)
         setLoading(false)
         return
       }
