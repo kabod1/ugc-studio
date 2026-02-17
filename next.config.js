@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+// Build ID: force-rebuild-clean-env
 const nextConfig = {
   images: {
     remotePatterns: [
