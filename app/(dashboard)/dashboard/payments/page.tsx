@@ -1,24 +1,76 @@
-import { createClient } from "@/lib/supabase/server"
+"use client"
+
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { CreditCard, DollarSign, Clock, Check } from "lucide-react"
+import { toast } from "sonner"
+import { CreditCard, DollarSign, Clock, Check, Loader2, Send } from "lucide-react"
 
-export default async function PaymentsPage() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+interface Payment {
+  id: string
+  status: string
+  amount_cents: number
+  platform_fee_cents: number
+  created_at: string
+  campaigns: { title: string } | null
+  creator_profiles: { display_name: string } | null
+}
 
-  const { data: brand } = await supabase
-    .from("brands")
-    .select("id")
-    .eq("user_id", user!.id)
-    .single()
+export default function PaymentsPage() {
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [releasingId, setReleasingId] = useState<string | null>(null)
 
-  const { data: payments } = await supabase
-    .from("payments")
-    .select("*, campaigns(title), creator_profiles(display_name)")
-    .eq("brand_id", brand!.id)
-    .order("created_at", { ascending: false })
+  useEffect(() => {
+    async function fetchPayments() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-  const totals = payments?.reduce(
+      const { data: brand } = await supabase
+        .from("brands")
+        .select("id")
+        .eq("user_id", user.id)
+        .single()
+
+      if (!brand) { setLoading(false); return }
+
+      const { data } = await supabase
+        .from("payments")
+        .select("*, campaigns(title), creator_profiles(display_name)")
+        .eq("brand_id", brand.id)
+        .order("created_at", { ascending: false })
+
+      if (data) setPayments(data)
+      setLoading(false)
+    }
+    fetchPayments()
+  }, [])
+
+  async function handleRelease(paymentId: string) {
+    if (!confirm("Release this payment to the creator? This cannot be undone.")) return
+    setReleasingId(paymentId)
+    try {
+      const res = await fetch("/api/payments/release-escrow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ payment_id: paymentId }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to release payment")
+      }
+      setPayments((prev) =>
+        prev.map((p) => (p.id === paymentId ? { ...p, status: "completed" } : p))
+      )
+      toast.success("Payment released to creator")
+    } catch (err: any) {
+      toast.error(err.message)
+    }
+    setReleasingId(null)
+  }
+
+  const totals = payments.reduce(
     (acc, p) => {
       acc.total += p.amount_cents || 0
       if (p.status === "pending") acc.pending += p.amount_cents || 0
@@ -27,7 +79,7 @@ export default async function PaymentsPage() {
       return acc
     },
     { total: 0, pending: 0, escrow: 0, completed: 0 }
-  ) || { total: 0, pending: 0, escrow: 0, completed: 0 }
+  )
 
   const statusColors: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-800",
@@ -35,6 +87,14 @@ export default async function PaymentsPage() {
     completed: "bg-green-100 text-green-800",
     failed: "bg-red-100 text-red-800",
     refunded: "bg-gray-100 text-gray-800",
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
   return (
@@ -63,7 +123,7 @@ export default async function PaymentsPage() {
         </div>
       </div>
 
-      {payments && payments.length > 0 ? (
+      {payments.length > 0 ? (
         <div className="bg-card border rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead><tr className="border-b bg-muted/50">
@@ -72,6 +132,7 @@ export default async function PaymentsPage() {
               <th className="text-right p-3 font-medium">Amount</th>
               <th className="text-center p-3 font-medium">Status</th>
               <th className="text-right p-3 font-medium">Date</th>
+              <th className="text-right p-3 font-medium">Action</th>
             </tr></thead>
             <tbody>
               {payments.map((p) => (
@@ -83,6 +144,18 @@ export default async function PaymentsPage() {
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[p.status] || ""}`}>{p.status}</span>
                   </td>
                   <td className="p-3 text-right text-muted-foreground">{formatDate(p.created_at)}</td>
+                  <td className="p-3 text-right">
+                    {p.status === "escrow" && (
+                      <button
+                        onClick={() => handleRelease(p.id)}
+                        disabled={releasingId === p.id}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-green-600 text-white text-xs font-medium hover:bg-green-700 disabled:opacity-50"
+                      >
+                        {releasingId === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                        Release
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

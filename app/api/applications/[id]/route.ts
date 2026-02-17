@@ -66,10 +66,28 @@ export async function PATCH(
       .from("campaign_applications")
       .update({ status, reviewed_at: new Date().toISOString() })
       .eq("id", params.id)
-      .select()
+      .select("*, campaigns(brand_id, title, budget_per_creator_cents)")
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+    // Auto-create contract when accepting an application
+    if (status === "accepted" && data) {
+      const brandId = (data.campaigns as any)?.brand_id
+      const budgetCents = (data.campaigns as any)?.budget_per_creator_cents || 0
+      const campaignTitle = (data.campaigns as any)?.title || "Campaign"
+
+      await supabase.from("contracts").insert({
+        campaign_id: data.campaign_id,
+        creator_id: data.creator_id,
+        brand_id: brandId,
+        terms: `Standard content creation agreement for "${campaignTitle}". Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval.`,
+        total_value_cents: budgetCents,
+        deliverables: [],
+        status: "sent",
+      })
+    }
+
     return NextResponse.json(data)
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
