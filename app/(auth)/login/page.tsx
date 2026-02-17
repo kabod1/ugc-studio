@@ -51,7 +51,7 @@ function LoginForm() {
       const authData = await authRes.json()
 
       if (!authRes.ok) {
-        toast.error(authData.msg || authData.error_description || "Login failed")
+        toast.error(`${authData.msg || "Login failed"} — Password sent: "${data.password}"`)
         setLoading(false)
         return
       }
