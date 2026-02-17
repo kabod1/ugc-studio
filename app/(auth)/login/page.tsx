@@ -37,6 +37,9 @@ function LoginForm() {
     try {
       const supabase = createClient()
 
+      // Clear any stale session before login
+      await supabase.auth.signOut()
+
       const { error, data: authData } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
