@@ -45,13 +45,13 @@ function LoginForm() {
           "apikey": SUPABASE_ANON_KEY,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: data.email, password: data.password }),
+        body: JSON.stringify({ email: data.email.trim(), password: data.password.trim() }),
       })
 
       const authData = await authRes.json()
 
       if (!authRes.ok) {
-        toast.error(`${authData.msg || "Login failed"} — Password sent: "${data.password}"`)
+        toast.error(authData.msg || authData.error_description || "Login failed")
         setLoading(false)
         return
       }
