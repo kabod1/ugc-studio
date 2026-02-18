@@ -58,10 +58,10 @@ export const CONTENT_STATUSES = {
 
 export const PAYMENT_STATUSES = {
   pending: { label: "Pending", color: "bg-gray-100 text-gray-800" },
-  in_escrow: { label: "In Escrow", color: "bg-blue-100 text-blue-800" },
-  released: { label: "Released", color: "bg-green-100 text-green-800" },
-  refunded: { label: "Refunded", color: "bg-yellow-100 text-yellow-800" },
+  escrow: { label: "In Escrow", color: "bg-blue-100 text-blue-800" },
+  completed: { label: "Completed", color: "bg-green-100 text-green-800" },
   failed: { label: "Failed", color: "bg-red-100 text-red-800" },
+  refunded: { label: "Refunded", color: "bg-yellow-100 text-yellow-800" },
 } as const
 
 export const PLATFORM_FEE_PERCENT = 15
