@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@supabase/ssr"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
 import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react"
@@ -56,8 +56,8 @@ function LoginForm() {
         return
       }
 
-      // Now set the session in the Supabase client so cookies get set
-      const supabase = createClient()
+      // Set session using hardcoded Supabase credentials to bypass broken env vars
+      const supabase = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       await supabase.auth.setSession({
         access_token: authData.access_token,
         refresh_token: authData.refresh_token,
