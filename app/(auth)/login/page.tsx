@@ -5,13 +5,9 @@ import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createBrowserClient } from "@supabase/ssr"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
 import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react"
-
-const SUPABASE_URL = "https://shqkvzzwademhglwlgiy.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocWt2enp3YWRlbWhnbHdsZ2l5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2MjQxNTIsImV4cCI6MjA4NjIwMDE1Mn0.fOhyCA9mD9KmS_ktqY26E8jMMuEUvZQshDb6je0a5A8"
 
 export default function LoginPage() {
   return (
@@ -38,54 +34,26 @@ function LoginForm() {
   async function onSubmit(data: LoginFormData) {
     setLoading(true)
     try {
-      // Use direct fetch to bypass any Supabase client issues
-      const authRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "apikey": SUPABASE_ANON_KEY,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: data.email.trim(), password: data.password.trim() }),
       })
 
-      const authData = await authRes.json()
+      const result = await res.json()
 
-      if (!authRes.ok) {
-        toast.error(authData.msg || authData.error_description || "Login failed")
+      if (!res.ok) {
+        toast.error(result.error || "Login failed")
         setLoading(false)
         return
       }
 
-      // Set session using hardcoded Supabase credentials to bypass broken env vars
-      const supabase = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      await supabase.auth.setSession({
-        access_token: authData.access_token,
-        refresh_token: authData.refresh_token,
-      })
-
       toast.success("Login successful! Redirecting...")
 
-      // Determine redirect destination based on role
+      // Determine redirect based on role
       let destination = redirect || "/dashboard"
-
-      try {
-        const profileRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/profiles?select=role&id=eq.${authData.user.id}`,
-          {
-            headers: {
-              "apikey": SUPABASE_ANON_KEY,
-              "Authorization": `Bearer ${authData.access_token}`,
-            },
-          }
-        )
-        const profiles = await profileRes.json()
-        const role = profiles?.[0]?.role
-
-        if (role === "creator") destination = redirect || "/creator"
-        else if (role === "admin") destination = redirect || "/admin"
-      } catch {
-        // Profile fetch failed — use default destination
-      }
+      if (result.role === "creator") destination = redirect || "/creator"
+      else if (result.role === "admin") destination = redirect || "/admin"
 
       window.location.href = destination
     } catch (err: any) {
