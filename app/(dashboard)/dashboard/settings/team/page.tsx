@@ -43,9 +43,12 @@ export default function TeamPage() {
     fetchTeam()
   }, [])
 
+  const atLimit = limit !== -1 && currentCount >= limit
+
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
+    if (atLimit) { alert("Team member limit reached. Upgrade your plan for more seats."); return }
 
     setInviting(true)
     try {
@@ -228,7 +231,7 @@ export default function TeamPage() {
           </select>
           <button
             type="submit"
-            disabled={inviting}
+            disabled={inviting || atLimit}
             className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
           >
             {inviting ? (

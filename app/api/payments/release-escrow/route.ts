@@ -25,11 +25,12 @@ export async function POST(request: NextRequest) {
     const connectId = (payment.creator_profiles as any)?.stripe_connect_account_id
     if (!connectId) return NextResponse.json({ error: "Creator has no Stripe Connect account" }, { status: 400 })
 
-    const transferAmount = payment.amount_cents - payment.platform_fee_cents
+    const transferAmount = payment.amount_cents - (payment.platform_fee_cents || 0)
+    if (transferAmount <= 0) return NextResponse.json({ error: "Invalid transfer amount" }, { status: 400 })
 
     const transfer = await stripe.transfers.create({
       amount: transferAmount,
-      currency: "usd",
+      currency: "eur",
       destination: connectId,
       metadata: { payment_id: payment.id },
     })
@@ -44,7 +45,14 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", payment_id)
 
-    return NextResponse.json({ success: true, transfer_id: transfer.id })
+    // Return updated payment for frontend state sync
+    const { data: updated } = await supabase
+      .from("payments")
+      .select("*, campaigns(title), creator_profiles(display_name)")
+      .eq("id", payment_id)
+      .single()
+
+    return NextResponse.json(updated || { success: true, transfer_id: transfer.id })
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Transfer failed" },

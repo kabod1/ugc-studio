@@ -104,6 +104,15 @@ export async function POST(request: NextRequest) {
         break
       }
 
+      case "payment_intent.payment_failed": {
+        const intent = event.data.object as any
+        await supabase
+          .from("payments")
+          .update({ status: "failed", updated_at: new Date().toISOString() })
+          .eq("stripe_payment_intent_id", intent.id)
+        break
+      }
+
       case "customer.subscription.deleted": {
         const subscription = event.data.object as any
         const customerId = subscription.customer

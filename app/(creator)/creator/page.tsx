@@ -55,10 +55,10 @@ export default async function CreatorOverviewPage() {
     .from("payments")
     .select("creator_payout_cents, status")
     .eq("creator_id", creatorProfile.id)
-    .in("status", ["released", "in_escrow"])
+    .in("status", ["released", "escrow", "completed"])
 
   const totalEarnings = payments?.reduce(
-    (sum, p) => sum + (p.status === "released" ? p.creator_payout_cents : 0),
+    (sum, p) => sum + (p.status === "completed" || p.status === "released" ? p.creator_payout_cents : 0),
     0
   ) ?? 0
 

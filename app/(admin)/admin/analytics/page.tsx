@@ -1,33 +1,35 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { formatCurrency, formatNumber } from "@/lib/utils"
-import { BarChart3, Users, Megaphone, DollarSign } from "lucide-react"
+import { BarChart3, Users, Megaphone, DollarSign, Loader2 } from "lucide-react"
 
 export default function AdminAnalyticsPage() {
   const [stats, setStats] = useState({ users: 0, brands: 0, creators: 0, campaigns: 0, revenue: 0, content: 0 })
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetch() {
-      const supabase = createClient()
-      const [u, b, c, ca, p, co] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("brands").select("*", { count: "exact", head: true }),
-        supabase.from("creator_profiles").select("*", { count: "exact", head: true }),
-        supabase.from("campaigns").select("*", { count: "exact", head: true }),
-        supabase.from("payments").select("platform_fee_cents").eq("status", "released"),
-        supabase.from("content_submissions").select("*", { count: "exact", head: true }),
-      ])
-      setStats({
-        users: u.count || 0, brands: b.count || 0, creators: c.count || 0,
-        campaigns: ca.count || 0,
-        revenue: p.data?.reduce((s, x) => s + (x.platform_fee_cents || 0), 0) || 0,
-        content: co.count || 0,
-      })
+    async function fetchStats() {
+      try {
+        const res = await fetch("/api/admin/stats")
+        if (res.ok) {
+          const data = await res.json()
+          setStats({
+            users: data.total_users || 0,
+            brands: data.total_brands || 0,
+            creators: data.total_creators || 0,
+            campaigns: data.total_campaigns || 0,
+            revenue: data.total_revenue_cents || 0,
+            content: data.total_content || 0,
+          })
+        }
+      } catch {}
+      setLoading(false)
     }
-    fetch()
+    fetchStats()
   }, [])
+
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
 
   return (
     <div className="space-y-6">

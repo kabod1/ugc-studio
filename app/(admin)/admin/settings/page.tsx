@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { Loader2, Save } from "lucide-react"
 
@@ -11,25 +10,26 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    async function fetch() {
-      const supabase = createClient()
-      const { data } = await supabase.from("platform_settings").select("*")
-      const map: Record<string, any> = {}
-      data?.forEach((s: any) => { map[s.key] = s.value })
-      setSettings(map)
+    async function fetchSettings() {
+      try {
+        const res = await fetch("/api/admin/settings")
+        if (res.ok) setSettings(await res.json())
+      } catch {}
       setLoading(false)
     }
-    fetch()
+    fetchSettings()
   }, [])
 
   async function handleSave() {
     setSaving(true)
     try {
-      const supabase = createClient()
-      for (const [key, value] of Object.entries(settings)) {
-        await supabase.from("platform_settings").upsert({ key, value, updated_at: new Date().toISOString() })
-      }
-      toast.success("Settings saved")
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      })
+      if (res.ok) toast.success("Settings saved")
+      else toast.error("Failed to save")
     } catch { toast.error("Failed to save") }
     setSaving(false)
   }
