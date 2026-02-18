@@ -31,11 +31,22 @@ export async function POST(request: NextRequest) {
         await svc.from("content_submissions").update({ status, brand_feedback: reason, updated_at: now }).eq("id", id)
         break
       }
+      case "user": {
+        if (action === "verify") {
+          await svc.from("profiles").update({ is_verified: true, updated_at: now }).eq("id", id)
+        } else if (action === "ban") {
+          // Toggle ban status
+          const { data: current } = await svc.from("profiles").select("is_active").eq("id", id).single()
+          const newStatus = current?.is_active !== false ? false : true
+          await svc.from("profiles").update({ is_active: newStatus, updated_at: now }).eq("id", id)
+        }
+        break
+      }
       case "creator": {
         if (action === "approve") {
           await svc.from("creator_profiles").update({ is_verified: true, verified_at: now, updated_at: now }).eq("id", id)
         } else if (action === "ban") {
-          await svc.from("profiles").update({ is_banned: true, updated_at: now }).eq("id", id)
+          await svc.from("profiles").update({ is_active: false, updated_at: now }).eq("id", id)
         }
         break
       }
