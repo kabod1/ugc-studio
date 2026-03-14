@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
 import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react"
+import { loginAction } from "./actions"
 
 export default function LoginPage() {
   return (
@@ -34,29 +35,18 @@ function LoginForm() {
   async function onSubmit(data: LoginFormData) {
     setLoading(true)
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: data.email.trim(), password: data.password.trim() }),
-      })
-
-      const result = await res.json()
-
-      if (!res.ok) {
-        toast.error(result.error || "Login failed")
+      const result = await loginAction(data.email, data.password)
+      // If we get here, there was an error (redirect throws and never returns)
+      if (result?.error) {
+        toast.error(result.error)
         setLoading(false)
+      }
+    } catch (err: any) {
+      // NEXT_REDIRECT is thrown by redirect() — it's not a real error
+      if (err?.digest?.startsWith("NEXT_REDIRECT")) {
+        toast.success("Login successful! Redirecting...")
         return
       }
-
-      toast.success("Login successful! Redirecting...")
-
-      // Determine redirect based on role
-      let destination = redirect || "/dashboard"
-      if (result.role === "creator") destination = redirect || "/creator"
-      else if (result.role === "admin") destination = redirect || "/admin"
-
-      window.location.href = destination
-    } catch (err: any) {
       toast.error("Error: " + (err?.message || "Unknown error"))
       setLoading(false)
     }
@@ -146,6 +136,9 @@ function LoginForm() {
         <Link href="/signup" className="text-primary hover:underline font-medium">
           Sign up
         </Link>
+      </p>
+      <p className="text-center text-xs text-muted-foreground">
+        Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a>
       </p>
     </div>
   )
