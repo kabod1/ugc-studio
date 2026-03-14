@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServiceClient as createClient } from "@/lib/supabase/server"
 import { formatDate, formatCurrency } from "@/lib/utils"
 import { SUBSCRIPTION_TIERS } from "@/lib/constants"
 import { Sliders } from "lucide-react"

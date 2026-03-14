@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServiceClient as createClient } from "@/lib/supabase/server"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { CreditCard, DollarSign, Clock, CheckCircle2 } from "lucide-react"
 
