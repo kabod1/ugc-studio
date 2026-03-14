@@ -64,7 +64,7 @@ export async function updateSession(request: NextRequest) {
     .eq("id", user.id)
     .single()
 
-  const role = profile?.role
+  const role = profile?.role ?? "brand"
 
   // Role-based access control
   if (path.startsWith("/admin") && role !== "admin") {
