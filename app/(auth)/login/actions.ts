@@ -3,6 +3,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
 
 export async function loginAction(email: string, password: string): Promise<{ error: string } | never> {
   const cookieStore = cookies()
@@ -34,16 +35,26 @@ export async function loginAction(email: string, password: string): Promise<{ er
     return { error: error.message }
   }
 
+  // Use service role key via direct fetch to bypass RLS infinite recursion
   let role = "brand"
   try {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .single()
-    if (profile?.role) role = profile.role
+    const profileRes = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/profiles?id=eq.${data.user.id}&select=role&limit=1`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        },
+        cache: "no-store",
+      }
+    )
+    const profiles = await profileRes.json()
+    if (profiles?.[0]?.role) role = profiles[0].role
   } catch {}
 
-  const destination = role === "creator" ? "/creator" : role === "admin" ? "/admin" : "/dashboard"
+  const destination =
+    role === "creator" ? "/creator" : role === "admin" ? "/admin" : "/dashboard"
+
+  revalidatePath("/", "layout")
   redirect(destination)
 }

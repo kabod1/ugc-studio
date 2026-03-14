@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
 import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { loginAction } from "./actions"
 
 export default function LoginPage() {
   return (
@@ -20,7 +20,6 @@ export default function LoginPage() {
 
 function LoginForm() {
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -35,37 +34,19 @@ function LoginForm() {
   async function onSubmit(data: LoginFormData) {
     setLoading(true)
     try {
-      const supabase = createClient()
-
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email.trim(),
-        password: data.password.trim(),
-      })
-
-      if (error) {
-        toast.error(error.message)
+      const result = await loginAction(data.email, data.password)
+      // If we get here without redirect, there was an error
+      if (result?.error) {
+        toast.error(result.error)
         setLoading(false)
-        return
       }
-
-      // Get role via API route (uses service role key, bypasses RLS)
-      let destination = redirectTo || "/dashboard"
-      try {
-        const roleRes = await fetch("/api/auth/role", {
-          headers: {
-            "x-user-id": authData.user.id,
-          },
-        })
-        const { role } = await roleRes.json()
-        if (role === "creator") destination = redirectTo || "/creator"
-        else if (role === "admin") destination = redirectTo || "/admin"
-      } catch {}
-
-      toast.success("Login successful! Redirecting...")
-      window.location.href = destination
     } catch (err: any) {
-      toast.error("Error: " + (err?.message || "Unknown error"))
-      setLoading(false)
+      // redirect() throws internally — Next.js handles navigation automatically
+      // Any real error shows here
+      if (!err?.digest?.startsWith("NEXT_REDIRECT")) {
+        toast.error(err?.message || "Login failed")
+        setLoading(false)
+      }
     }
   }
 
