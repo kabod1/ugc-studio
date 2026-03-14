@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 
@@ -12,17 +12,19 @@ export default async function DashboardLayout({
 
   if (!user) redirect("/login")
 
-  const { data: profile } = await supabase
+  const service = createServiceClient()
+
+  const { data: profile } = await service
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single()
 
   if (!profile || profile.role !== "brand") {
-    redirect(profile?.role === "creator" ? "/creator" : "/login")
+    redirect(profile?.role === "creator" ? "/creator" : profile?.role === "admin" ? "/admin" : "/login")
   }
 
-  const { data: brand } = await supabase
+  const { data: brand } = await service
     .from("brands")
     .select("*")
     .eq("user_id", user.id)
