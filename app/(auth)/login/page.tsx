@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
 import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react"
-import { loginAction } from "./actions"
+import { createClient } from "@/lib/supabase/client"
 
 export default function LoginPage() {
   return (
@@ -20,7 +20,7 @@ export default function LoginPage() {
 
 function LoginForm() {
   const searchParams = useSearchParams()
-  const redirect = searchParams.get("redirect")
+  const redirectTo = searchParams.get("redirect")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -35,18 +35,36 @@ function LoginForm() {
   async function onSubmit(data: LoginFormData) {
     setLoading(true)
     try {
-      const result = await loginAction(data.email, data.password)
-      // If we get here, there was an error (redirect throws and never returns)
-      if (result?.error) {
-        toast.error(result.error)
+      const supabase = createClient()
+
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email.trim(),
+        password: data.password.trim(),
+      })
+
+      if (error) {
+        toast.error(error.message)
         setLoading(false)
-      }
-    } catch (err: any) {
-      // NEXT_REDIRECT is thrown by redirect() — it's not a real error
-      if (err?.digest?.startsWith("NEXT_REDIRECT")) {
-        toast.success("Login successful! Redirecting...")
         return
       }
+
+      // Fetch role to determine where to redirect
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", authData.user.id)
+        .single()
+
+      const role = profile?.role ?? "brand"
+      let destination = redirectTo || "/dashboard"
+      if (role === "creator") destination = redirectTo || "/creator"
+      else if (role === "admin") destination = redirectTo || "/admin"
+
+      toast.success("Login successful! Redirecting...")
+
+      // Hard navigation ensures middleware picks up the new cookies
+      window.location.href = destination
+    } catch (err: any) {
       toast.error("Error: " + (err?.message || "Unknown error"))
       setLoading(false)
     }
@@ -106,10 +124,7 @@ function LoginForm() {
           </div>
 
           <div className="flex justify-end">
-            <Link
-              href="/forgot-password"
-              className="text-sm text-primary hover:underline"
-            >
+            <Link href="/forgot-password" className="text-sm text-primary hover:underline">
               Forgot password?
             </Link>
           </div>
