@@ -48,21 +48,20 @@ function LoginForm() {
         return
       }
 
-      // Fetch role to determine where to redirect
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", authData.user.id)
-        .single()
-
-      const role = profile?.role ?? "brand"
+      // Get role via API route (uses service role key, bypasses RLS)
       let destination = redirectTo || "/dashboard"
-      if (role === "creator") destination = redirectTo || "/creator"
-      else if (role === "admin") destination = redirectTo || "/admin"
+      try {
+        const roleRes = await fetch("/api/auth/role", {
+          headers: {
+            "x-user-id": authData.user.id,
+          },
+        })
+        const { role } = await roleRes.json()
+        if (role === "creator") destination = redirectTo || "/creator"
+        else if (role === "admin") destination = redirectTo || "/admin"
+      } catch {}
 
       toast.success("Login successful! Redirecting...")
-
-      // Hard navigation ensures middleware picks up the new cookies
       window.location.href = destination
     } catch (err: any) {
       toast.error("Error: " + (err?.message || "Unknown error"))

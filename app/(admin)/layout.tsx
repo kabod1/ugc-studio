@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 
@@ -12,7 +13,9 @@ export default async function AdminLayout({
 
   if (!user) redirect("/login")
 
-  const { data: profile } = await supabase
+  // Use service client to bypass RLS infinite recursion on profiles
+  const serviceClient = createServiceClient()
+  const { data: profile } = await serviceClient
     .from("profiles")
     .select("*")
     .eq("id", user.id)

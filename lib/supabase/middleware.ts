@@ -57,14 +57,22 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Fetch user role for routing
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single()
-
-  const role = profile?.role ?? "brand"
+  // Fetch user role using service role key to bypass RLS infinite recursion bug
+  let role = "brand"
+  try {
+    const profileRes = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=role&limit=1`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        },
+        cache: "no-store",
+      }
+    )
+    const profiles = await profileRes.json()
+    if (profiles?.[0]?.role) role = profiles[0].role
+  } catch {}
 
   // Role-based access control
   if (path.startsWith("/admin") && role !== "admin") {
