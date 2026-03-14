@@ -5,6 +5,16 @@ import { createClient } from "@/lib/supabase/client"
 import type { Profile } from "@/types"
 import type { User } from "@supabase/supabase-js"
 
+async function fetchProfile(userId: string): Promise<Profile | null> {
+  try {
+    const res = await fetch(`/api/auth/profile?userId=${userId}`)
+    if (!res.ok) return null
+    return await res.json()
+  } catch {
+    return null
+  }
+}
+
 export function useUser() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -16,14 +26,9 @@ export function useUser() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
-
         if (user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", user.id)
-            .single()
-          setProfile(profile)
+          const p = await fetchProfile(user.id)
+          setProfile(p)
         }
       } catch {
         setUser(null)
@@ -39,12 +44,8 @@ export function useUser() {
       async (_event, session) => {
         setUser(session?.user ?? null)
         if (session?.user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session.user.id)
-            .single()
-          setProfile(profile)
+          const p = await fetchProfile(session.user.id)
+          setProfile(p)
         } else {
           setProfile(null)
         }
@@ -57,9 +58,7 @@ export function useUser() {
   const signOut = async () => {
     try {
       await fetch("/api/auth/signout", { method: "POST" })
-    } catch {
-      // Sign out even if API call fails
-    }
+    } catch {}
     setUser(null)
     setProfile(null)
     window.location.href = "/login"
