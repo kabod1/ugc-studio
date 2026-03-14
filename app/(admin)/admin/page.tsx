@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import {
@@ -7,7 +7,7 @@ import {
 } from "lucide-react"
 
 export default async function AdminDashboardPage() {
-  const supabase = createClient()
+  const supabase = createServiceClient()
 
   const [
     { count: totalUsers },
