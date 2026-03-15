@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       const account = await stripeRequest("accounts", {
         type: "express",
         email: user.email,
-        capabilities: { transfers: { requested: true } },
+        capabilities: { transfers: { requested: true }, card_payments: { requested: true } },
       })
       accountId = account.id
 
