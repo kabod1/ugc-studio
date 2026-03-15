@@ -4,9 +4,9 @@ export async function POST(request: Request) {
   try {
     const { email, password } = await request.json()
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim()
+    const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim()
+    const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim()
 
     // Sign in via direct REST call — no createServerClient
     const authRes = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
