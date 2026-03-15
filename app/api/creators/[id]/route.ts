@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
@@ -10,7 +10,8 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { data, error } = await supabase
+    const svc = createServiceClient()
+    const { data, error } = await svc
       .from("creator_profiles")
       .select("*")
       .eq("id", params.id)

@@ -1,14 +1,14 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import { ArrowLeft, Star, Users, Globe, MapPin, BadgeCheck, Crown, Sparkles } from "lucide-react"
 
 export default async function CreatorDetailPage({ params }: { params: { id: string } }) {
-  const supabase = createClient()
+  const svc = createServiceClient()
 
-  const { data: creator } = await supabase
+  const { data: creator } = await svc
     .from("creator_profiles")
-    .select("*, profiles(full_name, email, avatar_url)")
+    .select("*")
     .eq("id", params.id)
     .single()
 
@@ -49,14 +49,14 @@ export default async function CreatorDetailPage({ params }: { params: { id: stri
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
               {creator.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{creator.location}</span>}
-              <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 text-yellow-500" />{creator.avg_rating || "N/A"} ({creator.total_reviews || 0} reviews)</span>
-              <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{(creator.follower_count || 0).toLocaleString()} followers</span>
+              <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 text-yellow-500" />{creator.platform_rating || "N/A"}</span>
+              <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{((creator.tiktok_followers || 0) + (creator.instagram_followers || 0) + (creator.youtube_subscribers || 0)).toLocaleString()} followers</span>
             </div>
             {creator.bio && <p className="text-muted-foreground mt-3">{creator.bio}</p>}
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold">{formatCurrency(creator.hourly_rate_cents || 0)}</p>
-            <p className="text-sm text-muted-foreground">per hour</p>
+            <p className="text-2xl font-bold">{formatCurrency(creator.base_rate_cents || 0)}</p>
+            <p className="text-sm text-muted-foreground">base rate</p>
           </div>
         </div>
       </div>
