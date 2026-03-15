@@ -15,11 +15,13 @@ export default async function AdminLayout({
 
   // Use service client to bypass RLS infinite recursion on profiles
   const serviceClient = createServiceClient()
-  const { data: profile } = await serviceClient
+  const { data: profile, error: profileError } = await serviceClient
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single()
+
+  console.log("[admin-layout] user.id:", user.id, "profile:", profile?.role, "error:", profileError?.message)
 
   if (!profile || profile.role !== "admin") {
     redirect(profile?.role === "creator" ? "/creator" : "/dashboard")
