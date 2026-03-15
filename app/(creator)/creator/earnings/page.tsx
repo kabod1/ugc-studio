@@ -1,14 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { DollarSign, Clock, CreditCard, TrendingUp, Loader2, ExternalLink } from "lucide-react"
-import { toast } from "sonner"
+import { Clock, CreditCard, TrendingUp, Loader2, ExternalLink, Euro } from "lucide-react"
+
+
+const formatEur = (cents: number) =>
+  new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" }).format(cents / 100)
 
 export default function EarningsPage() {
   const [payments, setPayments] = useState<any[]>([])
   const [creator, setCreator] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [settingUp, setSettingUp] = useState(false)
+  const [connectError, setConnectError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -29,6 +33,7 @@ export default function EarningsPage() {
 
   async function setupConnect() {
     setSettingUp(true)
+    setConnectError(null)
     try {
       const res = await fetch("/api/payments/create-connect-account", { method: "POST" })
       const data = await res.json()
@@ -36,16 +41,27 @@ export default function EarningsPage() {
         window.location.href = data.url
         return
       }
-      toast.error(data.error || "Failed to set up Stripe Connect")
+      const errMsg = data.error || "Failed to set up Stripe Connect"
+      if (
+        errMsg.includes("signed up for Connect") ||
+        errMsg.includes("create new accounts") ||
+        errMsg.includes("transfers") ||
+        errMsg.includes("capability") ||
+        errMsg.includes("approval")
+      ) {
+        setConnectError(
+          "Stripe Connect payouts are not yet active on this platform. The platform owner needs to complete Stripe Connect setup and approval. Please check back soon — payouts will be available once this is approved."
+        )
+      } else {
+        setConnectError(errMsg)
+      }
     } catch (err: any) {
-      toast.error("Connection error: " + (err?.message || "Unknown error"))
+      setConnectError("Connection error: " + (err?.message || "Unknown error"))
     }
     setSettingUp(false)
   }
 
   if (loading) return <div className="flex justify-center p-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
-
-  const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`
 
   const totals = payments.reduce(
     (acc, p) => {
@@ -73,6 +89,11 @@ export default function EarningsPage() {
         <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
           <h2 className="font-semibold text-lg mb-2">Set Up Payouts</h2>
           <p className="text-sm text-muted-foreground mb-4">Connect your Stripe account to receive payments from brands.</p>
+          {connectError && (
+            <div className="mb-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-sm text-yellow-800">
+              {connectError}
+            </div>
+          )}
           <button onClick={setupConnect} disabled={settingUp}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
             {settingUp ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
@@ -83,16 +104,16 @@ export default function EarningsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border rounded-lg p-4">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm"><DollarSign className="h-4 w-4" /> Total Earned</div>
-          <p className="text-2xl font-bold mt-1">{formatCurrency(totals.completed)}</p>
+          <div className="flex items-center gap-2 text-muted-foreground text-sm"><Euro className="h-4 w-4" /> Total Earned</div>
+          <p className="text-2xl font-bold mt-1">{formatEur(totals.completed)}</p>
         </div>
         <div className="bg-card border rounded-lg p-4">
           <div className="flex items-center gap-2 text-muted-foreground text-sm"><Clock className="h-4 w-4" /> Pending</div>
-          <p className="text-2xl font-bold mt-1">{formatCurrency(totals.pending)}</p>
+          <p className="text-2xl font-bold mt-1">{formatEur(totals.pending)}</p>
         </div>
         <div className="bg-card border rounded-lg p-4">
           <div className="flex items-center gap-2 text-muted-foreground text-sm"><TrendingUp className="h-4 w-4" /> This Month</div>
-          <p className="text-2xl font-bold mt-1">{formatCurrency(thisMonth)}</p>
+          <p className="text-2xl font-bold mt-1">{formatEur(thisMonth)}</p>
         </div>
         <div className="bg-card border rounded-lg p-4">
           <div className="flex items-center gap-2 text-muted-foreground text-sm"><CreditCard className="h-4 w-4" /> Payouts</div>
@@ -115,9 +136,9 @@ export default function EarningsPage() {
               {payments.map((p) => (
                 <tr key={p.id} className="border-b last:border-0">
                   <td className="p-3">{(p.campaigns as any)?.title || "—"}</td>
-                  <td className="p-3 text-right">{formatCurrency(p.amount_cents)}</td>
-                  <td className="p-3 text-right text-muted-foreground">-{formatCurrency(p.platform_fee_cents)}</td>
-                  <td className="p-3 text-right font-medium">{formatCurrency(p.amount_cents - p.platform_fee_cents)}</td>
+                  <td className="p-3 text-right">{formatEur(p.amount_cents)}</td>
+                  <td className="p-3 text-right text-muted-foreground">-{formatEur(p.platform_fee_cents)}</td>
+                  <td className="p-3 text-right font-medium">{formatEur(p.amount_cents - p.platform_fee_cents)}</td>
                   <td className="p-3 text-center">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                       p.status === "completed" ? "bg-green-100 text-green-800" :
