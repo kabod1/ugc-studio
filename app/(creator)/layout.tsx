@@ -12,29 +12,29 @@ export default async function CreatorLayout({
 
   if (!user) redirect("/login")
 
-  const service = createServiceClient()
-
-  const { data: profile } = await service
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single()
-
-  if (!profile || profile.role !== "creator") {
-    redirect(profile?.role === "brand" ? "/dashboard" : profile?.role === "admin" ? "/admin" : "/login")
+  // Role is stored in user_metadata (set at signup) — profiles table is admin-only
+  const role = user.user_metadata?.role || "brand"
+  if (role !== "creator") {
+    redirect(role === "brand" ? "/dashboard" : role === "admin" ? "/admin" : "/login")
   }
 
+  const service = createServiceClient()
   const { data: creatorProfile } = await service
     .from("creator_profiles")
     .select("*")
     .eq("user_id", user.id)
     .single()
 
+  const userDisplay = {
+    id: user.id,
+    email: user.email,
+    full_name: user.user_metadata?.full_name || "",
+    role: "creator",
+    creatorProfile,
+  }
+
   return (
-    <DashboardShell
-      user={{ ...profile, creatorProfile }}
-      role="creator"
-    >
+    <DashboardShell user={userDisplay} role="creator">
       {children}
     </DashboardShell>
   )
