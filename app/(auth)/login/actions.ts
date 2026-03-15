@@ -2,10 +2,8 @@
 
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
 
-export async function loginAction(email: string, password: string): Promise<{ error: string } | never> {
+export async function loginAction(email: string, password: string): Promise<{ error: string } | { destination: string }> {
   const cookieStore = cookies()
 
   const supabase = createServerClient(
@@ -55,6 +53,5 @@ export async function loginAction(email: string, password: string): Promise<{ er
   const destination =
     role === "creator" ? "/creator" : role === "admin" ? "/admin" : "/dashboard"
 
-  revalidatePath("/", "layout")
-  redirect(destination)
+  return { destination }
 }

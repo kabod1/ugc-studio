@@ -35,18 +35,16 @@ function LoginForm() {
     setLoading(true)
     try {
       const result = await loginAction(data.email, data.password)
-      // If we get here without redirect, there was an error
       if (result?.error) {
         toast.error(result.error)
         setLoading(false)
+      } else if (result?.destination) {
+        // Hard navigation ensures auth cookies are applied before the next request
+        window.location.href = result.destination
       }
     } catch (err: any) {
-      // redirect() throws internally — Next.js handles navigation automatically
-      // Any real error shows here
-      if (!err?.digest?.startsWith("NEXT_REDIRECT")) {
-        toast.error(err?.message || "Login failed")
-        setLoading(false)
-      }
+      toast.error(err?.message || "Login failed")
+      setLoading(false)
     }
   }
 
