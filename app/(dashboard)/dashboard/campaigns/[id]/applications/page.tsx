@@ -6,7 +6,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { toast } from "sonner"
-import { ArrowLeft, Star, Loader2 } from "lucide-react"
+import { ArrowLeft, Star, Loader2, CreditCard } from "lucide-react"
 
 interface Application {
   id: string
@@ -32,6 +32,7 @@ export default function ApplicationsPage() {
   const [campaignTitle, setCampaignTitle] = useState("")
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [payingId, setPayingId] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -56,6 +57,27 @@ export default function ApplicationsPage() {
     }
     fetchData()
   }, [campaignId])
+
+  async function handlePay(app: Application) {
+    setPayingId(app.id)
+    try {
+      const res = await fetch("/api/payments/creator-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          application_id: app.id,
+          campaign_id: campaignId,
+          amount_cents: app.proposed_rate_cents,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Payment failed")
+      window.location.href = data.url
+    } catch (err: any) {
+      toast.error(err.message)
+      setPayingId(null)
+    }
+  }
 
   async function handleUpdateStatus(applicationId: string, newStatus: "accepted" | "rejected") {
     setUpdatingId(applicationId)
@@ -169,6 +191,16 @@ export default function ApplicationsPage() {
                         Reject
                       </button>
                     </div>
+                  )}
+                  {app.status === "accepted" && (
+                    <button
+                      onClick={() => handlePay(app)}
+                      disabled={payingId === app.id}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      {payingId === app.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CreditCard className="h-3.5 w-3.5" />}
+                      Pay {formatCurrency(app.proposed_rate_cents)}
+                    </button>
                   )}
                 </div>
               </div>
