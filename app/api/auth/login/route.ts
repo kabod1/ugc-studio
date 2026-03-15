@@ -82,6 +82,9 @@ export async function POST(request: Request) {
       })
     }
 
+    // Set role cookie so middleware can skip Edge Runtime DB fetch
+    res.cookies.set("user-role", role, cookieOpts)
+
     return res
   } catch (err: any) {
     console.error("[login] error:", err?.message, err?.stack?.split("\n")[1])

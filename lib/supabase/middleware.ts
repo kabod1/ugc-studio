@@ -57,28 +57,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Fetch user role using service role key to bypass RLS infinite recursion bug
-  // Trim env vars — Vercel may store values with trailing \n which breaks HTTP headers in Edge Runtime
-  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim()
-  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim()
-  let role = "brand"
-  try {
-    const profileRes = await fetch(
-      `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=role&limit=1`,
-      {
-        headers: {
-          apikey: serviceKey,
-          Authorization: `Bearer ${serviceKey}`,
-        },
-        cache: "no-store",
-      }
-    )
-    const profiles = await profileRes.json()
-    if (profiles?.[0]?.role) role = profiles[0].role
-    else console.error("[middleware] profile fetch returned:", JSON.stringify(profiles))
-  } catch (e) {
-    console.error("[middleware] profile fetch error:", e)
-  }
+  // Read role from cookie set at login time (avoids Edge Runtime DB fetch issues)
+  const roleCookie = request.cookies.get("user-role")?.value
+  let role = roleCookie || "brand"
 
   // Role-based access control
   if (path.startsWith("/admin") && role !== "admin") {
