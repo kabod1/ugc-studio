@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { matchCreatorToCampaign } from "@/lib/ai/matching"
 
@@ -7,6 +7,8 @@ export async function GET(request: NextRequest) {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const svc = createServiceClient()
 
     const { searchParams } = new URL(request.url)
     const category = searchParams.get("category")
@@ -23,9 +25,9 @@ export async function GET(request: NextRequest) {
     const aiMatch = searchParams.get("ai_match")
     const campaignId = searchParams.get("campaign_id")
 
-    let query = supabase
+    let query = svc
       .from("creator_profiles")
-      .select("*, profiles(email, full_name, avatar_url)")
+      .select("*")
 
     // Default: show all creators (remove verified-only default so filters work)
     if (verifiedOnly === "true") {
@@ -62,7 +64,7 @@ export async function GET(request: NextRequest) {
     // AI Matching
     if (aiMatch === "true" && campaignId) {
       try {
-        const { data: campaign } = await supabase
+        const { data: campaign } = await svc
           .from("campaigns")
           .select("*")
           .eq("id", campaignId)
