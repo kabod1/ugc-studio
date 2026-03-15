@@ -61,6 +61,10 @@ export async function updateSession(request: NextRequest) {
   const roleCookie = request.cookies.get("user-role")?.value
   let role = roleCookie || "brand"
 
+  // Debug header — remove after fix confirmed
+  response.headers.set("x-debug-role", role)
+  response.headers.set("x-debug-user", user?.id || "none")
+
   // Role-based access control
   if (path.startsWith("/admin") && role !== "admin") {
     const redirect = role === "creator" ? "/creator" : "/dashboard"
