@@ -12,7 +12,7 @@ export async function GET(
 
     const { data, error } = await supabase
       .from("creator_profiles")
-      .select("*, profiles(email, full_name, avatar_url)")
+      .select("*")
       .eq("id", params.id)
       .single()
 
@@ -43,6 +43,21 @@ export async function PATCH(
     }
 
     const body = await request.json()
+
+    // Auto-verify age if date_of_birth is provided
+    if (body.date_of_birth) {
+      const dob = new Date(body.date_of_birth)
+      const age = Math.floor((Date.now() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+      body.age_verified = age >= 18
+    }
+
+    // Mark tax form as submitted when type is set
+    if (body.tax_form_type) {
+      body.tax_form_submitted = true
+    } else if (body.tax_form_type === null) {
+      body.tax_form_submitted = false
+    }
+
     const { data, error } = await supabase
       .from("creator_profiles")
       .update({ ...body, updated_at: new Date().toISOString() })

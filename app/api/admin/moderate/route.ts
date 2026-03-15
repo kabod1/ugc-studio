@@ -7,11 +7,8 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single()
+    const svc = createServiceClient()
+    const { data: profile } = await svc.from("profiles").select("role").eq("id", user.id).single()
 
     if (profile?.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
@@ -21,8 +18,6 @@ export async function POST(request: NextRequest) {
     if (!type || !id || !action) {
       return NextResponse.json({ error: "type, id, and action required" }, { status: 400 })
     }
-
-    const svc = createServiceClient()
     const now = new Date().toISOString()
 
     switch (type) {
