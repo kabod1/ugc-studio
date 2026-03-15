@@ -2,14 +2,22 @@ import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
+import { cookies } from "next/headers"
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Debug: check raw cookie value
+  const cookieStore = cookies()
+  const rawCookie = cookieStore.get("sb-shqkvzzwademhglwlgiy-auth-token")?.value
+  console.log("[admin-layout] cookie present:", !!rawCookie, "starts with %7B:", rawCookie?.startsWith("%7B"), "starts with {:", rawCookie?.startsWith("{"))
+
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+  console.log("[admin-layout] user:", user?.id, "error:", userError?.message)
 
   if (!user) redirect("/login")
 
