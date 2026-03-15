@@ -8,7 +8,7 @@ import { useParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   ArrowLeft, Users, FileVideo, BarChart3, Clock, DollarSign,
-  Play, Pause, CheckCircle, Trash2, Loader2
+  Play, Pause, CheckCircle, Trash2, Loader2, Pencil, X, Save
 } from "lucide-react"
 
 interface Campaign {
@@ -41,6 +41,11 @@ export default function CampaignDetailPage() {
   const [applicationCount, setApplicationCount] = useState(0)
   const [contentCount, setContentCount] = useState(0)
 
+  // Brief editing state
+  const [editingBrief, setEditingBrief] = useState(false)
+  const [briefDraft, setBriefDraft] = useState({ objective: "", dos: "", donts: "" })
+  const [savingBrief, setSavingBrief] = useState(false)
+
   useEffect(() => {
     async function fetchCampaign() {
       const supabase = createClient()
@@ -50,7 +55,14 @@ export default function CampaignDetailPage() {
         .eq("id", id)
         .single()
 
-      if (data) setCampaign(data)
+      if (data) {
+        setCampaign(data)
+        setBriefDraft({
+          objective: data.brief_objective || "",
+          dos: data.brief_dos || "",
+          donts: data.brief_donts || "",
+        })
+      }
 
       const { count: appCount } = await supabase
         .from("campaign_applications")
@@ -88,6 +100,32 @@ export default function CampaignDetailPage() {
       toast.error(err.message)
     }
     setUpdating(false)
+  }
+
+  async function handleSaveBrief() {
+    setSavingBrief(true)
+    try {
+      const res = await fetch(`/api/campaigns/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brief_objective: briefDraft.objective || null,
+          brief_dos: briefDraft.dos || null,
+          brief_donts: briefDraft.donts || null,
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to save brief")
+      }
+      const updated = await res.json()
+      setCampaign(updated)
+      setEditingBrief(false)
+      toast.success("Brief saved")
+    } catch (err: any) {
+      toast.error(err.message)
+    }
+    setSavingBrief(false)
   }
 
   async function handleDelete() {
@@ -216,15 +254,78 @@ export default function CampaignDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-card border rounded-lg p-6 space-y-4">
-          <h2 className="font-semibold text-lg">Brief</h2>
-          {campaign.brief_objective ? (
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-lg">Brief</h2>
+            {!editingBrief ? (
+              <button
+                onClick={() => setEditingBrief(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border hover:bg-muted"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Edit
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { setEditingBrief(false); setBriefDraft({ objective: campaign.brief_objective || "", dos: campaign.brief_dos || "", donts: campaign.brief_donts || "" }) }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border hover:bg-muted"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveBrief}
+                  disabled={savingBrief}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
+                  {savingBrief ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                  Save
+                </button>
+              </div>
+            )}
+          </div>
+
+          {editingBrief ? (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Objective</label>
+                <textarea
+                  value={briefDraft.objective}
+                  onChange={(e) => setBriefDraft((d) => ({ ...d, objective: e.target.value }))}
+                  placeholder="What do you want to achieve?"
+                  rows={3}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Do&apos;s</label>
+                <textarea
+                  value={briefDraft.dos}
+                  onChange={(e) => setBriefDraft((d) => ({ ...d, dos: e.target.value }))}
+                  placeholder="What should creators include?"
+                  rows={2}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Don&apos;ts</label>
+                <textarea
+                  value={briefDraft.donts}
+                  onChange={(e) => setBriefDraft((d) => ({ ...d, donts: e.target.value }))}
+                  placeholder="What should creators avoid?"
+                  rows={2}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                />
+              </div>
+            </div>
+          ) : campaign.brief_objective ? (
             <div className="space-y-3 text-sm">
               <div><span className="font-medium">Objective: </span><span className="text-muted-foreground">{campaign.brief_objective}</span></div>
               {campaign.brief_dos && <div><span className="font-medium">Do&apos;s: </span><span className="text-muted-foreground">{campaign.brief_dos}</span></div>}
               {campaign.brief_donts && <div><span className="font-medium">Don&apos;ts: </span><span className="text-muted-foreground">{campaign.brief_donts}</span></div>}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No brief provided</p>
+            <p className="text-sm text-muted-foreground">No brief provided. Click Edit to add one.</p>
           )}
         </div>
 
@@ -254,13 +355,6 @@ export default function CampaignDetailPage() {
             {campaign.end_date && <div><Clock className="h-3.5 w-3.5 inline mr-2 text-muted-foreground" />End: {formatDate(campaign.end_date)}</div>}
           </div>
         </div>
-
-        {campaign.style_guidelines && (
-          <div className="bg-card border rounded-lg p-6 space-y-4">
-            <h2 className="font-semibold text-lg">Style Guidelines</h2>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campaign.style_guidelines}</p>
-          </div>
-        )}
       </div>
     </div>
   )
