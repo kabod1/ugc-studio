@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
+
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { toast } from "sonner"
@@ -37,22 +38,18 @@ export default function ApplicationsPage() {
   useEffect(() => {
     async function fetchData() {
       const supabase = createClient()
-
       const { data: campaign } = await supabase
         .from("campaigns")
         .select("title")
         .eq("id", campaignId)
         .single()
-
       if (campaign) setCampaignTitle(campaign.title)
 
-      const { data } = await supabase
-        .from("campaign_applications")
-        .select("*, creator_profiles(display_name, avatar_url, avg_rating, follower_count, categories)")
-        .eq("campaign_id", campaignId)
-        .order("created_at", { ascending: false })
-
-      if (data) setApplications(data)
+      const res = await fetch(`/api/campaigns/${campaignId}/applications`)
+      if (res.ok) {
+        const data = await res.json()
+        setApplications(data)
+      }
       setLoading(false)
     }
     fetchData()
@@ -152,10 +149,10 @@ export default function ApplicationsPage() {
                     <div>
                       <h3 className="font-semibold">{creator?.display_name || "Creator"}</h3>
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        {creator?.avg_rating && (
-                          <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500" />{creator.avg_rating}</span>
+                        {creator?.platform_rating > 0 && (
+                          <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500" />{creator.platform_rating}</span>
                         )}
-                        <span>{creator?.follower_count?.toLocaleString() || 0} followers</span>
+                        <span>{((creator?.tiktok_followers || 0) + (creator?.instagram_followers || 0)).toLocaleString()} followers</span>
                       </div>
                     </div>
                   </div>
