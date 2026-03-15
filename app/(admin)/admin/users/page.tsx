@@ -1,28 +1,39 @@
-import { createServiceClient as createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
-import { Users, ArrowRight, CheckCircle2, XCircle, Search } from "lucide-react"
+import { Users, CheckCircle2, XCircle } from "lucide-react"
 
 export default async function AdminUsersPage({
   searchParams,
 }: {
   searchParams: { role?: string; search?: string }
 }) {
-  const supabase = createClient()
+  const svc = createServiceClient()
 
-  let query = supabase
-    .from("profiles")
-    .select("*")
-    .order("created_at", { ascending: false })
+  // Get all auth users (includes email + user_metadata)
+  const { data: authData } = await svc.auth.admin.listUsers({ perPage: 200 })
+  // Get all profiles (includes role)
+  const { data: profiles } = await svc.from("profiles").select("id, role, created_at")
+
+  const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]))
+
+  let users = (authData?.users || []).map((u: any) => ({
+    id: u.id,
+    email: u.email,
+    full_name: u.user_metadata?.full_name || u.user_metadata?.name || "",
+    role: profileMap.get(u.id)?.role || u.user_metadata?.role || "brand",
+    created_at: profileMap.get(u.id)?.created_at || u.created_at,
+    is_verified: !!u.email_confirmed_at,
+    is_active: !u.banned_until,
+  }))
 
   if (searchParams.role && searchParams.role !== "all") {
-    query = query.eq("role", searchParams.role)
+    users = users.filter((u) => u.role === searchParams.role)
   }
   if (searchParams.search) {
-    query = query.or(`full_name.ilike.%${searchParams.search}%,email.ilike.%${searchParams.search}%`)
+    const q = searchParams.search.toLowerCase()
+    users = users.filter((u) => u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q))
   }
-
-  const { data: users } = await query.limit(100)
 
   return (
     <div className="space-y-6">
@@ -45,12 +56,12 @@ export default async function AdminUsersPage({
               </tr>
             </thead>
             <tbody className="divide-y">
-              {users?.map((user: any) => (
+              {users.map((user) => (
                 <tr key={user.id} className="hover:bg-muted/30">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
-                        {(user.full_name || user.email).charAt(0).toUpperCase()}
+                        {(user.full_name || user.email || "?").charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <p className="font-medium text-sm">{user.full_name || "No name"}</p>
@@ -86,7 +97,7 @@ export default async function AdminUsersPage({
             </tbody>
           </table>
         </div>
-        {(!users || users.length === 0) && (
+        {users.length === 0 && (
           <div className="p-12 text-center">
             <Users className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
             <p className="font-medium">No users found</p>
