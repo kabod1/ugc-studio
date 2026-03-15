@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     const { data: application } = await svc
       .from("campaign_applications")
-      .select("id, creator_id, status, creator_profiles(id, display_name, stripe_connect_account_id)")
+      .select("id, creator_id, status, creator_profiles(id, display_name, stripe_connect_account_id, stripe_connect_onboarded)")
       .eq("id", application_id)
       .single()
 
@@ -40,7 +40,8 @@ export async function POST(request: NextRequest) {
 
     const platformFee = Math.round(amount_cents * 0.15)
     const creatorProfile = application.creator_profiles as any
-    const connectId = creatorProfile?.stripe_connect_account_id
+    // Only transfer directly if creator has fully completed Stripe onboarding
+    const connectId = creatorProfile?.stripe_connect_onboarded ? creatorProfile?.stripe_connect_account_id : null
     const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || ""
 
     const sessionParams: any = {
