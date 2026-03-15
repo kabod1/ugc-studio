@@ -80,6 +80,9 @@ export default function ForgotPasswordPage() {
           <ArrowLeft className="h-4 w-4" /> Back to login
         </Link>
       </p>
+      <p className="text-center text-xs text-muted-foreground">
+        Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a>
+      </p>
     </div>
   )
 }

@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Megaphone, Users, FileVideo, FileText,
   CreditCard, BarChart3, Settings, Menu, X, Sparkles,
   Bell, ChevronLeft, Video, LogOut, Building2, Palette,
-  Shield, UserCheck, Eye, Sliders, MessageSquare
+  Shield, UserCheck, Eye, Sliders, MessageSquare, HelpCircle
 } from "lucide-react"
 import { useUser } from "@/hooks/use-user"
 
@@ -22,7 +22,8 @@ const brandNavItems = [
   { label: "Payments", href: "/dashboard/payments", icon: CreditCard },
   { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
   { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: "Brand Kit", href: "/dashboard/settings/brand", icon: Palette },
+  { label: "Billing", href: "/dashboard/settings/billing", icon: Settings },
   { label: "Team", href: "/dashboard/settings/team", icon: Users },
 ]
 
@@ -135,6 +136,17 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
               </div>
             </div>
           )}
+          <a
+            href="mailto:support@townshub.com"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors",
+              collapsed ? "justify-center px-2" : ""
+            )}
+            title={collapsed ? "Support" : undefined}
+          >
+            <HelpCircle className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>Support</span>}
+          </a>
           <button
             onClick={signOut}
             className={cn(

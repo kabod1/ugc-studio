@@ -1,14 +1,14 @@
 import Link from "next/link"
-import { Sparkles, Users, FileVideo, CreditCard, Shield, BarChart3, ArrowRight, Check, Star, Zap, Globe, Video } from "lucide-react"
+import { Sparkles, Users, FileVideo, CreditCard, Shield, BarChart3, ArrowRight, Star, Zap, Globe, Video } from "lucide-react"
 import { PricingSection } from "@/components/landing/pricing-section"
 
 const features = [
-  { icon: Users, title: "Creator Discovery & AI Matching", description: "Find perfect creators with AI-powered matching. Analyze audience demographics, predict content performance, and get smart recommendations." },
-  { icon: FileVideo, title: "Content Collaboration Hub", description: "Version control, real-time feedback with timestamp comments, automatic quality checks, and brand kit integration all in one place." },
-  { icon: CreditCard, title: "Smart Payment System", description: "Multi-currency support, automated escrow, tax form collection, performance-based bonuses, and Stripe Connect integration." },
-  { icon: Shield, title: "Compliance & Rights Management", description: "Auto-generate contracts, track usage rights, handle age verification, and manage content licensing automatically." },
-  { icon: BarChart3, title: "Performance Analytics", description: "Track actual sales attribution, run content A/B tests, calculate ROI per creator, and analyze audience sentiment." },
-  { icon: Video, title: "AI UGC Video Generation", description: "Generate authentic UGC-style video ads with AI. GPT-4o analysis, ElevenLabs voice synthesis, and lip-sync technology." },
+  { icon: Users, title: "Creator Discovery & AI Matching", description: "Find the perfect creators with GPT-4o powered matching. Filter by category, platform, location, and ratings, then let AI score and rank creators for each campaign." },
+  { icon: FileVideo, title: "Content Collaboration Hub", description: "Version-tracked submissions, real-time feedback with timestamp comments, AI-powered quality scoring, and brand guidelines management in one place." },
+  { icon: CreditCard, title: "Smart Payment System", description: "Automated escrow payments, tax form tracking, performance bonuses, and Stripe Connect payouts — all in EUR with secure processing." },
+  { icon: Shield, title: "Compliance & Rights Management", description: "Auto-generate contracts on application approval, track usage rights with territories and duration, and manage age verification for creators." },
+  { icon: BarChart3, title: "Performance Analytics", description: "Track campaign spend over time, monitor content approval rates, view monthly trends with interactive charts, and measure ROI across creators." },
+  { icon: Video, title: "AI UGC Video Generation", description: "Generate authentic UGC-style video ads with AI. GPT-4o analysis, ElevenLabs voice synthesis, and WaveSpeed lip-sync technology." },
 ]
 
 const steps = [
@@ -214,22 +214,23 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold text-sm mb-3">Company</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground">About</a></li>
-                <li><a href="#" className="hover:text-foreground">Blog</a></li>
-                <li><a href="#" className="hover:text-foreground">Careers</a></li>
+                <li><Link href="/about" className="hover:text-foreground">About</Link></li>
+                <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
+                <li><Link href="/careers" className="hover:text-foreground">Careers</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-sm mb-3">Legal</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-foreground">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-foreground">Cookie Policy</a></li>
+                <li><Link href="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-foreground">Terms of Service</Link></li>
+                <li><Link href="/cookie-policy" className="hover:text-foreground">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} UGC Studio. All rights reserved.
+          <div className="border-t pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+            <p>&copy; {new Date().getFullYear()} UGC Studio. All rights reserved.</p>
+            <p>Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a></p>
           </div>
         </div>
       </footer>

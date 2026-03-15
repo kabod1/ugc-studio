@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import { CreditCard, DollarSign, Clock, Check, Loader2, Send } from "lucide-react"
@@ -23,25 +22,15 @@ export default function PaymentsPage() {
 
   useEffect(() => {
     async function fetchPayments() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data: brand } = await supabase
-        .from("brands")
-        .select("id")
-        .eq("user_id", user.id)
-        .single()
-
-      if (!brand) { setLoading(false); return }
-
-      const { data } = await supabase
-        .from("payments")
-        .select("*, campaigns(title), creator_profiles(display_name)")
-        .eq("brand_id", brand.id)
-        .order("created_at", { ascending: false })
-
-      if (data) setPayments(data)
+      try {
+        const res = await fetch("/api/payments")
+        if (res.ok) {
+          const data = await res.json()
+          setPayments(data.payments || [])
+        }
+      } catch (err) {
+        console.error("Payments load error:", err)
+      }
       setLoading(false)
     }
     fetchPayments()

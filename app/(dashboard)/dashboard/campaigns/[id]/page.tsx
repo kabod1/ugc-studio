@@ -15,16 +15,17 @@ interface Campaign {
   id: string
   title: string
   description: string | null
-  brief: string | null
+  brief_objective: string | null
+  brief_dos: string | null
+  brief_donts: string | null
   status: string
   budget_cents: number
   content_types: string[] | null
-  platforms: string[] | null
+  required_platforms: string[] | null
   max_creators: number | null
   start_date: string | null
   end_date: string | null
   content_deadline: string | null
-  style_guidelines: string | null
   created_at: string
 }
 
@@ -216,7 +217,15 @@ export default function CampaignDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-card border rounded-lg p-6 space-y-4">
           <h2 className="font-semibold text-lg">Brief</h2>
-          <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campaign.brief || "No brief provided"}</p>
+          {campaign.brief_objective ? (
+            <div className="space-y-3 text-sm">
+              <div><span className="font-medium">Objective: </span><span className="text-muted-foreground">{campaign.brief_objective}</span></div>
+              {campaign.brief_dos && <div><span className="font-medium">Do&apos;s: </span><span className="text-muted-foreground">{campaign.brief_dos}</span></div>}
+              {campaign.brief_donts && <div><span className="font-medium">Don&apos;ts: </span><span className="text-muted-foreground">{campaign.brief_donts}</span></div>}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No brief provided</p>
+          )}
         </div>
 
         <div className="bg-card border rounded-lg p-6 space-y-4">
@@ -228,7 +237,7 @@ export default function CampaignDetailPage() {
             </div>
             <div>
               <span className="text-muted-foreground">Platforms: </span>
-              <span>{campaign.platforms?.join(", ") || "Any"}</span>
+              <span>{campaign.required_platforms?.join(", ") || "Any"}</span>
             </div>
             <div>
               <span className="text-muted-foreground">Max Creators: </span>

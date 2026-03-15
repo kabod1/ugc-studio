@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { formatCurrency } from "@/lib/utils"
-import { Megaphone, FileVideo, DollarSign, TrendingUp, Loader2 } from "lucide-react"
+import { Megaphone, FileVideo, DollarSign, TrendingUp, Loader2, Target, CheckCircle, Users } from "lucide-react"
 import {
   BarChart,
   Bar,
@@ -19,6 +19,17 @@ import {
   Legend,
 } from "recharts"
 
+interface TopCreator {
+  id: string
+  name: string
+  totalSpentCents: number
+  bonusesCents: number
+  contentCount: number
+  approvedCount: number
+  avgRating: number
+  costPerContentCents: number
+}
+
 interface AnalyticsData {
   summary: {
     totalCampaigns: number
@@ -28,6 +39,12 @@ interface AnalyticsData {
   }
   monthlyData: { month: string; campaigns: number; spendCents: number }[]
   contentBreakdown: { status: string; count: number }[]
+  roi: {
+    costPerApprovedCents: number
+    approvalRate: number
+    totalApproved: number
+  }
+  topCreators: TopCreator[]
 }
 
 const PIE_COLORS: Record<string, string> = {
@@ -73,7 +90,7 @@ export default function AnalyticsPage() {
     )
   }
 
-  const { summary, monthlyData, contentBreakdown } = data
+  const { summary, monthlyData, contentBreakdown, roi, topCreators } = data
 
   // Format spend data for the line chart (cents -> EUR display value)
   const spendChartData = monthlyData.map((d) => ({
@@ -188,6 +205,68 @@ export default function AnalyticsPage() {
           )}
         </div>
       </div>
+
+      {/* ROI Summary */}
+      {roi && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Target className="h-4 w-4" /> Cost per Approved Content
+            </div>
+            <p className="text-2xl font-bold mt-1">{formatCurrency(roi.costPerApprovedCents)}</p>
+          </div>
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <CheckCircle className="h-4 w-4" /> Approval Rate
+            </div>
+            <p className="text-2xl font-bold mt-1">{roi.approvalRate}%</p>
+          </div>
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <CheckCircle className="h-4 w-4" /> Total Approved
+            </div>
+            <p className="text-2xl font-bold mt-1">{roi.totalApproved}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Top Creators Table */}
+      {topCreators && topCreators.length > 0 && (
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold text-lg">Top Creators by ROI</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left">
+                  <th className="pb-2 font-medium">Creator</th>
+                  <th className="pb-2 font-medium text-right">Content</th>
+                  <th className="pb-2 font-medium text-right">Approved</th>
+                  <th className="pb-2 font-medium text-right">Avg Rating</th>
+                  <th className="pb-2 font-medium text-right">Total Spent</th>
+                  <th className="pb-2 font-medium text-right">Bonuses</th>
+                  <th className="pb-2 font-medium text-right">Cost/Content</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topCreators.map((creator) => (
+                  <tr key={creator.id} className="border-b last:border-0">
+                    <td className="py-2 font-medium">{creator.name}</td>
+                    <td className="py-2 text-right">{creator.contentCount}</td>
+                    <td className="py-2 text-right">{creator.approvedCount}</td>
+                    <td className="py-2 text-right">{creator.avgRating > 0 ? `${creator.avgRating}/5` : "—"}</td>
+                    <td className="py-2 text-right">{formatCurrency(creator.totalSpentCents)}</td>
+                    <td className="py-2 text-right">{creator.bonusesCents > 0 ? formatCurrency(creator.bonusesCents) : "—"}</td>
+                    <td className="py-2 text-right">{creator.costPerContentCents > 0 ? formatCurrency(creator.costPerContentCents) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

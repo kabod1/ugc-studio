@@ -273,7 +273,7 @@ export default function NewCampaignPage() {
             <h2 className="text-lg font-semibold">Budget & Timeline</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Total Budget (USD) *</label>
+                <label className="text-sm font-medium">Total Budget (EUR) *</label>
                 <input
                   type="number"
                   value={form.budget_cents ? form.budget_cents / 100 : ""}
@@ -283,7 +283,7 @@ export default function NewCampaignPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Budget Per Creator (USD)</label>
+                <label className="text-sm font-medium">Budget Per Creator (EUR)</label>
                 <input
                   type="number"
                   value={form.budget_per_creator_cents ? form.budget_per_creator_cents / 100 : ""}

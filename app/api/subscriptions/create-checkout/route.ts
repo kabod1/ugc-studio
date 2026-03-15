@@ -37,7 +37,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (brand?.stripe_customer_id) {
-      sessionParams.customer = brand.stripe_customer_id
+      try {
+        await stripe.customers.retrieve(brand.stripe_customer_id)
+        sessionParams.customer = brand.stripe_customer_id
+      } catch {
+        // Customer doesn't exist in Stripe, fall back to email
+        sessionParams.customer_email = user.email
+      }
     } else {
       sessionParams.customer_email = user.email
     }
@@ -45,6 +51,7 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create(sessionParams)
     return NextResponse.json({ url: session.url })
   } catch (error) {
+    console.error("Checkout error:", error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Checkout failed" },
       { status: 500 }

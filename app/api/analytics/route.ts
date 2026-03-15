@@ -105,10 +105,85 @@ export async function GET() {
       contentBreakdown.push({ status, count: count || 0 })
     }
 
+    // --- ROI per creator ---
+    const { data: creatorPayments } = await supabase
+      .from("payments")
+      .select("creator_id, amount_cents, is_bonus")
+      .eq("brand_id", brand.id)
+      .eq("status", "completed")
+
+    const { data: creatorContent } = await supabase
+      .from("content_submissions")
+      .select("creator_id, status, brand_rating, campaigns!inner(brand_id)")
+      .eq("campaigns.brand_id", brand.id)
+
+    // Aggregate per creator
+    const creatorMap: Record<string, { spent: number; bonuses: number; content: number; approved: number; avgRating: number; ratings: number[] }> = {}
+    for (const p of creatorPayments || []) {
+      if (!p.creator_id) continue
+      if (!creatorMap[p.creator_id]) creatorMap[p.creator_id] = { spent: 0, bonuses: 0, content: 0, approved: 0, avgRating: 0, ratings: [] }
+      if (p.is_bonus) {
+        creatorMap[p.creator_id].bonuses += p.amount_cents || 0
+      } else {
+        creatorMap[p.creator_id].spent += p.amount_cents || 0
+      }
+    }
+    for (const c of creatorContent || []) {
+      if (!c.creator_id) continue
+      if (!creatorMap[c.creator_id]) creatorMap[c.creator_id] = { spent: 0, bonuses: 0, content: 0, approved: 0, avgRating: 0, ratings: [] }
+      creatorMap[c.creator_id].content += 1
+      if (c.status === "approved") creatorMap[c.creator_id].approved += 1
+      if (c.brand_rating) creatorMap[c.creator_id].ratings.push(c.brand_rating)
+    }
+
+    // Look up creator names
+    const creatorIds = Object.keys(creatorMap)
+    let creatorNames: Record<string, string> = {}
+    if (creatorIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("creator_profiles")
+        .select("id, display_name")
+        .in("id", creatorIds)
+      for (const p of profiles || []) {
+        creatorNames[p.id] = p.display_name
+      }
+    }
+
+    const topCreators = creatorIds
+      .map((id) => {
+        const c = creatorMap[id]
+        const avgRating = c.ratings.length > 0 ? c.ratings.reduce((a, b) => a + b, 0) / c.ratings.length : 0
+        const totalSpent = c.spent + c.bonuses
+        const costPerContent = c.approved > 0 ? Math.round(totalSpent / c.approved) : 0
+        return {
+          id,
+          name: creatorNames[id] || "Unknown",
+          totalSpentCents: totalSpent,
+          bonusesCents: c.bonuses,
+          contentCount: c.content,
+          approvedCount: c.approved,
+          avgRating: Math.round(avgRating * 10) / 10,
+          costPerContentCents: costPerContent,
+        }
+      })
+      .sort((a, b) => b.approvedCount - a.approvedCount)
+      .slice(0, 10)
+
+    // Overall ROI summary
+    const totalApproved = (contentBreakdown.find((c) => c.status === "approved")?.count) || 0
+    const costPerApproved = totalApproved > 0 ? Math.round(totalSpendCents / totalApproved) : 0
+    const approvalRate = (totalContent || 0) > 0 ? Math.round((totalApproved / (totalContent || 1)) * 100) : 0
+
     return NextResponse.json({
       summary,
       monthlyData,
       contentBreakdown,
+      roi: {
+        costPerApprovedCents: costPerApproved,
+        approvalRate,
+        totalApproved,
+      },
+      topCreators,
     })
   } catch (err) {
     console.error("GET /api/analytics error:", err)
