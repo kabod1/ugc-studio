@@ -1,14 +1,19 @@
-import { createServiceClient as createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
-import { Building2, ArrowRight } from "lucide-react"
+import { Building2 } from "lucide-react"
 
 export default async function AdminBrandsPage() {
-  const supabase = createClient()
-  const { data: brands } = await supabase
+  const svc = createServiceClient()
+
+  const { data: brands } = await svc
     .from("brands")
-    .select("*, profiles(full_name, email)")
+    .select("id, company_name, industry, subscription_tier, created_at, user_id")
     .order("created_at", { ascending: false })
+
+  // Get owner emails from auth
+  const { data: authData } = await svc.auth.admin.listUsers({ perPage: 200 })
+  const userMap = new Map((authData?.users || []).map((u: any) => [u.id, u.email || u.user_metadata?.full_name || u.id]))
 
   return (
     <div className="space-y-6">
@@ -32,7 +37,7 @@ export default async function AdminBrandsPage() {
             {brands?.map((b: any) => (
               <tr key={b.id} className="hover:bg-muted/30">
                 <td className="p-4 font-medium text-sm">{b.company_name}</td>
-                <td className="p-4 text-sm text-muted-foreground">{b.profiles?.full_name || b.profiles?.email}</td>
+                <td className="p-4 text-sm text-muted-foreground">{userMap.get(b.user_id) || "—"}</td>
                 <td className="p-4 text-sm">{b.industry || "—"}</td>
                 <td className="p-4"><span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary capitalize">{b.subscription_tier}</span></td>
                 <td className="p-4 text-sm text-muted-foreground">{formatDate(b.created_at)}</td>

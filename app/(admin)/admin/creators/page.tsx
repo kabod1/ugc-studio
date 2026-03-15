@@ -1,17 +1,31 @@
-import { createServiceClient as createClient } from "@/lib/supabase/server"
-import { formatDate, formatNumber } from "@/lib/utils"
+import { createServiceClient } from "@/lib/supabase/server"
+import { formatNumber } from "@/lib/utils"
 import Link from "next/link"
-import { UserCheck, CheckCircle2, XCircle, Star } from "lucide-react"
+import { CheckCircle2, XCircle, Star } from "lucide-react"
 
 export default async function AdminCreatorsPage() {
-  const supabase = createClient()
-  const { data: creators } = await supabase
+  const svc = createServiceClient()
+
+  const { data: creators } = await svc
     .from("creator_profiles")
-    .select("*, profiles(full_name, email, is_verified)")
+    .select("*")
     .order("created_at", { ascending: false })
 
-  const pending = creators?.filter((c: any) => !c.profiles?.is_verified) || []
-  const verified = creators?.filter((c: any) => c.profiles?.is_verified) || []
+  // Get emails from auth
+  const { data: authData } = await svc.auth.admin.listUsers({ perPage: 200 })
+  const userMap = new Map((authData?.users || []).map((u: any) => [
+    u.id,
+    { email: u.email, is_verified: !!u.email_confirmed_at }
+  ]))
+
+  const enriched = (creators || []).map((c: any) => ({
+    ...c,
+    ownerEmail: userMap.get(c.user_id)?.email || "",
+    is_verified: userMap.get(c.user_id)?.is_verified || false,
+  }))
+
+  const pending = enriched.filter((c) => !c.is_verified)
+  const verified = enriched.filter((c) => c.is_verified)
 
   return (
     <div className="space-y-6">
@@ -32,11 +46,11 @@ export default async function AdminCreatorsPage() {
                 className="bg-yellow-50 dark:bg-yellow-950/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 flex items-center justify-between hover:bg-yellow-100/50 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-yellow-200 flex items-center justify-center text-yellow-800 font-bold text-sm">
-                    {c.display_name.charAt(0).toUpperCase()}
+                    {(c.display_name || "?").charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <p className="font-medium">{c.display_name}</p>
-                    <p className="text-sm text-muted-foreground">{c.profiles?.email} &middot; {c.categories?.join(", ") || "No categories"}</p>
+                    <p className="text-sm text-muted-foreground">{c.ownerEmail} &middot; {c.categories?.join(", ") || "No categories"}</p>
                   </div>
                 </div>
                 <span className="text-sm text-primary">Review &rarr;</span>
@@ -47,7 +61,7 @@ export default async function AdminCreatorsPage() {
       )}
 
       <div>
-        <h2 className="font-semibold text-lg mb-3">All Creators ({creators?.length || 0})</h2>
+        <h2 className="font-semibold text-lg mb-3">All Creators ({enriched.length})</h2>
         <div className="bg-card border rounded-lg overflow-x-auto">
           <table className="w-full">
             <thead><tr className="border-b bg-muted/50">
@@ -60,16 +74,20 @@ export default async function AdminCreatorsPage() {
               <th className="p-4"></th>
             </tr></thead>
             <tbody className="divide-y">
-              {creators?.map((c: any) => (
+              {enriched.map((c: any) => (
                 <tr key={c.id} className="hover:bg-muted/30">
                   <td className="p-4"><div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">{c.display_name.charAt(0)}</div>
-                    <div><p className="font-medium text-sm">{c.display_name}</p><p className="text-xs text-muted-foreground">{c.profiles?.email}</p></div>
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">{(c.display_name || "?").charAt(0)}</div>
+                    <div><p className="font-medium text-sm">{c.display_name}</p><p className="text-xs text-muted-foreground">{c.ownerEmail}</p></div>
                   </div></td>
-                  <td className="p-4 text-sm">{formatNumber(c.tiktok_followers + c.instagram_followers + c.youtube_subscribers)}</td>
+                  <td className="p-4 text-sm">{formatNumber((c.tiktok_followers || 0) + (c.instagram_followers || 0) + (c.youtube_subscribers || 0))}</td>
                   <td className="p-4 text-sm">{c.categories?.slice(0, 2).join(", ") || "—"}</td>
-                  <td className="p-4 text-sm flex items-center gap-1">{c.platform_rating > 0 ? <><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{c.platform_rating.toFixed(1)}</> : "—"}</td>
-                  <td className="p-4">{c.profiles?.is_verified ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-muted-foreground" />}</td>
+                  <td className="p-4 text-sm">
+                    {c.platform_rating > 0
+                      ? <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{c.platform_rating.toFixed(1)}</span>
+                      : "—"}
+                  </td>
+                  <td className="p-4">{c.is_verified ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-muted-foreground" />}</td>
                   <td className="p-4 text-sm">{c.total_campaigns_completed}</td>
                   <td className="p-4"><Link href={`/admin/creators/${c.id}`} className="text-primary hover:underline text-sm">View</Link></td>
                 </tr>
