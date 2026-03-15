@@ -44,20 +44,7 @@ export async function POST(request: Request) {
       "Prefer": "resolution=merge-duplicates",
     }
 
-    // 2. Upsert profile with role
-    await fetch(`${supabaseUrl}/rest/v1/profiles`, {
-      method: "POST",
-      headers: svcHeaders,
-      body: JSON.stringify({
-        id: userId,
-        role: role || "brand",
-        plan: "free",
-        generations_used: 0,
-        generations_limit: 10,
-      }),
-    })
-
-    // 3. Create brand or creator_profiles placeholder
+    // 2. Create brand or creator_profiles placeholder
     if (role === "creator") {
       await fetch(`${supabaseUrl}/rest/v1/creator_profiles`, {
         method: "POST",

@@ -48,36 +48,30 @@ export async function POST(request: Request) {
       const profiles = await profileRes.json()
       if (profiles?.[0]?.role) {
         role = profiles[0].role
-      } else {
-        // No profile record — create it now (handles users who signed up before the fix)
-        await fetch(`${supabaseUrl}/rest/v1/profiles`, {
+      } else if (role === "creator") {
+        // Ensure creator_profiles record exists (for users who signed up before the fix)
+        await fetch(`${supabaseUrl}/rest/v1/creator_profiles`, {
           method: "POST",
           headers: svcHeaders,
-          body: JSON.stringify({ id: userId, role, plan: "free", generations_used: 0, generations_limit: 10 }),
+          body: JSON.stringify({
+            user_id: userId,
+            display_name: userMeta.full_name || "",
+            tiktok_followers: 0, instagram_followers: 0, youtube_subscribers: 0,
+            platform_rating: 0, total_campaigns_completed: 0,
+            age_verified: false, tax_form_submitted: false,
+          }),
         })
-        if (role === "creator") {
-          await fetch(`${supabaseUrl}/rest/v1/creator_profiles`, {
-            method: "POST",
-            headers: svcHeaders,
-            body: JSON.stringify({
-              user_id: userId,
-              display_name: userMeta.full_name || "",
-              tiktok_followers: 0, instagram_followers: 0, youtube_subscribers: 0,
-              platform_rating: 0, total_campaigns_completed: 0,
-              age_verified: false, tax_form_submitted: false,
-            }),
-          })
-        } else if (role === "brand") {
-          await fetch(`${supabaseUrl}/rest/v1/brands`, {
-            method: "POST",
-            headers: svcHeaders,
-            body: JSON.stringify({
-              user_id: userId,
-              company_name: userMeta.company_name || userMeta.full_name || "My Brand",
-              subscription_tier: "free",
-            }),
-          })
-        }
+      } else if (role === "brand") {
+        // Ensure brands record exists
+        await fetch(`${supabaseUrl}/rest/v1/brands`, {
+          method: "POST",
+          headers: svcHeaders,
+          body: JSON.stringify({
+            user_id: userId,
+            company_name: userMeta.company_name || userMeta.full_name || "My Brand",
+            subscription_tier: "free",
+          }),
+        })
       }
     } catch {}
 
