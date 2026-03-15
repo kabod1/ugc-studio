@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createClient } from "@/lib/supabase/client"
 import { signupSchema, type SignupFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
-import { Eye, EyeOff, Loader2, Sparkles, Building2, Palette } from "lucide-react"
+import { Eye, EyeOff, Loader2, Sparkles, Building2, Palette, CheckCircle2 } from "lucide-react"
 
 export default function SignupPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
 
   const {
     register,
@@ -30,28 +30,55 @@ export default function SignupPage() {
 
   async function onSubmit(data: SignupFormData) {
     setLoading(true)
-    const supabase = createClient()
-
-    const { error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: {
-          full_name: data.full_name,
-          role: data.role,
-          company_name: data.company_name,
-        },
-      },
-    })
-
-    if (error) {
-      toast.error(error.message)
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      const result = await res.json()
+      if (!res.ok || result.error) {
+        toast.error(result.error || "Signup failed. Please try again.")
+        setLoading(false)
+        return
+      }
+      if (result.needsConfirmation) {
+        setDone(true)
+      } else {
+        toast.success("Account created!")
+        router.push(data.role === "creator" ? "/creator" : "/dashboard")
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.")
       setLoading(false)
-      return
     }
+  }
 
-    toast.success("Account created! Please check your email to verify.")
-    router.push("/login")
+  if (done) {
+    return (
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <Sparkles className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl font-bold">UGC Studio</h1>
+        </div>
+        <div className="bg-card border rounded-lg p-8 shadow-sm space-y-4">
+          <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
+          <h2 className="text-xl font-bold">Check your email</h2>
+          <p className="text-muted-foreground">
+            We sent a verification link to your email address. Click the link to activate your account.
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center w-full h-10 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
+          >
+            Back to Sign In
+          </Link>
+        </div>
+        <p className="text-center text-xs text-muted-foreground">
+          Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a>
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -105,12 +132,10 @@ export default function SignupPage() {
               id="full_name"
               type="text"
               placeholder="John Doe"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
               {...register("full_name")}
             />
-            {errors.full_name && (
-              <p className="text-sm text-destructive">{errors.full_name.message}</p>
-            )}
+            {errors.full_name && <p className="text-sm text-destructive">{errors.full_name.message}</p>}
           </div>
 
           {selectedRole === "brand" && (
@@ -120,12 +145,10 @@ export default function SignupPage() {
                 id="company_name"
                 type="text"
                 placeholder="Your Company"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
                 {...register("company_name")}
               />
-              {errors.company_name && (
-                <p className="text-sm text-destructive">{errors.company_name.message}</p>
-              )}
+              {errors.company_name && <p className="text-sm text-destructive">{errors.company_name.message}</p>}
             </div>
           )}
 
@@ -135,12 +158,10 @@ export default function SignupPage() {
               id="email"
               type="email"
               placeholder="you@example.com"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
               {...register("email")}
             />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -150,7 +171,7 @@ export default function SignupPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Min. 8 characters"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm pr-10"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm pr-10 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
                 {...register("password")}
               />
               <button
@@ -161,9 +182,7 @@ export default function SignupPage() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
-            )}
+            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -172,18 +191,16 @@ export default function SignupPage() {
               id="confirm_password"
               type="password"
               placeholder="Confirm your password"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
               {...register("confirm_password")}
             />
-            {errors.confirm_password && (
-              <p className="text-sm text-destructive">{errors.confirm_password.message}</p>
-            )}
+            {errors.confirm_password && <p className="text-sm text-destructive">{errors.confirm_password.message}</p>}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center justify-center w-full h-10 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+            className="inline-flex items-center justify-center w-full h-10 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none"
           >
             {loading ? (
               <>
@@ -202,6 +219,9 @@ export default function SignupPage() {
         <Link href="/login" className="text-primary hover:underline font-medium">
           Sign in
         </Link>
+      </p>
+      <p className="text-center text-xs text-muted-foreground">
+        Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a>
       </p>
     </div>
   )
