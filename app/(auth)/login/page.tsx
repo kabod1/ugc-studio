@@ -35,10 +35,10 @@ function LoginForm() {
     setLoading(true)
     try {
       const result = await loginAction(data.email, data.password)
-      if (result?.error) {
+      if ("error" in result) {
         toast.error(result.error)
         setLoading(false)
-      } else if (result?.destination) {
+      } else {
         // Hard navigation ensures auth cookies are applied before the next request
         window.location.href = result.destination
       }
