@@ -84,7 +84,7 @@ export async function POST(request: Request) {
 
     return res
   } catch (err: any) {
-    console.error("[login] error:", err?.message)
-    return NextResponse.json({ error: "Server error. Please try again." }, { status: 500 })
+    console.error("[login] error:", err?.message, err?.stack?.split("\n")[1])
+    return NextResponse.json({ error: err?.message || "Server error" }, { status: 500 })
   }
 }
