@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Clock, CreditCard, TrendingUp, Loader2, ExternalLink, Euro } from "lucide-react"
+import { Clock, CreditCard, TrendingUp, Loader2, Euro } from "lucide-react"
 
 
 const formatEur = (cents: number) =>
@@ -11,9 +11,6 @@ export default function EarningsPage() {
   const [payments, setPayments] = useState<any[]>([])
   const [creator, setCreator] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [settingUp, setSettingUp] = useState(false)
-  const [connectError, setConnectError] = useState<string | null>(null)
-
   useEffect(() => {
     async function load() {
       try {
@@ -30,36 +27,6 @@ export default function EarningsPage() {
     }
     load()
   }, [])
-
-  async function setupConnect() {
-    setSettingUp(true)
-    setConnectError(null)
-    try {
-      const res = await fetch("/api/payments/create-connect-account", { method: "POST" })
-      const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
-        return
-      }
-      const errMsg = data.error || "Failed to set up Stripe Connect"
-      if (
-        errMsg.includes("signed up for Connect") ||
-        errMsg.includes("create new accounts") ||
-        errMsg.includes("transfers") ||
-        errMsg.includes("capability") ||
-        errMsg.includes("approval")
-      ) {
-        setConnectError(
-          "Stripe Connect payouts are not yet active on this platform. The platform owner needs to complete Stripe Connect setup and approval. Please check back soon — payouts will be available once this is approved."
-        )
-      } else {
-        setConnectError(errMsg)
-      }
-    } catch (err: any) {
-      setConnectError("Connection error: " + (err?.message || "Unknown error"))
-    }
-    setSettingUp(false)
-  }
 
   if (loading) return <div className="flex justify-center p-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
 
@@ -86,19 +53,11 @@ export default function EarningsPage() {
       </div>
 
       {!creator?.stripe_connect_account_id && (
-        <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
-          <h2 className="font-semibold text-lg mb-2">Set Up Payouts</h2>
-          <p className="text-sm text-muted-foreground mb-4">Connect your Stripe account to receive payments from brands.</p>
-          {connectError && (
-            <div className="mb-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-sm text-yellow-800">
-              {connectError}
-            </div>
-          )}
-          <button onClick={setupConnect} disabled={settingUp}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
-            {settingUp ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
-            Set Up Stripe Connect
-          </button>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <h2 className="font-semibold text-lg mb-2 text-blue-900">Payouts Coming Soon</h2>
+          <p className="text-sm text-blue-700">
+            Direct payouts to creators are being set up. You will be notified once payout setup is available. Your earnings are tracked and will be paid out as soon as the system is live.
+          </p>
         </div>
       )}
 
