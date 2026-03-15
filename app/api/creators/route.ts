@@ -36,20 +36,20 @@ export async function GET(request: NextRequest) {
 
     if (category) query = query.contains("categories", [category])
     if (platform) query = query.contains("platforms", [platform])
-    if (minFollowers) query = query.gte("follower_count", parseInt(minFollowers))
-    if (maxRate) query = query.lte("hourly_rate_cents", parseInt(maxRate))
+    if (minFollowers) query = query.gte("tiktok_followers", parseInt(minFollowers))
+    if (maxRate) query = query.lte("base_rate_cents", parseInt(maxRate))
     if (search) query = query.ilike("display_name", `%${search}%`)
     if (language) query = query.contains("languages", [language])
     if (contentType) query = query.contains("content_types", [contentType])
     if (location) query = query.ilike("country", `%${location}%`)
-    if (minRating) query = query.gte("avg_rating", parseFloat(minRating))
+    if (minRating) query = query.gte("platform_rating", parseFloat(minRating))
 
     // Sort: Pro/Elite creators first, then by selected sort
     const sortColumn =
-      sortBy === "followers" ? "follower_count" :
-      sortBy === "rate" ? "hourly_rate_cents" :
+      sortBy === "followers" ? "tiktok_followers" :
+      sortBy === "rate" ? "base_rate_cents" :
       sortBy === "name" ? "display_name" :
-      "avg_rating"
+      "platform_rating"
 
     const ascending = sortBy === "rate" || sortBy === "name"
 
