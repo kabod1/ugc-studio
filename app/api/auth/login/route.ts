@@ -39,20 +39,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 401 })
   }
 
-  // Fetch role for redirect
+  // Use service role key via direct fetch to bypass RLS infinite recursion
   let role = "brand"
   try {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .single()
-    if (profile?.role) role = profile.role
+    const profileRes = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/profiles?id=eq.${data.user.id}&select=role&limit=1`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        },
+        cache: "no-store",
+      }
+    )
+    const profiles = await profileRes.json()
+    if (profiles?.[0]?.role) role = profiles[0].role
   } catch {}
 
-  const res = NextResponse.json({ success: true, role, userId: data.user.id })
+  const destination =
+    role === "creator" ? "/creator" : role === "admin" ? "/admin" : "/dashboard"
 
-  // Set session cookies directly on the response
+  const res = NextResponse.json({ destination })
+
+  // Set all auth session cookies on the response
   cookiesToSet.forEach(({ name, value, options }) => {
     res.cookies.set(name, value, options)
   })

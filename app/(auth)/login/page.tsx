@@ -1,14 +1,12 @@
 "use client"
 
 import { useState, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
 import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react"
-import { loginAction } from "./actions"
 
 export default function LoginPage() {
   return (
@@ -19,8 +17,7 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const searchParams = useSearchParams()
-  const [showPassword, setShowPassword] = useState(false)
+const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const {
@@ -34,12 +31,17 @@ function LoginForm() {
   async function onSubmit(data: LoginFormData) {
     setLoading(true)
     try {
-      const result = await loginAction(data.email, data.password)
-      if ("error" in result) {
-        toast.error(result.error)
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      })
+      const result = await res.json()
+      if (!res.ok || result.error) {
+        toast.error(result.error || "Login failed")
         setLoading(false)
       } else {
-        // Hard navigation ensures auth cookies are applied before the next request
+        // Hard navigation ensures auth cookies from the API response are applied first
         window.location.href = result.destination
       }
     } catch (err: any) {
