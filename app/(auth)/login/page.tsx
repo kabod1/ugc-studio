@@ -36,9 +36,10 @@ const [showPassword, setShowPassword] = useState(false)
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: data.email, password: data.password }),
       })
-      const result = await res.json()
-      if (!res.ok || result.error) {
-        toast.error(result.error || "Login failed")
+      let result: any = null
+      try { result = await res.json() } catch {}
+      if (!res.ok || !result || result.error) {
+        toast.error((result && result.error) || "Login failed. Please try again.")
         setLoading(false)
       } else {
         // Hard navigation ensures auth cookies from the API response are applied first
