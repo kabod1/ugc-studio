@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
-import { toast } from "sonner"
+
 import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react"
 
 export default function LoginPage() {
@@ -19,6 +19,7 @@ export default function LoginPage() {
 function LoginForm() {
 const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
 
   const {
     register,
@@ -30,6 +31,7 @@ const [showPassword, setShowPassword] = useState(false)
 
   async function onSubmit(data: LoginFormData) {
     setLoading(true)
+    setLoginError(null)
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -39,14 +41,15 @@ const [showPassword, setShowPassword] = useState(false)
       let result: any = null
       try { result = await res.json() } catch {}
       if (!res.ok || !result || result.error) {
-        toast.error((result && result.error) || "Login failed. Please try again.")
+        const msg = (result && result.error) || "Login failed. Please try again."
+        setLoginError(msg)
         setLoading(false)
       } else {
         // Hard navigation ensures auth cookies from the API response are applied first
         window.location.href = result.destination
       }
     } catch (err: any) {
-      toast.error(err?.message || "Login failed")
+      setLoginError(err?.message || "Login failed")
       setLoading(false)
     }
   }
@@ -109,6 +112,12 @@ const [showPassword, setShowPassword] = useState(false)
               Forgot password?
             </Link>
           </div>
+
+          {loginError && (
+            <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+              {loginError}
+            </div>
+          )}
 
           <button
             type="submit"
