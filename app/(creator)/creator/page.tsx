@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -29,11 +29,32 @@ export default async function CreatorOverviewPage() {
   if (!user) redirect("/login")
 
   // Fetch creator profile
-  const { data: creatorProfile } = await supabase
+  let { data: creatorProfile } = await supabase
     .from("creator_profiles")
     .select("*")
     .eq("user_id", user.id)
     .single()
+
+  // If profile missing (e.g. signup race condition), create it on the fly
+  if (!creatorProfile) {
+    const svc = createServiceClient()
+    const { data: newProfile } = await svc
+      .from("creator_profiles")
+      .insert({
+        user_id: user.id,
+        display_name: (user.user_metadata?.full_name as string) || user.email || "",
+        tiktok_followers: 0,
+        instagram_followers: 0,
+        youtube_subscribers: 0,
+        platform_rating: 0,
+        total_campaigns_completed: 0,
+        age_verified: false,
+        tax_form_submitted: false,
+      })
+      .select()
+      .single()
+    creatorProfile = newProfile
+  }
 
   if (!creatorProfile) redirect("/login")
 
