@@ -44,8 +44,8 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
-  // Auth callback
-  if (path.startsWith("/auth/callback") || path.startsWith("/api/auth")) {
+  // Auth callback — allow /callback (Next.js route group strips the "(auth)" segment)
+  if (path.startsWith("/auth/callback") || path.startsWith("/callback") || path.startsWith("/api/auth")) {
     return response
   }
 
@@ -57,9 +57,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Read role from cookie set at login time (avoids Edge Runtime DB fetch issues)
+  // Read role from cookie (set at login/signup) or fall back to user_metadata
   const roleCookie = request.cookies.get("user-role")?.value
-  let role = roleCookie || "brand"
+  let role = roleCookie || (user.user_metadata?.role as string) || "brand"
 
   // Role-based access control
   if (path.startsWith("/admin") && role !== "admin") {

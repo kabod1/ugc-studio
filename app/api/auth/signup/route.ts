@@ -76,7 +76,41 @@ export async function POST(request: Request) {
     // Check if email confirmation is required (user has no session yet)
     const needsConfirmation = !signupData.access_token
 
-    return NextResponse.json({ success: true, needsConfirmation })
+    const res = NextResponse.json({ success: true, needsConfirmation })
+
+    // If auto-confirmed (no email needed), set session + role cookies now
+    if (!needsConfirmation && signupData.access_token) {
+      const supabaseUrl2 = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim()
+      const projectRef = new URL(supabaseUrl2).hostname.split(".")[0]
+      const cookieName = `sb-${projectRef}-auth-token`
+      const session = {
+        access_token: signupData.access_token,
+        refresh_token: signupData.refresh_token,
+        expires_in: signupData.expires_in,
+        expires_at: signupData.expires_at,
+        token_type: signupData.token_type || "bearer",
+        user: signupData.user,
+      }
+      const cookieOpts = {
+        path: "/",
+        sameSite: "lax" as const,
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 31536000,
+      }
+      const encoded = encodeURIComponent(JSON.stringify(session))
+      if (encoded.length <= 3180) {
+        res.cookies.set(cookieName, JSON.stringify(session), cookieOpts)
+      } else {
+        const chunks = encoded.match(/.{1,3180}/g) || []
+        chunks.forEach((chunk, i) => {
+          res.cookies.set(`${cookieName}.${i}`, decodeURIComponent(chunk), cookieOpts)
+        })
+      }
+      res.cookies.set("user-role", role || "brand", cookieOpts)
+    }
+
+    return res
   } catch (err: any) {
     console.error("[signup] error:", err?.message)
     return NextResponse.json({ error: err?.message || "Server error" }, { status: 500 })

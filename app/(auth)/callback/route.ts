@@ -11,15 +11,27 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .single()
+      const { data: { user } } = await supabase.auth.getUser()
+      const role = (user?.user_metadata?.role as string) || "brand"
 
-      const destination = profile?.role === "creator" ? "/creator" :
-        profile?.role === "admin" ? "/admin" : next
+      const destination =
+        role === "creator" ? "/creator" :
+        role === "admin" ? "/admin" :
+        next
 
-      return NextResponse.redirect(`${origin}${destination}`)
+      const res = NextResponse.redirect(`${origin}${destination}`)
+
+      // Set the user-role cookie so middleware can route correctly without a DB call
+      const cookieOpts = {
+        path: "/",
+        sameSite: "lax" as const,
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 31536000,
+      }
+      res.cookies.set("user-role", role, cookieOpts)
+
+      return res
     }
   }
 
