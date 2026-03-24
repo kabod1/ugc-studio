@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Check, Sparkles, Crown, Star, ArrowRight } from "lucide-react"
 import { PricingToggle } from "./pricing-toggle"
+import { LogoHorizontal } from "@/components/shared/logo"
 
 export const metadata: Metadata = {
   title: "Pricing - UGC Studio",
@@ -252,10 +253,7 @@ export default function PricingPage() {
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">UGC Studio</span>
-          </Link>
+          <Link href="/"><LogoHorizontal /></Link>
           <div className="hidden md:flex items-center gap-8">
             <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
               Home
@@ -328,10 +326,7 @@ export default function PricingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <span className="font-bold">UGC Studio</span>
-              </div>
+              <div className="mb-4"><LogoHorizontal /></div>
               <p className="text-sm text-muted-foreground">
                 The end-to-end UGC production platform.
               </p>
