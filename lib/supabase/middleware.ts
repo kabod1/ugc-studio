@@ -32,10 +32,6 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   const path = request.nextUrl.pathname
 
   // Public routes - no auth needed
@@ -49,17 +45,21 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
+  // Use getSession() for routing — reads cookie locally, no network call.
+  // Individual pages call getUser() for proper server-side verification.
+  const { data: { session } } = await supabase.auth.getSession()
+
   // Not authenticated - redirect to login
-  if (!user) {
+  if (!session) {
     const url = request.nextUrl.clone()
     url.pathname = "/login"
     url.searchParams.set("redirect", path)
     return NextResponse.redirect(url)
   }
 
-  // Read role from cookie (set at login/signup) or fall back to user_metadata
+  // Read role from cookie (set at login/signup) or fall back to session user_metadata
   const roleCookie = request.cookies.get("user-role")?.value
-  let role = roleCookie || (user.user_metadata?.role as string) || "brand"
+  let role = roleCookie || (session.user?.user_metadata?.role as string) || "brand"
 
   // Role-based access control
   if (path.startsWith("/admin") && role !== "admin") {
