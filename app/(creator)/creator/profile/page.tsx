@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { CreatorProfileForm } from "@/components/creator/profile-form"
 
@@ -10,7 +10,8 @@ export default async function CreatorProfilePage() {
 
   if (!user) redirect("/login")
 
-  const { data: creatorProfile } = await supabase
+  const svc = createServiceClient()
+  const { data: creatorProfile } = await svc
     .from("creator_profiles")
     .select("*")
     .eq("user_id", user.id)

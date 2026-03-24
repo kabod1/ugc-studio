@@ -28,8 +28,9 @@ export default async function CreatorOverviewPage() {
 
   if (!user) redirect("/login")
 
-  // Fetch creator profile
-  let { data: creatorProfile } = await supabase
+  // Use service client to bypass RLS — consistent with creator layout
+  const svc = createServiceClient()
+  let { data: creatorProfile } = await svc
     .from("creator_profiles")
     .select("*")
     .eq("user_id", user.id)
@@ -37,7 +38,6 @@ export default async function CreatorOverviewPage() {
 
   // If profile missing (e.g. signup race condition), create it on the fly
   if (!creatorProfile) {
-    const svc = createServiceClient()
     const { data: newProfile } = await svc
       .from("creator_profiles")
       .insert({
