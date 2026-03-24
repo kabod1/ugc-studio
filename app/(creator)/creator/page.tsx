@@ -22,11 +22,10 @@ import {
 
 export default async function CreatorOverviewPage() {
   const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
 
-  if (!user) redirect("/login")
+  if (!session) redirect("/login")
+  const user = session.user
 
   // Use service client to bypass RLS — consistent with creator layout
   const svc = createServiceClient()

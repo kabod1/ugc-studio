@@ -6,7 +6,6 @@ export async function POST(request: Request) {
 
     const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim()
     const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim()
-    const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim()
 
     // Sign in via direct REST call — no createServerClient
     const authRes = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
@@ -28,52 +27,10 @@ export async function POST(request: Request) {
       )
     }
 
-    const userId = authData.user?.id
     const userMeta = authData.user?.user_metadata || {}
 
-    const svcHeaders = {
-      "Content-Type": "application/json",
-      "apikey": serviceKey,
-      "Authorization": `Bearer ${serviceKey}`,
-      "Prefer": "resolution=merge-duplicates",
-    }
-
-    // Get role from profiles table, fall back to user_metadata
-    let role = userMeta.role || "brand"
-    try {
-      const profileRes = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=role&limit=1`,
-        { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
-      )
-      const profiles = await profileRes.json()
-      if (profiles?.[0]?.role) {
-        role = profiles[0].role
-      } else if (role === "creator") {
-        // Ensure creator_profiles record exists (for users who signed up before the fix)
-        await fetch(`${supabaseUrl}/rest/v1/creator_profiles`, {
-          method: "POST",
-          headers: svcHeaders,
-          body: JSON.stringify({
-            user_id: userId,
-            display_name: userMeta.full_name || "",
-            tiktok_followers: 0, instagram_followers: 0, youtube_subscribers: 0,
-            platform_rating: 0, total_campaigns_completed: 0,
-            age_verified: false, tax_form_submitted: false,
-          }),
-        })
-      } else if (role === "brand") {
-        // Ensure brands record exists
-        await fetch(`${supabaseUrl}/rest/v1/brands`, {
-          method: "POST",
-          headers: svcHeaders,
-          body: JSON.stringify({
-            user_id: userId,
-            company_name: userMeta.company_name || userMeta.full_name || "My Brand",
-            subscription_tier: "free",
-          }),
-        })
-      }
-    } catch {}
+    // Role is stored in user_metadata (set at signup)
+    const role = (userMeta.role as string) || "brand"
 
     const destination =
       role === "creator" ? "/creator" : role === "admin" ? "/admin" : "/dashboard"
@@ -104,16 +61,22 @@ export async function POST(request: Request) {
       maxAge: 31536000,
     }
 
-    // Chunk if URL-encoded length > 3180 (matches @supabase/ssr CHUNK_SIZE)
+    // Chunk if URL-encoded length > 3180 — mirrors @supabase/ssr createChunks logic
     const encoded = encodeURIComponent(sessionJson)
     if (encoded.length <= 3180) {
       res.cookies.set(cookieName, sessionJson, cookieOpts)
     } else {
-      const chunkSize = 3180
-      const chunks = encoded.match(new RegExp(`.{1,${chunkSize}}`, "g")) || []
-      chunks.forEach((chunk, i) => {
-        res.cookies.set(`${cookieName}.${i}`, decodeURIComponent(chunk), cookieOpts)
-      })
+      let remaining = encoded
+      let i = 0
+      while (remaining.length > 0) {
+        let head = remaining.slice(0, 3180)
+        // Don't split a %XX escape sequence
+        const lastPct = head.lastIndexOf("%")
+        if (lastPct > 3180 - 3) head = head.slice(0, lastPct)
+        res.cookies.set(`${cookieName}.${i}`, decodeURIComponent(head), cookieOpts)
+        remaining = remaining.slice(head.length)
+        i++
+      }
     }
 
     // Set role cookie so middleware can skip Edge Runtime DB fetch
