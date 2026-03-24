@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
   LayoutDashboard, Megaphone, Users, FileVideo, FileText,
-  CreditCard, BarChart3, Settings, Menu, X, Sparkles,
+  CreditCard, BarChart3, Settings, Menu,
   Bell, ChevronLeft, Video, LogOut, Building2, Palette,
   Shield, UserCheck, Eye, Sliders, MessageSquare, HelpCircle
 } from "lucide-react"
 import { useUser } from "@/hooks/use-user"
+import { LogoIcon, LogoHorizontal } from "@/components/shared/logo"
 
 const brandNavItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -92,8 +93,7 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
           "flex items-center gap-2 p-4 border-b",
           collapsed ? "justify-center" : ""
         )}>
-          <Sparkles className="h-6 w-6 text-primary shrink-0" />
-          {!collapsed && <span className="font-bold text-lg">UGC Studio</span>}
+          {collapsed ? <LogoIcon size={32} /> : <LogoHorizontal />}
         </div>
 
         {/* Navigation */}

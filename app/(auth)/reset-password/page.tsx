@@ -7,7 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { createClient } from "@/lib/supabase/client"
 import { resetPasswordSchema, type ResetPasswordFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
-import { Loader2, Sparkles } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import { LogoFull } from "@/components/shared/logo"
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -37,7 +38,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <Sparkles className="h-8 w-8 text-primary mx-auto" />
+        <div className="flex justify-center"><LogoFull className="w-20 h-20" /></div>
         <h1 className="text-2xl font-bold">Set New Password</h1>
         <p className="text-muted-foreground">Enter your new password below</p>
       </div>

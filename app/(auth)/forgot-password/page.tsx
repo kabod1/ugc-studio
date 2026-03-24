@@ -7,7 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { createClient } from "@/lib/supabase/client"
 import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
-import { Loader2, ArrowLeft, Sparkles } from "lucide-react"
+import { Loader2, ArrowLeft } from "lucide-react"
+import { LogoFull } from "@/components/shared/logo"
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)
@@ -36,7 +37,7 @@ export default function ForgotPasswordPage() {
   if (sent) {
     return (
       <div className="text-center space-y-4">
-        <Sparkles className="h-12 w-12 text-primary mx-auto" />
+        <div className="flex justify-center"><LogoFull className="w-20 h-20" /></div>
         <h2 className="text-xl font-bold">Check your email</h2>
         <p className="text-muted-foreground">We sent a password reset link to your email address.</p>
         <Link href="/login" className="inline-flex items-center gap-2 text-primary hover:underline text-sm">

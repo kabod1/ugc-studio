@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { Sparkles, Users, FileVideo, CreditCard, Shield, BarChart3, ArrowRight, Star, Zap, Globe, Video } from "lucide-react"
+import { Users, FileVideo, CreditCard, Shield, BarChart3, ArrowRight, Star, Zap, Globe, Video } from "lucide-react"
 import { PricingSection } from "@/components/landing/pricing-section"
+import { LogoHorizontal } from "@/components/shared/logo"
 
 const features = [
   { icon: Users, title: "Creator Discovery & AI Matching", description: "Find the perfect creators with GPT-4o powered matching. Filter by category, platform, location, and ratings, then let AI score and rank creators for each campaign." },
@@ -27,9 +28,8 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">UGC Studio</span>
+          <Link href="/">
+            <LogoHorizontal />
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground">Features</a>
@@ -197,9 +197,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <span className="font-bold">UGC Studio</span>
+              <div className="mb-4">
+                <LogoHorizontal />
               </div>
               <p className="text-sm text-muted-foreground">The end-to-end UGC production platform.</p>
             </div>

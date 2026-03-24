@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 
-import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { LogoFull } from "@/components/shared/logo"
 
 export default function LoginPage() {
   return (
@@ -57,9 +58,8 @@ const [showPassword, setShowPassword] = useState(false)
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Sparkles className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold">UGC Studio</h1>
+        <div className="flex justify-center mb-4">
+          <LogoFull className="w-28 h-28" />
         </div>
         <p className="text-muted-foreground">Sign in to your account</p>
       </div>

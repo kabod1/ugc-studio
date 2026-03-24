@@ -7,7 +7,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signupSchema, type SignupFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
-import { Eye, EyeOff, Loader2, Sparkles, Building2, Palette, CheckCircle2 } from "lucide-react"
+import { Eye, EyeOff, Loader2, Building2, Palette, CheckCircle2 } from "lucide-react"
+import { LogoFull } from "@/components/shared/logo"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -57,9 +58,8 @@ export default function SignupPage() {
   if (done) {
     return (
       <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Sparkles className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold">UGC Studio</h1>
+        <div className="flex justify-center mb-4">
+          <LogoFull className="w-24 h-24" />
         </div>
         <div className="bg-card border rounded-lg p-8 shadow-sm space-y-4">
           <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
@@ -84,9 +84,8 @@ export default function SignupPage() {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Sparkles className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold">UGC Studio</h1>
+        <div className="flex justify-center mb-4">
+          <LogoFull className="w-24 h-24" />
         </div>
         <p className="text-muted-foreground">Create your account</p>
       </div>

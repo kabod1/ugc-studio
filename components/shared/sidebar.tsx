@@ -3,7 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Sparkles, ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react"
+import { LogoIcon, LogoHorizontal } from "@/components/shared/logo"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,12 +40,7 @@ export function Sidebar({ items, role }: SidebarProps) {
         {/* Logo */}
         <div className="flex h-16 items-center border-b px-4">
           <Link href="/" className="flex items-center gap-2 overflow-hidden">
-            <Sparkles className="h-6 w-6 shrink-0 text-primary" />
-            {!collapsed && (
-              <span className="text-lg font-bold whitespace-nowrap">
-                UGC Studio
-              </span>
-            )}
+            {collapsed ? <LogoIcon size={32} /> : <LogoHorizontal />}
           </Link>
         </div>
 
