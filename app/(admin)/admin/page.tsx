@@ -15,16 +15,15 @@ export default async function AdminDashboardPage() {
     { data: payments },
     { count: pendingVerifications },
     { count: pendingContent },
-    { data: authData },
   ] = await Promise.all([
     supabase.from("creator_profiles").select("*", { count: "exact", head: true }),
     supabase.from("campaigns").select("*", { count: "exact", head: true }).eq("status", "active"),
     supabase.from("payments").select("amount_cents, platform_fee_cents").eq("status", "released"),
     supabase.from("creator_profiles").select("*", { count: "exact", head: true }).eq("is_featured", false).eq("age_verified", false),
     supabase.from("content_submissions").select("*", { count: "exact", head: true }).eq("status", "submitted"),
-    supabase.auth.admin.listUsers({ perPage: 1000 }),
   ])
 
+  const { data: authData } = await supabase.auth.admin.listUsers({ perPage: 1000 })
   const allUsers = authData?.users || []
   const totalUsers = allUsers.length
   const totalBrands = allUsers.filter((u: any) => {

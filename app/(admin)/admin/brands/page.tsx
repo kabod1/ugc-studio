@@ -7,10 +7,8 @@ export default async function AdminBrandsPage() {
   const svc = createServiceClient()
 
   // Pull from auth (source of truth) + join brands table for extra details
-  const [{ data: authData }, { data: brandsData }] = await Promise.all([
-    svc.auth.admin.listUsers({ perPage: 1000 }),
-    svc.from("brands").select("id, company_name, industry, subscription_tier, created_at, user_id"),
-  ])
+  const { data: authData } = await svc.auth.admin.listUsers({ perPage: 1000 })
+  const { data: brandsData } = await svc.from("brands").select("id, company_name, industry, subscription_tier, created_at, user_id")
 
   const brandsMap = new Map((brandsData || []).map((b: any) => [b.user_id, b]))
 
