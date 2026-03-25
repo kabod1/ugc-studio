@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { Plus, Megaphone, ArrowRight, Search } from "lucide-react"
@@ -10,18 +10,18 @@ export default async function CampaignsPage({
   searchParams: { status?: string; search?: string }
 }) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
+  const userId = session?.user?.id
+  if (!userId) return <div className="p-12 text-center text-muted-foreground">Not authenticated</div>
 
-  const { data: brand } = await supabase
-    .from("brands")
-    .select("id")
-    .eq("user_id", user!.id)
-    .single()
+  const svc = createServiceClient()
+  const { data: brand } = await svc.from("brands").select("id").eq("user_id", userId).single()
+  if (!brand) return <div className="p-12 text-center text-muted-foreground">Brand profile not found. Please refresh the page.</div>
 
   let query = supabase
     .from("campaigns")
     .select("*")
-    .eq("brand_id", brand!.id)
+    .eq("brand_id", brand.id)
     .order("created_at", { ascending: false })
 
   if (searchParams.status && searchParams.status !== "all") {

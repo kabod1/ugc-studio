@@ -9,20 +9,18 @@ import {
 
 export default async function DashboardPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect("/login")
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) redirect("/login")
 
   const service = createServiceClient()
 
   const { data: brand } = await service
     .from("brands")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("user_id", session.user.id)
     .single()
 
   if (!brand) {
-    // Brand record doesn't exist yet — show empty state without crashing
     return (
       <div className="space-y-6">
         <div>
@@ -33,10 +31,7 @@ export default async function DashboardPage() {
           <Megaphone className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="font-medium">Set up your brand to get started</p>
           <p className="text-sm text-muted-foreground mb-4">Complete your brand profile to start creating campaigns</p>
-          <Link
-            href="/dashboard/settings/brand"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-          >
+          <Link href="/dashboard/settings/brand" className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90">
             Set Up Brand
           </Link>
         </div>
@@ -44,7 +39,11 @@ export default async function DashboardPage() {
     )
   }
 
-  // Fetch stats
+  // Get campaign IDs first (needed for sub-queries)
+  const { data: campaignIds } = await service.from("campaigns").select("id").eq("brand_id", brand.id)
+  const ids = (campaignIds || []).map((c: any) => c.id)
+
+  // Fetch stats in parallel
   const [
     { count: totalCampaigns },
     { count: activeCampaigns },
@@ -55,14 +54,15 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     service.from("campaigns").select("*", { count: "exact", head: true }).eq("brand_id", brand.id),
     service.from("campaigns").select("*", { count: "exact", head: true }).eq("brand_id", brand.id).eq("status", "active"),
-    service.from("content_submissions").select("*", { count: "exact", head: true })
-      .in("campaign_id", (await service.from("campaigns").select("id").eq("brand_id", brand.id)).data?.map(c => c.id) || []),
+    ids.length > 0
+      ? service.from("content_submissions").select("*", { count: "exact", head: true }).in("campaign_id", ids)
+      : Promise.resolve({ count: 0, data: null, error: null, status: 200, statusText: "OK" }),
     service.from("payments").select("amount_cents").eq("brand_id", brand.id).eq("status", "released"),
     service.from("campaigns").select("*, campaign_applications(count), content_submissions(count)")
       .eq("brand_id", brand.id).order("created_at", { ascending: false }).limit(5),
-    service.from("campaign_applications").select("*", { count: "exact", head: true })
-      .eq("status", "pending")
-      .in("campaign_id", (await service.from("campaigns").select("id").eq("brand_id", brand.id)).data?.map(c => c.id) || []),
+    ids.length > 0
+      ? service.from("campaign_applications").select("*", { count: "exact", head: true }).eq("status", "pending").in("campaign_id", ids)
+      : Promise.resolve({ count: 0, data: null, error: null, status: 200, statusText: "OK" }),
   ])
 
   const totalSpent = payments?.reduce((sum, p) => sum + p.amount_cents, 0) || 0

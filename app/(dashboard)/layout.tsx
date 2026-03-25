@@ -20,11 +20,25 @@ export default async function DashboardLayout({
   }
 
   const service = createServiceClient()
-  const { data: brand } = await service
+  let { data: brand } = await service
     .from("brands")
     .select("*")
     .eq("user_id", user.id)
     .single()
+
+  // Auto-create brands row if missing (signup DB insert may have failed)
+  if (!brand) {
+    const { data: newBrand } = await service
+      .from("brands")
+      .insert({
+        user_id: user.id,
+        company_name: user.user_metadata?.company_name || user.user_metadata?.full_name || user.email || "My Brand",
+        subscription_tier: "free",
+      })
+      .select()
+      .single()
+    brand = newBrand
+  }
 
   const userDisplay = {
     id: user.id,
