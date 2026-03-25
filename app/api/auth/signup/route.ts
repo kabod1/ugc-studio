@@ -44,7 +44,15 @@ export async function POST(request: Request) {
       "Prefer": "resolution=merge-duplicates",
     }
 
-    // 2. Create brand or creator_profiles placeholder
+    // 2. Update the profiles table role to match the signup role
+    // (DB trigger creates the profile with role="user" by default)
+    await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+      method: "PATCH",
+      headers: svcHeaders,
+      body: JSON.stringify({ role: role === "creator" ? "creator" : "brand" }),
+    })
+
+    // 3. Create brand or creator_profiles placeholder
     if (role === "creator") {
       await fetch(`${supabaseUrl}/rest/v1/creator_profiles`, {
         method: "POST",
