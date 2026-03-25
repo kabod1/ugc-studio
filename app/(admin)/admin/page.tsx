@@ -10,26 +10,37 @@ export default async function AdminDashboardPage() {
   const supabase = createServiceClient()
 
   const [
-    { count: totalUsers },
-    { count: totalBrands },
     { count: totalCreators },
     { count: activeCampaigns },
-    { count: totalCampaigns },
     { data: payments },
     { count: pendingVerifications },
     { count: pendingContent },
-    { data: recentUsers },
+    { data: authData },
   ] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("brands").select("*", { count: "exact", head: true }),
     supabase.from("creator_profiles").select("*", { count: "exact", head: true }),
     supabase.from("campaigns").select("*", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("campaigns").select("*", { count: "exact", head: true }),
     supabase.from("payments").select("amount_cents, platform_fee_cents").eq("status", "released"),
     supabase.from("creator_profiles").select("*", { count: "exact", head: true }).eq("is_featured", false).eq("age_verified", false),
     supabase.from("content_submissions").select("*", { count: "exact", head: true }).eq("status", "submitted"),
-    supabase.from("profiles").select("id, full_name, email, role, created_at").order("created_at", { ascending: false }).limit(10),
+    supabase.auth.admin.listUsers({ perPage: 1000 }),
   ])
+
+  const allUsers = authData?.users || []
+  const totalUsers = allUsers.length
+  const totalBrands = allUsers.filter((u: any) => {
+    const role = u.user_metadata?.role
+    return !role || role === "brand"
+  }).length
+  const recentUsers = allUsers
+    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 10)
+    .map((u: any) => ({
+      id: u.id,
+      full_name: u.user_metadata?.full_name || u.user_metadata?.company_name || "",
+      email: u.email,
+      role: u.user_metadata?.role || "brand",
+      created_at: u.created_at,
+    }))
 
   const totalRevenue = payments?.reduce((sum, p) => sum + (p.platform_fee_cents || 0), 0) || 0
   const totalVolume = payments?.reduce((sum, p) => sum + p.amount_cents, 0) || 0
