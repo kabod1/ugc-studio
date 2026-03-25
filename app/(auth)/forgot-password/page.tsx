@@ -4,7 +4,6 @@ import { useState } from "react"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createClient } from "@/lib/supabase/client"
 import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
 import { Loader2, ArrowLeft } from "lucide-react"
@@ -20,16 +19,20 @@ export default function ForgotPasswordPage() {
 
   async function onSubmit(data: ForgotPasswordFormData) {
     setLoading(true)
-    const supabase = createClient()
-
-    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
-
-    if (error) {
-      toast.error(error.message)
-    } else {
-      setSent(true)
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error || "Something went wrong. Please try again.")
+      } else {
+        setSent(true)
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.")
     }
     setLoading(false)
   }
