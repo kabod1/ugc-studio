@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createClient } from "@/lib/supabase/client"
@@ -10,13 +10,47 @@ import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import { LogoFull } from "@/components/shared/logo"
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+  const [ready, setReady] = useState(false)
 
   const { register, handleSubmit, formState: { errors } } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
   })
+
+  useEffect(() => {
+    const email = searchParams.get("email")
+    const token = searchParams.get("token")
+
+    if (!email || !token) {
+      // No OTP params — might be coming from Supabase magic link (hash-based)
+      setReady(true)
+      return
+    }
+
+    // Verify the OTP to establish a session before showing the form
+    async function verifyOtp() {
+      setVerifying(true)
+      const supabase = createClient()
+      const { error } = await supabase.auth.verifyOtp({
+        email: email!,
+        token: token!,
+        type: "recovery",
+      })
+      if (error) {
+        toast.error("This reset link has expired or already been used. Please request a new one.")
+        router.push("/forgot-password")
+        return
+      }
+      setReady(true)
+      setVerifying(false)
+    }
+
+    verifyOtp()
+  }, [searchParams, router])
 
   async function onSubmit(data: ResetPasswordFormData) {
     setLoading(true)
@@ -34,6 +68,17 @@ export default function ResetPasswordPage() {
     }
     setLoading(false)
   }
+
+  if (verifying) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground text-sm">Verifying your reset link...</p>
+      </div>
+    )
+  }
+
+  if (!ready) return null
 
   return (
     <div className="space-y-6">
@@ -66,5 +111,17 @@ export default function ResetPasswordPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   )
 }

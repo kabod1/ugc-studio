@@ -8,23 +8,24 @@ export async function POST(request: Request) {
     if (!email) return NextResponse.json({ error: "Email is required" }, { status: 400 })
 
     const supabase = createServiceClient()
-
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ugc-studio-zeta.vercel.app"
 
-    // Generate a real recovery link without Supabase sending the email
+    // Generate recovery OTP — we'll build our own redirect URL to avoid
+    // Supabase's redirect URL whitelist requirement
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "recovery",
       email,
-      options: { redirectTo: `${appUrl}/reset-password` },
     })
 
-    if (error || !data?.properties?.action_link) {
+    if (error || !data?.properties?.email_otp) {
       console.error("generateLink error:", error)
       // Don't reveal whether the email exists — always return success
       return NextResponse.json({ success: true })
     }
 
-    const resetLink = data.properties.action_link
+    // Build our own reset URL pointing directly to /reset-password
+    const otp = data.properties.email_otp
+    const resetLink = `${appUrl}/reset-password?email=${encodeURIComponent(email)}&token=${encodeURIComponent(otp)}`
 
     const gmailUser = process.env.GMAIL_USER
     const gmailPass = process.env.GMAIL_APP_PASSWORD
