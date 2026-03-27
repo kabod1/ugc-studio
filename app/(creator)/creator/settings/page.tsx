@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Loader2, Save, Check, Crown, ShieldCheck, FileText, AlertTriangle, Banknote } from "lucide-react"
 import { toast } from "sonner"
+import { GdprRights } from "@/components/shared/gdpr-rights"
 
 const CATEGORIES = ["Beauty", "Fashion", "Tech", "Food", "Fitness", "Travel", "Lifestyle", "Gaming", "Education", "Finance"]
 
@@ -357,6 +358,9 @@ export default function CreatorSettingsPage() {
           </button>
         </form>
       </div>
+
+      {/* GDPR / Data Rights */}
+      <GdprRights />
 
       {/* Subscription Section */}
       <div className="bg-card border rounded-lg p-6 space-y-4">

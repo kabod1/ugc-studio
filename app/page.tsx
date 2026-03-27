@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Users, FileVideo, CreditCard, Shield, BarChart3, ArrowRight, Star, Zap, Globe, Video } from "lucide-react"
 import { PricingSection } from "@/components/landing/pricing-section"
 import { LogoHorizontal } from "@/components/shared/logo"
+import { ManageCookiesButton } from "@/components/shared/manage-cookies-button"
 
 const features = [
   { icon: Users, title: "Creator Discovery & AI Matching", description: "Find the perfect creators with GPT-4o powered matching. Filter by category, platform, location, and ratings, then let AI score and rank creators for each campaign." },
@@ -224,11 +225,12 @@ export default function LandingPage() {
                 <li><Link href="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-foreground">Terms of Service</Link></li>
                 <li><Link href="/cookie-policy" className="hover:text-foreground">Cookie Policy</Link></li>
+                <li><ManageCookiesButton /></li>
               </ul>
             </div>
           </div>
           <div className="border-t pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} UGC Studio. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Townshub Limited. All rights reserved.</p>
             <p>Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a></p>
           </div>
         </div>

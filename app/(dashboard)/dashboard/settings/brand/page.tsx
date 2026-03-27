@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Loader2, Save, Palette, Link as LinkIcon, Plus, X } from "lucide-react"
+import { GdprRights } from "@/components/shared/gdpr-rights"
 
 interface BrandData {
   id: string
@@ -182,6 +183,9 @@ export default function BrandSettingsPage() {
           {saved ? "Saved!" : "Save Settings"}
         </button>
       </form>
+
+      {/* GDPR / Data Rights */}
+      <GdprRights />
     </div>
   )
 }

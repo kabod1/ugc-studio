@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { LogoHorizontal } from "@/components/shared/logo"
+import { ManageCookiesButton } from "@/components/shared/manage-cookies-button"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - UGC Studio",
-  description: "UGC Studio privacy policy. Learn how we collect, use, and protect your data.",
+  title: "Privacy Policy - Townshub",
+  description: "Townshub privacy policy. Learn how we collect, use, and protect your data.",
 }
 
 export default function PrivacyPage() {
@@ -29,9 +30,9 @@ export default function PrivacyPage() {
           <p className="text-muted-foreground">Last updated: February 18, 2026</p>
 
           <p>
-            UGC Studio (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) operates the UGC Studio platform
-            (the &quot;Service&quot;). This Privacy Policy explains how we collect, use, disclose, and
-            safeguard your information when you use our Service.
+            Townshub Limited (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) operates the Townshub UGC
+            Studio platform (the &quot;Service&quot;). This Privacy Policy explains how we collect, use,
+            disclose, and safeguard your information when you use our Service.
           </p>
 
           <h2>1. Information We Collect</h2>
@@ -142,8 +143,11 @@ export default function PrivacyPage() {
 
       <footer className="py-8 px-4 border-t">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} UGC Studio. All rights reserved.</p>
-          <p>Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a></p>
+          <p>&copy; {new Date().getFullYear()} Townshub Limited. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <ManageCookiesButton />
+            <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a>
+          </div>
         </div>
       </footer>
     </div>

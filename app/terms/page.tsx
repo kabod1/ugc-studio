@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { LogoHorizontal } from "@/components/shared/logo"
+import { ManageCookiesButton } from "@/components/shared/manage-cookies-button"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Terms of Service - UGC Studio",
-  description: "UGC Studio terms of service. Rules and guidelines for using our platform.",
+  title: "Terms of Service - Townshub",
+  description: "Townshub terms of service. Rules and guidelines for using our platform.",
 }
 
 export default function TermsPage() {
@@ -29,9 +30,9 @@ export default function TermsPage() {
           <p className="text-muted-foreground">Last updated: February 18, 2026</p>
 
           <p>
-            These Terms of Service (&quot;Terms&quot;) govern your access to and use of UGC Studio
-            (the &quot;Service&quot;), operated by UGC Studio (&quot;we,&quot; &quot;us,&quot; or
-            &quot;our&quot;). By using the Service, you agree to these Terms.
+            These Terms of Service (&quot;Terms&quot;) govern your access to and use of the Townshub
+            UGC Studio platform (the &quot;Service&quot;), operated by Townshub Limited (&quot;we,&quot;
+            &quot;us,&quot; or &quot;our&quot;). By using the Service, you agree to these Terms.
           </p>
 
           <h2>1. Account Registration</h2>
@@ -159,8 +160,11 @@ export default function TermsPage() {
 
       <footer className="py-8 px-4 border-t">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} UGC Studio. All rights reserved.</p>
-          <p>Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a></p>
+          <p>&copy; {new Date().getFullYear()} Townshub Limited. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <ManageCookiesButton />
+            <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a>
+          </div>
         </div>
       </footer>
     </div>
