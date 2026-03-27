@@ -17,6 +17,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: '*.supabase.in',
       },
+      {
+        protocol: 'https',
+        hostname: 'unavatar.io',
+      },
     ],
   },
 }

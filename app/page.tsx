@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Users, FileVideo, CreditCard, Shield, BarChart3, ArrowRight, Star, Zap, Globe, Video } from "lucide-react"
 import { PricingSection } from "@/components/landing/pricing-section"
+import { FeaturedCreators } from "@/components/landing/featured-creators"
 import { LogoHorizontal } from "@/components/shared/logo"
 import { ManageCookiesButton } from "@/components/shared/manage-cookies-button"
 
@@ -149,32 +150,13 @@ export default function LandingPage() {
 
       {/* Featured Creators */}
       <section className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">Featured Creators</h2>
-            <p className="text-lg text-muted-foreground">Top-rated creators ready to bring your brand to life</p>
+            <p className="text-lg text-muted-foreground">Top-rated creators from around the world, ready to bring your brand to life</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { name: "Ava Martinez", niche: "Beauty & Lifestyle", followers: "245K", rating: 4.9, avatar: "A" },
-              { name: "Jordan Lee", niche: "Tech & Gaming", followers: "180K", rating: 4.8, avatar: "J" },
-              { name: "Priya Sharma", niche: "Fitness & Wellness", followers: "320K", rating: 5.0, avatar: "P" },
-              { name: "Marcus Chen", niche: "Food & Travel", followers: "150K", rating: 4.7, avatar: "M" },
-            ].map((c) => (
-              <div key={c.name} className="bg-card border rounded-xl p-5 text-center hover:border-primary/50 hover:shadow-lg transition-all">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary mx-auto mb-3">
-                  {c.avatar}
-                </div>
-                <h3 className="font-semibold">{c.name}</h3>
-                <p className="text-xs text-muted-foreground mb-2">{c.niche}</p>
-                <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" /> {c.rating}</span>
-                  <span>{c.followers} followers</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-8">
+          <FeaturedCreators />
+          <div className="text-center mt-10">
             <Link href="/signup" className="inline-flex items-center gap-2 text-primary font-medium hover:underline">
               Browse all creators <ArrowRight className="h-4 w-4" />
             </Link>
