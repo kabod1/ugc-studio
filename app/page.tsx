@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Users, FileVideo, CreditCard, Shield, BarChart3, ArrowRight, Star, Zap, Globe, Video } from "lucide-react"
 import { PricingSection } from "@/components/landing/pricing-section"
 import { FeaturedCreators } from "@/components/landing/featured-creators"
+import { CreatorTestimonials } from "@/components/landing/creator-testimonials"
 import { LogoHorizontal } from "@/components/shared/logo"
 import { ManageCookiesButton } from "@/components/shared/manage-cookies-button"
 
@@ -123,30 +124,7 @@ export default function LandingPage() {
       {/* Pricing */}
       <PricingSection />
 
-      {/* Testimonials */}
-      <section className="py-20 px-4 bg-muted/30">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Trusted by Leading Brands</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { name: "Sarah Chen", role: "Marketing Director, BeautyBrand", quote: "UGC Studio cut our campaign management time by 70%. We went from managing everything in spreadsheets to having a seamless workflow." },
-              { name: "Marcus Johnson", role: "CEO, CreatorAgency", quote: "The AI matching is incredible. We're finding creators that perfectly align with our clients' brands, and the quality scores save hours of review time." },
-              { name: "Elena Rodriguez", role: "Brand Manager, FitTech", quote: "The escrow payment system gave our creators confidence and our finance team peace of mind. We've scaled from 10 to 200 creators effortlessly." },
-            ].map((t) => (
-              <div key={t.name} className="bg-card border rounded-xl p-6">
-                <div className="flex items-center gap-1 mb-4">
-                  {[1, 2, 3, 4, 5].map((s) => <Star key={s} className="h-4 w-4 text-yellow-500 fill-yellow-500" />)}
-                </div>
-                <p className="text-sm text-muted-foreground mb-4">&ldquo;{t.quote}&rdquo;</p>
-                <div>
-                  <p className="font-medium text-sm">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <CreatorTestimonials />
 
       {/* Featured Creators */}
       <section className="py-20 px-4">
