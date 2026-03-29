@@ -8,7 +8,8 @@ import {
   LayoutDashboard, Megaphone, Users, FileVideo, FileText,
   CreditCard, BarChart3, Settings, Menu,
   Bell, ChevronLeft, Video, LogOut, Building2, Palette,
-  Shield, UserCheck, Eye, Sliders, MessageSquare, HelpCircle
+  Shield, UserCheck, Eye, Sliders, MessageSquare, HelpCircle,
+  BookOpen, Briefcase, Share2
 } from "lucide-react"
 import { useUser } from "@/hooks/use-user"
 import { LogoIcon, LogoHorizontal } from "@/components/shared/logo"
@@ -34,8 +35,11 @@ const creatorNavItems = [
   { label: "Browse Campaigns", href: "/creator/campaigns", icon: Megaphone },
   { label: "My Campaigns", href: "/creator/my-campaigns", icon: FileVideo },
   { label: "My Content", href: "/creator/content", icon: Video },
+  { label: "Portfolio", href: "/creator/portfolio", icon: Briefcase },
+  { label: "Training", href: "/creator/training", icon: BookOpen },
   { label: "Contracts", href: "/creator/contracts", icon: FileText },
   { label: "Earnings", href: "/creator/earnings", icon: CreditCard },
+  { label: "Affiliates", href: "/creator/affiliates", icon: Share2 },
   { label: "Messages", href: "/creator/messages", icon: MessageSquare },
   { label: "Settings", href: "/creator/settings", icon: Settings },
 ]
@@ -97,7 +101,7 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href ||
               (item.href !== `/${role === "brand" ? "dashboard" : role}` && pathname.startsWith(item.href))
@@ -108,15 +112,15 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                   isActive
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   collapsed ? "justify-center px-2" : ""
                 )}
                 title={collapsed ? item.label : undefined}
               >
-                <item.icon className="h-5 w-5 shrink-0" />
+                <item.icon className="h-[18px] w-[18px] shrink-0" />
                 {!collapsed && <span>{item.label}</span>}
               </Link>
             )
@@ -124,14 +128,14 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
         </nav>
 
         {/* User section */}
-        <div className="border-t p-3">
+        <div className="border-t p-3 space-y-1">
           {!collapsed && (
-            <div className="flex items-center gap-3 mb-3 px-1">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+            <div className="flex items-center gap-3 mb-2 px-2 py-2 rounded-lg bg-muted/50">
+              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
                 {displayName.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium truncate">{displayName}</p>
+                <p className="text-sm font-semibold truncate">{displayName}</p>
                 <p className="text-xs text-muted-foreground capitalize">{role}</p>
               </div>
             </div>
@@ -139,22 +143,22 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
           <a
             href="mailto:support@townshub.com"
             className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors",
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors",
               collapsed ? "justify-center px-2" : ""
             )}
             title={collapsed ? "Support" : undefined}
           >
-            <HelpCircle className="h-4 w-4 shrink-0" />
+            <HelpCircle className="h-[18px] w-[18px] shrink-0" />
             {!collapsed && <span>Support</span>}
           </a>
           <button
             onClick={signOut}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors",
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors",
               collapsed ? "justify-center px-2" : ""
             )}
           >
-            <LogOut className="h-4 w-4 shrink-0" />
+            <LogOut className="h-[18px] w-[18px] shrink-0" />
             {!collapsed && <span>Sign Out</span>}
           </button>
         </div>

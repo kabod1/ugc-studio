@@ -46,13 +46,14 @@ export async function POST(request: Request) {
 
     // 2. Update the profiles table role to match the signup role
     // (DB trigger creates the profile with role="user" by default)
+    const profileRole = role === "creator" ? "creator" : "brand"
     await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
       method: "PATCH",
       headers: svcHeaders,
-      body: JSON.stringify({ role: role === "creator" ? "creator" : "brand" }),
+      body: JSON.stringify({ role: profileRole }),
     })
 
-    // 3. Create brand or creator_profiles placeholder
+    // 3. Create brand, agency, or creator_profiles placeholder
     if (role === "creator") {
       await fetch(`${supabaseUrl}/rest/v1/creator_profiles`, {
         method: "POST",
@@ -70,12 +71,13 @@ export async function POST(request: Request) {
         }),
       })
     } else {
+      // brand or agency both get a brands row
       await fetch(`${supabaseUrl}/rest/v1/brands`, {
         method: "POST",
         headers: svcHeaders,
         body: JSON.stringify({
           user_id: userId,
-          company_name: company_name || full_name || "My Brand",
+          company_name: company_name || full_name || (role === "agency" ? "My Agency" : "My Brand"),
           subscription_tier: "free",
         }),
       })
@@ -115,7 +117,7 @@ export async function POST(request: Request) {
           res.cookies.set(`${cookieName}.${i}`, decodeURIComponent(chunk), cookieOpts)
         })
       }
-      res.cookies.set("user-role", role || "brand", cookieOpts)
+      res.cookies.set("user-role", profileRole || "brand", cookieOpts)
     }
 
     return res

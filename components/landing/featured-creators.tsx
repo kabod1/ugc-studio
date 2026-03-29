@@ -5,165 +5,149 @@ import { Star } from "lucide-react"
 
 interface Creator {
   name: string
-  handle: string
+  slug: string
   niche: string
   country: string
   flag: string
   followers: string
   rating: number
-  platform: "instagram" | "twitter" | "youtube"
 }
 
 const CREATORS: Creator[] = [
   {
     name: "Khaby Lame",
-    handle: "khaby.lame",
+    slug: "khaby-lame",
     niche: "Comedy & Reactions",
     country: "Italy",
     flag: "🇮🇹",
     followers: "162M",
     rating: 5.0,
-    platform: "instagram",
   },
   {
     name: "Charli D'Amelio",
-    handle: "charlidamelio",
+    slug: "charli-damelio",
     niche: "Dance & Lifestyle",
     country: "United States",
     flag: "🇺🇸",
     followers: "155M",
     rating: 4.9,
-    platform: "instagram",
   },
   {
     name: "Addison Rae",
-    handle: "addisonraee",
+    slug: "addison-rae",
     niche: "Beauty & Lifestyle",
     country: "United States",
     flag: "🇺🇸",
     followers: "88M",
     rating: 4.8,
-    platform: "instagram",
   },
   {
     name: "Wisdom Kaye",
-    handle: "wisdomkaye",
+    slug: "wisdom-kaye",
     niche: "Fashion & Style",
     country: "Nigeria",
     flag: "🇳🇬",
     followers: "8.2M",
     rating: 4.9,
-    platform: "instagram",
   },
   {
     name: "Jay Shetty",
-    handle: "jayshetty",
+    slug: "jay-shetty",
     niche: "Wellness & Mindset",
     country: "United Kingdom",
     flag: "🇬🇧",
     followers: "22M",
     rating: 4.9,
-    platform: "instagram",
   },
   {
     name: "NikkieTutorials",
-    handle: "nikkietutorials",
+    slug: "nikkie-tutorials",
     niche: "Beauty & Makeup",
     country: "Netherlands",
     flag: "🇳🇱",
     followers: "18M",
     rating: 4.8,
-    platform: "instagram",
   },
   {
     name: "Bretman Rock",
-    handle: "bretmanrock",
+    slug: "bretman-rock",
     niche: "Beauty & Comedy",
     country: "Philippines",
     flag: "🇵🇭",
     followers: "18M",
     rating: 4.9,
-    platform: "instagram",
   },
   {
     name: "Zach King",
-    handle: "zachking",
+    slug: "zach-king",
     niche: "Magic & Illusions",
     country: "United States",
     flag: "🇺🇸",
     followers: "80M",
     rating: 5.0,
-    platform: "instagram",
   },
   {
     name: "Emma Chamberlain",
-    handle: "emmachamberlain",
+    slug: "emma-chamberlain",
     niche: "Lifestyle & Fashion",
     country: "United States",
     flag: "🇺🇸",
     followers: "15M",
     rating: 4.8,
-    platform: "instagram",
   },
   {
     name: "Nas Daily",
-    handle: "nasdaily",
+    slug: "nas-daily",
     niche: "Travel & Storytelling",
     country: "Palestine",
     flag: "🇵🇸",
     followers: "20M",
     rating: 4.9,
-    platform: "instagram",
   },
   {
     name: "Pokimane",
-    handle: "pokimanelol",
+    slug: "pokimane",
     niche: "Gaming & Lifestyle",
     country: "Canada",
     flag: "🇨🇦",
     followers: "9.4M",
     rating: 4.7,
-    platform: "instagram",
   },
   {
     name: "Lilly Singh",
-    handle: "iisuperwomanii",
+    slug: "lilly-singh",
     niche: "Comedy & Entertainment",
     country: "Canada",
     flag: "🇨🇦",
     followers: "14M",
     rating: 4.8,
-    platform: "instagram",
   },
   {
     name: "Bhuvan Bam",
-    handle: "bhuvan.bam22",
+    slug: "bhuvan-bam",
     niche: "Comedy & Storytelling",
     country: "India",
     flag: "🇮🇳",
     followers: "16M",
     rating: 4.9,
-    platform: "instagram",
   },
   {
     name: "Mikayla Nogueira",
-    handle: "mikaylanogueira",
+    slug: "mikayla-nogueira",
     niche: "Beauty & Skincare",
     country: "United States",
     flag: "🇺🇸",
     followers: "16M",
     rating: 4.8,
-    platform: "instagram",
   },
   {
     name: "Marques Brownlee",
-    handle: "mkbhd",
+    slug: "mkbhd",
     niche: "Tech & Reviews",
     country: "United States",
     flag: "🇺🇸",
     followers: "18M",
     rating: 4.9,
-    platform: "instagram",
   },
 ]
 
@@ -182,7 +166,7 @@ function CreatorCard({ creator }: { creator: Creator }) {
         {!imgError ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={`https://unavatar.io/${creator.platform}/${creator.handle}`}
+            src={`/creators/${creator.slug}.jpg`}
             alt={creator.name}
             onError={() => setImgError(true)}
             className="h-16 w-16 rounded-full object-cover ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all"
@@ -215,7 +199,7 @@ export function FeaturedCreators() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {CREATORS.map((c) => (
-        <CreatorCard key={c.handle} creator={c} />
+        <CreatorCard key={c.slug} creator={c} />
       ))}
     </div>
   )

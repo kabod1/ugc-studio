@@ -10,18 +10,18 @@ export const signupSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirm_password: z.string(),
-  role: z.enum(["brand", "creator"]),
+  role: z.enum(["brand", "creator", "agency"]),
   company_name: z.string().optional(),
 }).refine((data) => data.password === data.confirm_password, {
   message: "Passwords don't match",
   path: ["confirm_password"],
 }).refine((data) => {
-  if (data.role === "brand" && (!data.company_name || data.company_name.length < 2)) {
+  if ((data.role === "brand" || data.role === "agency") && (!data.company_name || data.company_name.length < 2)) {
     return false
   }
   return true
 }, {
-  message: "Company name is required for brands",
+  message: "Company name is required",
   path: ["company_name"],
 })
 

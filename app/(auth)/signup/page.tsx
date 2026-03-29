@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signupSchema, type SignupFormData } from "@/lib/validations/auth"
 import { toast } from "sonner"
-import { Eye, EyeOff, Loader2, Building2, Palette, CheckCircle2 } from "lucide-react"
+import { Eye, EyeOff, Loader2, Building2, Palette, CheckCircle2, Users } from "lucide-react"
 import { LogoFull } from "@/components/shared/logo"
 
 export default function SignupPage() {
@@ -47,7 +47,11 @@ export default function SignupPage() {
         setDone(true)
       } else {
         toast.success("Account created!")
-        router.push(data.role === "creator" ? "/creator" : "/dashboard")
+        if (data.role === "creator") {
+          router.push("/onboarding")
+        } else {
+          router.push("/dashboard")
+        }
       }
     } catch {
       toast.error("Something went wrong. Please try again.")
@@ -95,32 +99,45 @@ export default function SignupPage() {
           {/* Role Selection */}
           <div className="space-y-2">
             <label className="text-sm font-medium">I am a...</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setValue("role", "brand")}
-                className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
-                  selectedRole === "brand"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <Building2 className={`h-6 w-6 ${selectedRole === "brand" ? "text-primary" : "text-muted-foreground"}`} />
-                <span className={`text-sm font-medium ${selectedRole === "brand" ? "text-primary" : ""}`}>Brand</span>
-                <span className="text-xs text-muted-foreground text-center">Find creators & manage campaigns</span>
-              </button>
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setValue("role", "creator")}
-                className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all ${
                   selectedRole === "creator"
                     ? "border-primary bg-primary/5"
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                <Palette className={`h-6 w-6 ${selectedRole === "creator" ? "text-primary" : "text-muted-foreground"}`} />
-                <span className={`text-sm font-medium ${selectedRole === "creator" ? "text-primary" : ""}`}>Creator</span>
-                <span className="text-xs text-muted-foreground text-center">Find campaigns & earn money</span>
+                <Palette className={`h-5 w-5 ${selectedRole === "creator" ? "text-primary" : "text-muted-foreground"}`} />
+                <span className={`text-xs font-semibold ${selectedRole === "creator" ? "text-primary" : ""}`}>Content Creator</span>
+                <span className="text-[10px] text-muted-foreground text-center leading-tight">Find campaigns & earn money</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setValue("role", "brand")}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all ${
+                  selectedRole === "brand"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                }`}
+              >
+                <Building2 className={`h-5 w-5 ${selectedRole === "brand" ? "text-primary" : "text-muted-foreground"}`} />
+                <span className={`text-xs font-semibold ${selectedRole === "brand" ? "text-primary" : ""}`}>Brand</span>
+                <span className="text-[10px] text-muted-foreground text-center leading-tight">Hire creators & run campaigns</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setValue("role", "agency")}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all ${
+                  selectedRole === "agency"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                }`}
+              >
+                <Users className={`h-5 w-5 ${selectedRole === "agency" ? "text-primary" : "text-muted-foreground"}`} />
+                <span className={`text-xs font-semibold ${selectedRole === "agency" ? "text-primary" : ""}`}>Agency</span>
+                <span className="text-[10px] text-muted-foreground text-center leading-tight">Manage multiple clients</span>
               </button>
             </div>
           </div>
@@ -137,9 +154,11 @@ export default function SignupPage() {
             {errors.full_name && <p className="text-sm text-destructive">{errors.full_name.message}</p>}
           </div>
 
-          {selectedRole === "brand" && (
+          {(selectedRole === "brand" || selectedRole === "agency") && (
             <div className="space-y-2">
-              <label htmlFor="company_name" className="text-sm font-medium">Company Name</label>
+              <label htmlFor="company_name" className="text-sm font-medium">
+                {selectedRole === "agency" ? "Agency Name" : "Company Name"}
+              </label>
               <input
                 id="company_name"
                 type="text"
