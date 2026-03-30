@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { TRAINING_MODULES, getModule, getLesson } from "@/lib/training-content"
@@ -10,10 +10,9 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-export default function LessonPage({ params }: { params: Promise<{ moduleId: string; lessonId: string }> }) {
-  const { moduleId: moduleIdStr, lessonId: lessonIdStr } = use(params)
-  const moduleId = parseInt(moduleIdStr)
-  const lessonId = parseInt(lessonIdStr)
+export default function LessonPage({ params }: { params: { moduleId: string; lessonId: string } }) {
+  const moduleId = parseInt(params.moduleId)
+  const lessonId = parseInt(params.lessonId)
   const router = useRouter()
 
   const mod = getModule(moduleId)
