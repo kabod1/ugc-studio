@@ -2,7 +2,7 @@ export interface Lesson {
   id: number
   title: string
   duration: string
-  videoId: string
+  videoQuery: string
   videoTitle: string
   objectives: string[]
   content: string // markdown-style HTML
@@ -30,7 +30,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 1,
         title: "Completing Your Creator Profile",
         duration: "8 min",
-        videoId: "nJUmav2wWOk",
+        videoQuery: "how to build ugc creator profile get hired by brands",
         videoTitle: "How to Build a UGC Creator Profile That Gets Hired",
         objectives: [
           "Understand every field in your UGC Studio creator profile",
@@ -80,7 +80,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 2,
         title: "Adding Social Handles & Building Credibility",
         duration: "6 min",
-        videoId: "w6bBl-_L3Q8",
+        videoQuery: "UGC creator social proof verify brands portfolio tutorial",
         videoTitle: "How Brands Verify UGC Creators — Social Proof Guide",
         objectives: [
           "Connect all your social profiles on UGC Studio",
@@ -123,7 +123,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 3,
         title: "Building Your UGC Studio Portfolio",
         duration: "9 min",
-        videoId: "xMTpQH6YF-k",
+        videoQuery: "build UGC portfolio no experience get hired brands",
         videoTitle: "Build a UGC Portfolio That Gets You Hired by Top Brands",
         objectives: [
           "Add your best work to your UGC Studio portfolio",
@@ -172,7 +172,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 4,
         title: "Age Verification & Tax Setup",
         duration: "7 min",
-        videoId: "HqJTVzRz95s",
+        videoQuery: "UGC creator legal setup tax freelance contracts",
         videoTitle: "Creator Legal Setup — Tax Forms & Verification Explained",
         objectives: [
           "Complete age verification to unlock all campaigns",
@@ -210,7 +210,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 5,
         title: "Understanding Your Creator Dashboard",
         duration: "5 min",
-        videoId: "_HkV5MNvhL8",
+        videoQuery: "UGC creator platform dashboard tutorial beginners",
         videoTitle: "UGC Studio Dashboard Walkthrough — Everything You Need to Know",
         objectives: [
           "Understand every metric on your creator dashboard",
@@ -265,7 +265,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 1,
         title: "How the Browse Campaigns Page Works",
         duration: "7 min",
-        videoId: "kXv6oxC-hMU",
+        videoQuery: "how to find UGC brand deals campaigns 2024",
         videoTitle: "How to Find UGC Brand Deals — Complete Campaign Hunting Guide",
         objectives: [
           "Navigate the Browse Campaigns page efficiently",
@@ -310,7 +310,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 2,
         title: "Reading a Campaign Brief Like a Pro",
         duration: "9 min",
-        videoId: "8fHd8EOHY8Q",
+        videoQuery: "how to read brand brief UGC creator guide",
         videoTitle: "How to Read a Brand Brief — UGC Creator Guide",
         objectives: [
           "Understand every section of a campaign detail page",
@@ -358,7 +358,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 3,
         title: "Writing a Winning Application Message",
         duration: "10 min",
-        videoId: "nJUmav2wWOk",
+        videoQuery: "how to build ugc creator profile get hired by brands",
         videoTitle: "How to Write a Brand Deal Application That Gets Accepted",
         objectives: [
           "Write applications that stand out from 50+ other creators",
@@ -406,7 +406,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 4,
         title: "What Brands Actually Evaluate in Your Profile",
         duration: "8 min",
-        videoId: "w6bBl-_L3Q8",
+        videoQuery: "UGC creator social proof verify brands portfolio tutorial",
         videoTitle: "Inside the Brand Mind — What They Look For in UGC Creators",
         objectives: [
           "See your profile through a brand's eyes",
@@ -446,7 +446,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 5,
         title: "Tracking & Managing Your Applications",
         duration: "6 min",
-        videoId: "S7t2JNKtGXE",
+        videoQuery: "UGC creator brand deal pipeline management",
         videoTitle: "How to Track Brand Deal Applications — Creator Pipeline Management",
         objectives: [
           "Use the My Campaigns page to track every application",
@@ -495,7 +495,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 6,
         title: "The Volume & Targeting Strategy",
         duration: "7 min",
-        videoId: "kXv6oxC-hMU",
+        videoQuery: "how to find UGC brand deals campaigns 2024",
         videoTitle: "How Top UGC Creators Apply to Campaigns at Scale",
         objectives: [
           "Set weekly application targets to guarantee consistent income",
@@ -547,7 +547,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 1,
         title: "Translating a Brief Into a Shot List",
         duration: "9 min",
-        videoId: "8fHd8EOHY8Q",
+        videoQuery: "how to read brand brief UGC creator guide",
         videoTitle: "How to Break Down a Brand Brief Before You Film",
         objectives: [
           "Extract all deliverables from the campaign brief into a clear shot list",
@@ -596,7 +596,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 2,
         title: "Filming UGC That Brands Actually Approve",
         duration: "11 min",
-        videoId: "8fHd8EOHY8Q",
+        videoQuery: "how to read brand brief UGC creator guide",
         videoTitle: "UGC Filming Masterclass — Lighting, Framing & Audio on Your Phone",
         objectives: [
           "Set up natural lighting for clear, professional-looking content",
@@ -643,7 +643,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 3,
         title: "Writing Scripts That Convert",
         duration: "8 min",
-        videoId: "nJUmav2wWOk",
+        videoQuery: "how to build ugc creator profile get hired by brands",
         videoTitle: "UGC Script Writing Formula — Hook, Demo, CTA That Brands Love",
         objectives: [
           "Write a script using the proven UGC structure brands approve",
@@ -688,7 +688,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 4,
         title: "Editing & Exporting to Brand Standards",
         duration: "10 min",
-        videoId: "_HkV5MNvhL8",
+        videoQuery: "UGC creator platform dashboard tutorial beginners",
         videoTitle: "UGC Video Editing for Beginners — CapCut Tutorial for Brand Content",
         objectives: [
           "Edit a UGC video to brand-ready quality on your phone",
@@ -740,7 +740,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 1,
         title: "The Content Submission Workflow on UGC Studio",
         duration: "7 min",
-        videoId: "S7t2JNKtGXE",
+        videoQuery: "UGC creator brand deal pipeline management",
         videoTitle: "How to Submit UGC Content — Platform Walkthrough",
         objectives: [
           "Submit content correctly through the UGC Studio workflow",
@@ -785,7 +785,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 2,
         title: "Handling Revision Requests Like a 5-Star Creator",
         duration: "8 min",
-        videoId: "S7t2JNKtGXE",
+        videoQuery: "UGC creator brand deal pipeline management",
         videoTitle: "How to Handle Client Revisions Professionally — Creator Guide",
         objectives: [
           "Respond to revision requests without damaging the brand relationship",
@@ -826,7 +826,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 3,
         title: "Using the Messages System Professionally",
         duration: "6 min",
-        videoId: "w6bBl-_L3Q8",
+        videoQuery: "UGC creator social proof verify brands portfolio tutorial",
         videoTitle: "Professional Creator Communication — Message Templates & Etiquette",
         objectives: [
           "Use the UGC Studio Messages system effectively",
@@ -869,7 +869,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 4,
         title: "Understanding Your Contracts & Usage Rights",
         duration: "8 min",
-        videoId: "HqJTVzRz95s",
+        videoQuery: "UGC creator legal setup tax freelance contracts",
         videoTitle: "Creator Contracts Explained — Usage Rights, Exclusivity & Payment Terms",
         objectives: [
           "Read and understand your UGC Studio contracts",
@@ -913,7 +913,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 5,
         title: "Building Your Creator Rating to 4.8+",
         duration: "7 min",
-        videoId: "mY0Ea9oeqlM",
+        videoQuery: "how to get 5 star UGC creator rating brands",
         videoTitle: "How Creator Ratings Work — Getting to 5 Stars on UGC Platforms",
         objectives: [
           "Understand exactly how your platform rating is calculated",
@@ -975,7 +975,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 1,
         title: "Reading Your Earnings Dashboard",
         duration: "6 min",
-        videoId: "mY0Ea9oeqlM",
+        videoQuery: "how to get 5 star UGC creator rating brands",
         videoTitle: "How to Track Your UGC Creator Income — Earnings Dashboard Guide",
         objectives: [
           "Understand every section of your UGC Studio Earnings page",
@@ -1018,7 +1018,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 2,
         title: "Setting Up Your Payout Method — Wise, PayPal & Bank",
         duration: "8 min",
-        videoId: "HqJTVzRz95s",
+        videoQuery: "UGC creator legal setup tax freelance contracts",
         videoTitle: "How to Set Up Creator Payouts — Wise vs PayPal vs Bank Transfer",
         objectives: [
           "Set up your preferred payout method in UGC Studio Settings",
@@ -1069,7 +1069,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 3,
         title: "Creator Pro — Is It Worth It?",
         duration: "7 min",
-        videoId: "xMTpQH6YF-k",
+        videoQuery: "build UGC portfolio no experience get hired brands",
         videoTitle: "Creator Pro Subscription — Full Breakdown and ROI Analysis",
         objectives: [
           "Compare free vs. Creator Pro features side by side",
@@ -1117,7 +1117,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 4,
         title: "The Affiliates Programme — Passive Income on UGC Studio",
         duration: "9 min",
-        videoId: "MN9jvTUb5ug",
+        videoQuery: "UGC creator passive income affiliate scale 5k month",
         videoTitle: "How to Make Passive Income as a UGC Creator — Affiliate Strategy",
         objectives: [
           "Generate and share your unique UGC Studio referral link",
@@ -1162,7 +1162,7 @@ export const TRAINING_MODULES: Module[] = [
         id: 5,
         title: "Scaling to €5,000+/Month on UGC Studio",
         duration: "12 min",
-        videoId: "MN9jvTUb5ug",
+        videoQuery: "UGC creator passive income affiliate scale 5k month",
         videoTitle: "Full-Time UGC Creator Income — How to Scale to €5K/Month",
         objectives: [
           "Build a systematic, data-driven approach to scaling your UGC income",

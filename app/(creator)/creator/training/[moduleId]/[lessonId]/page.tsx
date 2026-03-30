@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { TRAINING_MODULES, getModule, getLesson } from "@/lib/training-content"
 import {
   CheckCircle2, ChevronLeft, ChevronRight, Clock,
-  PlayCircle, BookOpen, Target, ListChecks, Lock, Loader2
+  PlayCircle, BookOpen, Target, ListChecks, Lock, Loader2, ExternalLink, Youtube
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -21,7 +21,6 @@ export default function LessonPage({ params }: { params: { moduleId: string; les
   const [completed, setCompleted] = useState(false)
   const [marking, setMarking] = useState(false)
   const [progress, setProgress] = useState<{ module_id: number; lesson_id: number }[]>([])
-  const [videoError, setVideoError] = useState(false)
   const [activeTab, setActiveTab] = useState<"video" | "text">("video")
 
   useEffect(() => {
@@ -160,33 +159,31 @@ export default function LessonPage({ params }: { params: { moduleId: string; les
           {/* VIDEO TAB */}
           {activeTab === "video" && (
             <div className="space-y-4">
-              <div className="relative bg-black rounded-xl overflow-hidden aspect-video">
-                {!videoError ? (
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${lesson.videoId}?rel=0&modestbranding=1`}
-                    title={lesson.videoTitle}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    onError={() => setVideoError(true)}
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white space-y-3">
-                    <PlayCircle className="h-16 w-16 opacity-40" />
-                    <p className="text-sm opacity-60">Video unavailable — please read the lesson text instead.</p>
-                    <button
-                      onClick={() => setActiveTab("text")}
-                      className="text-xs underline opacity-70"
-                    >
-                      Switch to Read mode
-                    </button>
+              {/* YouTube search card */}
+              <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-red-600 to-red-700 aspect-video flex flex-col items-center justify-center text-white p-8 text-center">
+                <div className="absolute inset-0 bg-black/20" />
+                <div className="relative z-10 space-y-5">
+                  <div className="flex items-center justify-center">
+                    <div className="h-20 w-20 rounded-full bg-white/15 flex items-center justify-center">
+                      <Youtube className="h-10 w-10 text-white" />
+                    </div>
                   </div>
-                )}
-              </div>
-              <div className="bg-muted/40 rounded-lg p-3">
-                <p className="text-xs text-muted-foreground">
-                  <strong className="text-foreground">Video:</strong> {lesson.videoTitle}
-                </p>
+                  <div>
+                    <p className="text-sm font-medium opacity-75 mb-1">Watch on YouTube</p>
+                    <h3 className="text-xl font-bold leading-snug">{lesson.videoTitle}</h3>
+                  </div>
+                  <a
+                    href={`https://www.youtube.com/results?search_query=${encodeURIComponent(lesson.videoQuery)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-white text-red-600 font-bold px-6 py-3 rounded-lg hover:bg-white/90 transition-colors text-sm"
+                  >
+                    <PlayCircle className="h-4 w-4" />
+                    Watch on YouTube
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                  <p className="text-xs opacity-60">Opens in a new tab — then switch back to continue</p>
+                </div>
               </div>
 
               {/* Objectives under video */}
