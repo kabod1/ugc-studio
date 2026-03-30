@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { TRAINING_MODULES, getModule, getLesson } from "@/lib/training-content"
 import {
   CheckCircle2, ChevronLeft, ChevronRight, Clock,
-  PlayCircle, BookOpen, Target, ListChecks, Lock, Loader2, ExternalLink, Youtube
+  PlayCircle, BookOpen, Target, ListChecks, Lock, Loader2, ExternalLink
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -165,7 +165,7 @@ export default function LessonPage({ params }: { params: { moduleId: string; les
                 <div className="relative z-10 space-y-5">
                   <div className="flex items-center justify-center">
                     <div className="h-20 w-20 rounded-full bg-white/15 flex items-center justify-center">
-                      <Youtube className="h-10 w-10 text-white" />
+                      <PlayCircle className="h-10 w-10 text-white" />
                     </div>
                   </div>
                   <div>

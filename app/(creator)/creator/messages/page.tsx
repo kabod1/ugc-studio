@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, useRef } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { MessageThread } from "@/components/shared/message-thread"
 import { MessageSquare, Search, Loader2, Plus, X, Send } from "lucide-react"
 import { toast } from "sonner"
