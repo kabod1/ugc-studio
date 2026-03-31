@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe/client"
 
@@ -13,16 +13,21 @@ export async function POST(request: NextRequest) {
 
     if (!payment_id) return NextResponse.json({ error: "payment_id required" }, { status: 400 })
 
-    const { data: payment } = await supabase
+    const svc = createServiceClient()
+
+    const { data: payment } = await svc
       .from("payments")
-      .select("*, creator_profiles(stripe_connect_account_id)")
+      .select("*, creator_profiles(user_id, display_name, stripe_connect_account_id, stripe_connect_onboarded), campaigns(title, brand_id)")
       .eq("id", payment_id)
       .single()
 
     if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 })
     if (payment.status !== "escrow") return NextResponse.json({ error: "Payment not in escrow" }, { status: 400 })
 
-    const connectId = (payment.creator_profiles as any)?.stripe_connect_account_id
+    const creator = (payment as any).creator_profiles
+    const campaign = (payment as any).campaigns
+    const connectId = creator?.stripe_connect_onboarded ? creator?.stripe_connect_account_id : null
+
     if (!connectId) return NextResponse.json({ error: "Creator has no Stripe Connect account" }, { status: 400 })
 
     const transferAmount = payment.amount_cents - (payment.platform_fee_cents || 0)
@@ -35,7 +40,7 @@ export async function POST(request: NextRequest) {
       metadata: { payment_id: payment.id },
     })
 
-    await supabase
+    await svc
       .from("payments")
       .update({
         status: "completed",
@@ -45,8 +50,18 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", payment_id)
 
-    // Return updated payment for frontend state sync
-    const { data: updated } = await supabase
+    // Notify creator they've been paid
+    if (creator?.user_id) {
+      await svc.from("notifications").insert({
+        user_id: creator.user_id,
+        title: "You've been paid! 🎉",
+        message: `€${(transferAmount / 100).toFixed(2)} has been transferred to your account for "${campaign?.title || "your campaign"}".`,
+        type: "payment",
+        link: "/creator/earnings",
+      })
+    }
+
+    const { data: updated } = await svc
       .from("payments")
       .select("*, campaigns(title), creator_profiles(display_name)")
       .eq("id", payment_id)

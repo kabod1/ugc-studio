@@ -28,10 +28,29 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case "payment_intent.succeeded": {
         const intent = event.data.object as any
-        await supabase
+
+        // Move payment to escrow
+        const { data: payment } = await supabase
           .from("payments")
           .update({ status: "escrow", updated_at: new Date().toISOString() })
           .eq("stripe_payment_intent_id", intent.id)
+          .select("id, amount_cents, creator_id, campaign_id, campaigns(title), brands(company_name)")
+          .single()
+
+        if (payment) {
+          const campaign = (payment as any).campaigns
+          const brand = (payment as any).brands
+          const amountEur = ((payment.amount_cents || 0) / 100).toFixed(2)
+
+          // Notify the creator that payment is in escrow
+          await supabase.from("notifications").insert({
+            user_id: payment.creator_id,
+            title: "Payment received! 💰",
+            message: `€${amountEur} from ${brand?.company_name || "a brand"} for "${campaign?.title || "your campaign"}" is held in escrow. Submit your content to release it.`,
+            type: "payment",
+            link: "/creator/earnings",
+          })
+        }
         break
       }
 
@@ -56,7 +75,6 @@ export async function POST(request: NextRequest) {
         const subscription = event.data.object as any
         const priceId = subscription.items?.data?.[0]?.price?.id
 
-        // Map Stripe price ID to tier name
         const PRICE_TO_TIER: Record<string, string> = {
           [process.env.STRIPE_PRICE_STARTER || ""]: "starter",
           [process.env.STRIPE_PRICE_GROWTH || ""]: "growth",
@@ -76,11 +94,9 @@ export async function POST(request: NextRequest) {
             updated_at: new Date().toISOString(),
           }, { onConflict: "stripe_subscription_id" })
 
-        // Update brand or creator tier based on subscription
         if (tier && subscription.status === "active") {
           const customerId = subscription.customer
           if (tier === "pro") {
-            // Creator subscription
             await supabase
               .from("creator_profiles")
               .update({
@@ -90,7 +106,6 @@ export async function POST(request: NextRequest) {
               })
               .eq("stripe_customer_id", customerId)
           } else {
-            // Brand subscription
             await supabase
               .from("brands")
               .update({
@@ -122,13 +137,11 @@ export async function POST(request: NextRequest) {
           .update({ status: "cancelled", updated_at: new Date().toISOString() })
           .eq("stripe_subscription_id", subscription.id)
 
-        // Revert brand to free tier
         await supabase
           .from("brands")
           .update({ subscription_tier: "free", subscription_stripe_id: null })
           .eq("stripe_customer_id", customerId)
 
-        // Revert creator to free tier
         await supabase
           .from("creator_profiles")
           .update({ subscription_tier: "free", subscription_stripe_id: null })
