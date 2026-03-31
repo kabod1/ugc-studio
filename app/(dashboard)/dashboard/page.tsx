@@ -51,6 +51,7 @@ export default async function DashboardPage() {
     { data: payments },
     { data: recentCampaigns },
     { count: pendingApplications },
+    { data: pendingAppData },
   ] = await Promise.all([
     service.from("campaigns").select("*", { count: "exact", head: true }).eq("brand_id", brand.id),
     service.from("campaigns").select("*", { count: "exact", head: true }).eq("brand_id", brand.id).eq("status", "active"),
@@ -63,7 +64,16 @@ export default async function DashboardPage() {
     ids.length > 0
       ? service.from("campaign_applications").select("*", { count: "exact", head: true }).eq("status", "pending").in("campaign_id", ids)
       : Promise.resolve({ count: 0, data: null, error: null, status: 200, statusText: "OK" }),
+    ids.length > 0
+      ? service.from("campaign_applications").select("campaign_id").eq("status", "pending").in("campaign_id", ids).limit(1)
+      : Promise.resolve({ count: 0, data: [], error: null, status: 200, statusText: "OK" }),
   ])
+
+  // Link directly to the first campaign with pending applications
+  const firstPendingCampaignId = pendingAppData?.[0]?.campaign_id
+  const reviewHref = firstPendingCampaignId
+    ? `/dashboard/campaigns/${firstPendingCampaignId}/applications`
+    : "/dashboard/campaigns"
 
   const totalSpent = payments?.reduce((sum, p) => sum + p.amount_cents, 0) || 0
 
@@ -119,8 +129,8 @@ export default async function DashboardPage() {
             </div>
           </div>
           <Link
-            href="/dashboard/campaigns"
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            href={reviewHref}
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline font-medium"
           >
             Review <ArrowRight className="h-4 w-4" />
           </Link>
