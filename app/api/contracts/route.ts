@@ -18,7 +18,6 @@ export async function GET() {
     let query = svc
       .from("contracts")
       .select("*, campaigns(title), creator_profiles(display_name)")
-      .order("created_at", { ascending: false })
 
     if (brand) {
       query = query.eq("brand_id", brand.id)
