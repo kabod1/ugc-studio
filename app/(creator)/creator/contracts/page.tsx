@@ -91,8 +91,8 @@ export default function CreatorContractsPage() {
             <div key={c.id} className="bg-card border rounded-lg p-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold">{(c.campaigns as any)?.title}</h3>
-                  <p className="text-sm text-muted-foreground">{(c.brands as any)?.company_name} &middot; {formatCurrency(c.total_amount_cents)}</p>
+                  <h3 className="font-semibold">{(c.brands as any)?.company_name || "Brand"}</h3>
+                  <p className="text-sm text-muted-foreground">{(c.campaigns as any)?.title || "Campaign"} &middot; {formatCurrency(c.total_amount_cents)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[c.status] || ""}`}>

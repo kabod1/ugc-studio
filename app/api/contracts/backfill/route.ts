@@ -52,7 +52,7 @@ export async function POST() {
           campaign_id: app.campaign_id,
           creator_id: app.creator_id,
           brand_id: brand.id,
-          terms: { summary: `Standard content creation agreement for "${campaign.title}". Payment released upon content approval.` },
+          terms: { summary: `Content creation agreement for the "${campaign.title}" campaign. Payment will be released upon content approval.` },
           total_amount_cents: campaign.budget_per_creator_cents || 0,
           deliverables: [],
           status: "sent",

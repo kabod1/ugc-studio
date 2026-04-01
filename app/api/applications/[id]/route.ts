@@ -92,7 +92,7 @@ export async function PATCH(
           campaign_id: data.campaign_id,
           creator_id: data.creator_id,
           brand_id: brandId,
-          terms: { summary: `Standard content creation agreement for "${campaignTitle}". Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval.` },
+          terms: { summary: `Content creation agreement for the "${campaignTitle}" campaign. Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval.` },
           total_amount_cents: budgetCents,
           deliverables: [],
           status: "sent",
