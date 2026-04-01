@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { canAddSeat } from "@/lib/subscription-limits"
 
@@ -71,21 +71,50 @@ export async function PATCH(
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
-    // Auto-create contract when accepting an application
+    // Auto-create contract when accepting — use service client to bypass RLS
     if (status === "accepted" && data) {
+      const svc = createServiceClient()
       const brandId = (data.campaigns as any)?.brand_id
       const budgetCents = (data.campaigns as any)?.budget_per_creator_cents || 0
       const campaignTitle = (data.campaigns as any)?.title || "Campaign"
 
-      await supabase.from("contracts").insert({
-        campaign_id: data.campaign_id,
-        creator_id: data.creator_id,
-        brand_id: brandId,
-        terms: `Standard content creation agreement for "${campaignTitle}". Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval.`,
-        total_value_cents: budgetCents,
-        deliverables: [],
-        status: "sent",
-      })
+      // Only create if one doesn't already exist for this campaign + creator
+      const { data: existing } = await svc
+        .from("contracts")
+        .select("id")
+        .eq("campaign_id", data.campaign_id)
+        .eq("creator_id", data.creator_id)
+        .limit(1)
+        .single()
+
+      if (!existing) {
+        await svc.from("contracts").insert({
+          campaign_id: data.campaign_id,
+          creator_id: data.creator_id,
+          brand_id: brandId,
+          terms: `Standard content creation agreement for "${campaignTitle}". Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval.`,
+          total_value_cents: budgetCents,
+          deliverables: [],
+          status: "sent",
+        })
+      }
+
+      // Notify creator their application was accepted
+      const { data: creatorProfile } = await svc
+        .from("creator_profiles")
+        .select("user_id")
+        .eq("id", data.creator_id)
+        .single()
+
+      if (creatorProfile?.user_id) {
+        await svc.from("notifications").insert({
+          user_id: creatorProfile.user_id,
+          title: "Application accepted! 🎉",
+          message: `Your application for "${campaignTitle}" has been accepted. A contract has been sent for your review.`,
+          type: "application",
+          link: "/creator",
+        })
+      }
     }
 
     return NextResponse.json(data)
