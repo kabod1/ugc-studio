@@ -44,20 +44,18 @@ export async function GET(request: NextRequest) {
     if (location) query = query.ilike("country", `%${location}%`)
     if (minRating) query = query.gte("platform_rating", parseFloat(minRating))
 
-    // Sort: Pro/Elite creators first, then by selected sort
     const sortColumn =
       sortBy === "followers" ? "tiktok_followers" :
       sortBy === "rate" ? "base_rate_cents" :
       sortBy === "name" ? "display_name" :
-      "platform_rating"
+      sortBy === "rating" ? "platform_rating" :
+      "created_at"
 
     const ascending = sortBy === "rate" || sortBy === "name"
 
-    query = query
-      .order("subscription_tier", { ascending: false }) // pro > free
-      .order(sortColumn, { ascending })
+    query = query.order(sortColumn, { ascending, nullsFirst: false })
 
-    const { data: creators, error } = await query.limit(50)
+    const { data: creators, error } = await query.limit(100)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
