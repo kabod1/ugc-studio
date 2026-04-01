@@ -46,17 +46,16 @@ export default function ContractsPage() {
       const res = await fetch("/api/contracts/backfill", { method: "POST" })
       const data = await res.json()
       if (res.ok) {
-        if (data.created > 0) {
-          toast.success(`${data.created} contract(s) generated`)
-          await fetchContracts()
-        } else {
-          toast.info("All contracts are up to date")
-        }
+        toast.success(data.created > 0 ? `${data.created} contract(s) generated` : "Contracts synced")
+        // Always re-fetch regardless of count — fixes any null brand_id rows
+        setContracts([])
+        setLoading(true)
+        await fetchContracts()
       } else {
-        toast.error(data.error || "Backfill failed")
+        toast.error(data.error || "Sync failed")
       }
     } catch {
-      toast.error("Failed to generate contracts")
+      toast.error("Failed to sync contracts")
     }
     setBackfilling(false)
   }

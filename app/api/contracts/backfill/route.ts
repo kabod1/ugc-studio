@@ -1,8 +1,6 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
-// POST /api/contracts/backfill
-// Creates missing contracts for all accepted applications that don't have one
 export async function POST() {
   try {
     const supabase = createClient()
@@ -11,7 +9,6 @@ export async function POST() {
 
     const svc = createServiceClient()
 
-    // Only brands can backfill their own contracts
     const { data: brand } = await svc
       .from("brands")
       .select("id")
@@ -20,23 +17,43 @@ export async function POST() {
 
     if (!brand) return NextResponse.json({ error: "Brand not found" }, { status: 403 })
 
-    // Find all accepted applications for this brand's campaigns that have no contract
+    // Step 1: get this brand's campaigns directly
+    const { data: brandCampaigns } = await svc
+      .from("campaigns")
+      .select("id, title, budget_per_creator_cents, brand_id")
+      .eq("brand_id", brand.id)
+
+    if (!brandCampaigns || brandCampaigns.length === 0) {
+      return NextResponse.json({ created: 0, message: "No campaigns found" })
+    }
+
+    const campaignMap = Object.fromEntries(brandCampaigns.map((c) => [c.id, c]))
+    const campaignIds = brandCampaigns.map((c) => c.id)
+
+    // Step 2: get all accepted applications for those campaigns
     const { data: accepted } = await svc
       .from("campaign_applications")
-      .select("id, creator_id, campaign_id, campaigns(brand_id, title, budget_per_creator_cents)")
+      .select("id, creator_id, campaign_id")
       .eq("status", "accepted")
-      .eq("campaigns.brand_id", brand.id)
+      .in("campaign_id", campaignIds)
 
     if (!accepted || accepted.length === 0) {
       return NextResponse.json({ created: 0, message: "No accepted applications found" })
     }
 
+    // Step 3: fix any contracts that were created with null brand_id
+    await svc
+      .from("contracts")
+      .update({ brand_id: brand.id })
+      .is("brand_id", null)
+      .in("campaign_id", campaignIds)
+
+    // Step 4: create missing contracts
     let created = 0
     for (const app of accepted) {
-      const campaign = (app as any).campaigns
+      const campaign = campaignMap[app.campaign_id]
       if (!campaign) continue
 
-      // Check if contract already exists
       const { data: existing } = await svc
         .from("contracts")
         .select("id")
@@ -46,16 +63,16 @@ export async function POST() {
         .single()
 
       if (!existing) {
-        await svc.from("contracts").insert({
+        const { error } = await svc.from("contracts").insert({
           campaign_id: app.campaign_id,
           creator_id: app.creator_id,
-          brand_id: campaign.brand_id,
+          brand_id: brand.id,
           terms: `Standard content creation agreement for "${campaign.title}". Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval.`,
           total_value_cents: campaign.budget_per_creator_cents || 0,
           deliverables: [],
           status: "sent",
         })
-        created++
+        if (!error) created++
       }
     }
 

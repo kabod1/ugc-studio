@@ -29,7 +29,10 @@ export async function GET() {
     }
 
     const { data, error } = await query
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+    if (error) {
+      console.error("Contracts fetch error:", error)
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
     return NextResponse.json(data || [])
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
