@@ -16,7 +16,7 @@ export async function GET() {
 
     let query = svc
       .from("contracts")
-      .select("*, campaigns(title), creator_profiles(display_name)")
+      .select("*, campaigns(title), creator_profiles(display_name), brands(company_name)")
 
     if (brand) {
       query = query.eq("brand_id", brand.id)

@@ -8,10 +8,10 @@ import { ScrollText, Loader2, FileCheck } from "lucide-react"
 interface Contract {
   id: string
   status: string
-  terms: string
-  total_value_cents: number
-  creator_signed_at: string | null
-  brand_signed_at: string | null
+  terms: Record<string, any>
+  total_amount_cents: number
+  signed_by_creator_at: string | null
+  signed_by_brand_at: string | null
   created_at: string
   campaigns: { title: string } | null
   brands: { company_name: string } | null
@@ -50,7 +50,11 @@ export default function CreatorContractsPage() {
       }
       const updated = await res.json()
       setContracts((prev) =>
-        prev.map((c) => (c.id === contractId ? { ...c, ...updated } : c))
+        prev.map((c) =>
+          c.id === contractId
+            ? { ...c, signed_by_creator_at: updated.signed_by_creator_at, signed_by_brand_at: updated.signed_by_brand_at, status: updated.status }
+            : c
+        )
       )
       toast.success("Contract signed successfully!")
     } catch (err: any) {
@@ -88,13 +92,13 @@ export default function CreatorContractsPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-semibold">{(c.campaigns as any)?.title}</h3>
-                  <p className="text-sm text-muted-foreground">{(c.brands as any)?.company_name} &middot; {formatCurrency(c.total_value_cents)}</p>
+                  <p className="text-sm text-muted-foreground">{(c.brands as any)?.company_name} &middot; {formatCurrency(c.total_amount_cents)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[c.status] || ""}`}>
                     {c.status}
                   </span>
-                  {(c.status === "sent" || c.status === "draft") && !c.creator_signed_at && (
+                  {(c.status === "sent" || c.status === "draft") && !c.signed_by_creator_at && (
                     <button
                       onClick={() => handleSign(c.id)}
                       disabled={signingId === c.id}
@@ -104,7 +108,7 @@ export default function CreatorContractsPage() {
                       Sign Contract
                     </button>
                   )}
-                  {c.creator_signed_at && (
+                  {c.signed_by_creator_at && (
                     <span className="text-xs text-green-600 font-medium">Signed</span>
                   )}
                 </div>
@@ -118,7 +122,9 @@ export default function CreatorContractsPage() {
                 {expandedId === c.id ? "Hide terms" : "View terms"}
               </button>
               {expandedId === c.id && c.terms && (
-                <p className="text-sm text-muted-foreground mt-2 p-3 bg-muted/50 rounded-md whitespace-pre-wrap">{c.terms}</p>
+                <p className="text-sm text-muted-foreground mt-2 p-3 bg-muted/50 rounded-md whitespace-pre-wrap">
+                  {c.terms.summary || JSON.stringify(c.terms)}
+                </p>
               )}
 
               <p className="text-xs text-muted-foreground mt-2">Created: {formatDate(c.created_at)}</p>

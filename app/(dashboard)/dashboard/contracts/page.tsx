@@ -70,7 +70,11 @@ export default function ContractsPage() {
       }
       const updated = await res.json()
       setContracts((prev) =>
-        prev.map((c) => (c.id === contractId ? { ...c, ...updated } : c))
+        prev.map((c) =>
+          c.id === contractId
+            ? { ...c, signed_by_brand_at: updated.signed_by_brand_at, signed_by_creator_at: updated.signed_by_creator_at, status: updated.status }
+            : c
+        )
       )
       toast.success("Contract signed!")
     } catch (err: any) {
