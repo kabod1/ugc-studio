@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { canAddSeat } from "@/lib/subscription-limits"
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -92,8 +92,8 @@ export async function PATCH(
           campaign_id: data.campaign_id,
           creator_id: data.creator_id,
           brand_id: brandId,
-          terms: `Standard content creation agreement for "${campaignTitle}". Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval.`,
-          total_value_cents: budgetCents,
+          terms: { summary: `Standard content creation agreement for "${campaignTitle}". Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval.` },
+          total_amount_cents: budgetCents,
           deliverables: [],
           status: "sent",
         })

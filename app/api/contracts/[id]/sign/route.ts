@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -10,38 +10,35 @@ export async function POST(
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single()
+    const svc = createServiceClient()
+
+    const [{ data: brand }, { data: creator }] = await Promise.all([
+      svc.from("brands").select("id").eq("user_id", user.id).single(),
+      svc.from("creator_profiles").select("id").eq("user_id", user.id).single(),
+    ])
 
     const now = new Date().toISOString()
     const updateData: Record<string, any> = { updated_at: now }
 
-    if (profile?.role === "brand") {
-      updateData.brand_signed_at = now
-    } else if (profile?.role === "creator") {
-      updateData.creator_signed_at = now
+    if (brand) {
+      updateData.signed_by_brand_at = now
+    } else if (creator) {
+      updateData.signed_by_creator_at = now
     }
 
-    const { data: contract } = await supabase
+    const { data: contract } = await svc
       .from("contracts")
-      .select("brand_signed_at, creator_signed_at")
+      .select("signed_by_brand_at, signed_by_creator_at")
       .eq("id", params.id)
       .single()
 
     if (contract) {
-      const brandSigned = profile?.role === "brand" ? true : !!contract.brand_signed_at
-      const creatorSigned = profile?.role === "creator" ? true : !!contract.creator_signed_at
-      if (brandSigned && creatorSigned) {
-        updateData.status = "signed"
-      } else {
-        updateData.status = "sent"
-      }
+      const brandSigned  = brand    ? true : !!contract.signed_by_brand_at
+      const creatorSigned = creator ? true : !!contract.signed_by_creator_at
+      updateData.status = brandSigned && creatorSigned ? "signed" : "sent"
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await svc
       .from("contracts")
       .update(updateData)
       .eq("id", params.id)

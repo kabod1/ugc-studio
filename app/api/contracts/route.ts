@@ -9,7 +9,6 @@ export async function GET() {
 
     const svc = createServiceClient()
 
-    // Determine if brand or creator
     const [{ data: brand }, { data: creator }] = await Promise.all([
       svc.from("brands").select("id").eq("user_id", user.id).single(),
       svc.from("creator_profiles").select("id").eq("user_id", user.id).single(),
@@ -45,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const body = await request.json()
-    const { campaign_id, application_id, terms, total_value_cents, deliverables } = body
+    const { campaign_id, application_id, terms, total_amount_cents, deliverables } = body
 
     const svc = createServiceClient()
 
@@ -63,8 +62,8 @@ export async function POST(request: NextRequest) {
         campaign_id,
         creator_id: application.creator_id,
         brand_id: (application.campaigns as any)?.brand_id,
-        terms: terms || "",
-        total_value_cents: total_value_cents || 0,
+        terms: terms || {},
+        total_amount_cents: total_amount_cents || 0,
         deliverables: deliverables || [],
         status: "draft",
       })
