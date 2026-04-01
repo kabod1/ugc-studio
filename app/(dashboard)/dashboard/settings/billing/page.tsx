@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Check, CreditCard, Loader2, BarChart3 } from "lucide-react"
+import { toast } from "sonner"
 
 const tiers = [
   {
@@ -64,6 +65,7 @@ interface UsageData {
 export default function BillingPage() {
   const [loading, setLoading] = useState<string | null>(null)
   const [usage, setUsage] = useState<UsageData | null>(null)
+  const [hasStripeAccount, setHasStripeAccount] = useState(false)
 
   useEffect(() => {
     async function fetchUsage() {
@@ -74,11 +76,12 @@ export default function BillingPage() {
 
         const { data: brand } = await supabase
           .from("brands")
-          .select("id, subscription_tier")
+          .select("id, subscription_tier, stripe_customer_id")
           .eq("user_id", user.id)
           .single()
 
         if (!brand) return
+        setHasStripeAccount(!!brand.stripe_customer_id)
 
         const { count: campaignCount } = await supabase
           .from("campaigns")
@@ -137,9 +140,9 @@ export default function BillingPage() {
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
-      else alert(data.error || "Failed to create checkout session")
+      else toast.error(data.error || "Failed to create checkout session")
     } catch {
-      alert("Failed to create checkout session")
+      toast.error("Failed to create checkout session")
     }
     setLoading(null)
   }
@@ -150,7 +153,7 @@ export default function BillingPage() {
       const res = await fetch("/api/subscriptions/manage", { method: "POST" })
       const data = await res.json()
       if (data.url) window.location.href = data.url
-      else alert(data.error || "Failed to open billing portal")
+      else toast.error(data.error || "Failed to open billing portal")
     } catch {
       alert("Failed to open billing portal")
     }
@@ -166,14 +169,16 @@ export default function BillingPage() {
           <h1 className="text-2xl font-bold">Billing & Subscription</h1>
           <p className="text-muted-foreground">Manage your subscription plan</p>
         </div>
-        <button
-          onClick={handleManage}
-          disabled={loading === "manage"}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md border text-sm font-medium hover:bg-muted disabled:opacity-50"
-        >
-          {loading === "manage" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-          Manage Billing
-        </button>
+        {hasStripeAccount && (
+          <button
+            onClick={handleManage}
+            disabled={loading === "manage"}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md border text-sm font-medium hover:bg-muted disabled:opacity-50"
+          >
+            {loading === "manage" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+            Manage Billing
+          </button>
+        )}
       </div>
 
       {/* Usage Overview */}
