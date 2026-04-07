@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
-import { setConsent, getConsent } from "@/lib/consent"
+import { setConsent, getConsent, withdrawAll } from "@/lib/consent"
 import Link from "next/link"
 
 interface CookiePreferencesProps {
@@ -17,9 +17,18 @@ export function CookiePreferences({ open, onClose, onSave }: CookiePreferencesPr
   const existing = getConsent()
   const [functional, setFunctional] = useState(existing?.functional ?? true)
   const [analytics, setAnalytics] = useState(existing?.analytics ?? true)
+  const [aiProcessing, setAiProcessing] = useState(existing?.aiProcessing ?? false)
 
   function handleSave() {
-    setConsent({ functional, analytics })
+    setConsent({ functional, analytics, aiProcessing })
+    onSave()
+  }
+
+  function handleWithdrawAll() {
+    withdrawAll()
+    setFunctional(false)
+    setAnalytics(false)
+    setAiProcessing(false)
     onSave()
   }
 
@@ -27,9 +36,9 @@ export function CookiePreferences({ open, onClose, onSave }: CookiePreferencesPr
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Cookie Preferences</DialogTitle>
+          <DialogTitle>Cookie &amp; Processing Preferences</DialogTitle>
           <DialogDescription>
-            Manage how Townshub uses cookies on your device. You can update these
+            Manage how Townshub uses cookies and AI processing on your account. You can update these
             preferences at any time from the footer. For more details, see our{" "}
             <Link href="/cookie-policy" className="text-primary underline underline-offset-2">
               Cookie Policy
@@ -94,13 +103,49 @@ export function CookiePreferences({ open, onClose, onSave }: CookiePreferencesPr
               aria-label="Toggle analytics cookies"
             />
           </div>
+
+          {/* AI Processing */}
+          <div className="flex items-start justify-between gap-4 rounded-lg border p-4">
+            <div>
+              <p className="text-sm font-semibold">AI-Powered Matching &amp; Scoring</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Allow your profile data and content to be processed by OpenAI (GPT-4o) for
+                creator-campaign matching and content quality scoring. Disabling this may limit
+                platform recommendations.
+              </p>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Data shared: profile, niche categories, content metadata. We do not use your
+                data to train third-party models.
+              </p>
+            </div>
+            <Switch
+              checked={aiProcessing}
+              onCheckedChange={setAiProcessing}
+              aria-label="Toggle AI processing"
+            />
+          </div>
         </div>
 
-        <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>Save Preferences</Button>
+        <div className="mt-4 flex flex-col gap-3">
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave}>Save Preferences</Button>
+          </div>
+          <div className="border-t pt-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-muted-foreground hover:text-destructive"
+              onClick={handleWithdrawAll}
+            >
+              Withdraw All Consent
+            </Button>
+            <p className="mt-1 text-center text-xs text-muted-foreground">
+              Disables all optional cookies and AI processing. Essential cookies remain active.
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

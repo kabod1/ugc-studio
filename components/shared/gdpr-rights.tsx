@@ -1,12 +1,65 @@
 "use client"
 
 import { useState } from "react"
-import { ShieldCheck, Download, Trash2, Cookie, ExternalLink } from "lucide-react"
+import { ShieldCheck, Download, Trash2, Cookie, ExternalLink, Mail, Loader2 } from "lucide-react"
 import { CookiePreferences } from "@/components/shared/cookie-preferences"
+import { EmailPreferencesPanel } from "@/components/shared/email-preferences"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export function GdprRights() {
   const [showCookiePrefs, setShowCookiePrefs] = useState(false)
+  const [showEmailPrefs, setShowEmailPrefs] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  async function handleDataExport() {
+    setExportLoading(true)
+    try {
+      const res = await fetch("/api/gdpr/data-export", { method: "POST" })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error ?? "Export failed")
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `townshub-data-export-${Date.now()}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success("Data export downloaded.")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Export failed. Please try again.")
+    } finally {
+      setExportLoading(false)
+    }
+  }
+
+  async function handleAccountDeletion() {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    setDeleteLoading(true)
+    try {
+      const res = await fetch("/api/gdpr/account-deletion", { method: "DELETE" })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error ?? "Deletion failed")
+      }
+      toast.success("Account deleted. You will be signed out.")
+      setTimeout(() => {
+        window.location.href = "/"
+      }, 2000)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Deletion failed. Please try again.")
+      setConfirmDelete(false)
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
 
   return (
     <>
@@ -17,8 +70,8 @@ export function GdprRights() {
         </div>
 
         <p className="text-sm text-muted-foreground">
-          Under GDPR and applicable data protection law, you have the right to access, correct,
-          export, or delete your personal data at any time.
+          Under GDPR and applicable Cyprus data protection law, you have the right to access,
+          correct, export, or delete your personal data at any time.
         </p>
 
         <div className="space-y-3">
@@ -27,10 +80,10 @@ export function GdprRights() {
             <div className="flex items-start gap-3">
               <Cookie className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Cookie Preferences</p>
+                <p className="text-sm font-medium">Cookie &amp; AI Processing Preferences</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Control which cookies Townshub uses on your device — analytics, functional, or
-                  essential only.
+                  Control cookies, analytics, and AI-powered matching on your account.
+                  Includes bulk &quot;Withdraw All Consent&quot; option.
                 </p>
               </div>
             </div>
@@ -43,6 +96,32 @@ export function GdprRights() {
             </button>
           </div>
 
+          {/* Email preferences */}
+          <div className="flex items-start justify-between gap-4 rounded-md border p-4">
+            <div className="flex items-start gap-3">
+              <Mail className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">Email Preferences</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Opt in or out of marketing, product updates, and security alert emails.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowEmailPrefs((v) => !v)}
+              className="shrink-0 text-xs font-medium text-primary hover:underline"
+            >
+              {showEmailPrefs ? "Hide" : "Manage"}
+            </button>
+          </div>
+
+          {showEmailPrefs && (
+            <div className="pl-1">
+              <EmailPreferencesPanel />
+            </div>
+          )}
+
           {/* Download data */}
           <div className="flex items-start justify-between gap-4 rounded-md border p-4">
             <div className="flex items-start gap-3">
@@ -50,17 +129,20 @@ export function GdprRights() {
               <div>
                 <p className="text-sm font-medium">Export My Data</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Request a copy of all personal data we hold about you. We&apos;ll email it to
-                  you within 30 days (usually within 72 hours).
+                  Download a JSON copy of all personal data we hold: profile, campaigns,
+                  payments, contracts, and notifications.
                 </p>
               </div>
             </div>
-            <a
-              href="mailto:support@townshub.com?subject=Data%20Export%20Request&body=Please%20send%20me%20a%20copy%20of%20all%20personal%20data%20held%20about%20my%20account."
-              className="shrink-0 text-xs font-medium text-primary hover:underline"
+            <button
+              type="button"
+              onClick={handleDataExport}
+              disabled={exportLoading}
+              className="shrink-0 text-xs font-medium text-primary hover:underline disabled:opacity-50 flex items-center gap-1"
             >
-              Request
-            </a>
+              {exportLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+              {exportLoading ? "Exporting…" : "Download"}
+            </button>
           </div>
 
           {/* Delete account */}
@@ -73,14 +155,22 @@ export function GdprRights() {
                   Permanently delete your account and all associated data. This action is
                   irreversible. Outstanding payments will be processed before deletion.
                 </p>
+                {confirmDelete && (
+                  <p className="mt-1.5 text-xs font-medium text-destructive">
+                    Click again to confirm permanent deletion.
+                  </p>
+                )}
               </div>
             </div>
-            <a
-              href="mailto:support@townshub.com?subject=Account%20Deletion%20Request&body=Please%20permanently%20delete%20my%20account%20and%20all%20associated%20personal%20data."
-              className="shrink-0 text-xs font-medium text-destructive hover:underline"
+            <button
+              type="button"
+              onClick={handleAccountDeletion}
+              disabled={deleteLoading}
+              className="shrink-0 text-xs font-medium text-destructive hover:underline disabled:opacity-50 flex items-center gap-1"
             >
-              Request
-            </a>
+              {deleteLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+              {deleteLoading ? "Deleting…" : confirmDelete ? "Confirm Delete" : "Delete"}
+            </button>
           </div>
         </div>
 
@@ -93,7 +183,11 @@ export function GdprRights() {
           <Link href="/privacy" className="text-primary hover:underline inline-flex items-center gap-0.5">
             Privacy Policy <ExternalLink className="h-3 w-3" />
           </Link>{" "}
-          for full details on how we handle your data.
+          and{" "}
+          <Link href="/privacy/subprocessors" className="text-primary hover:underline inline-flex items-center gap-0.5">
+            Data Subprocessors <ExternalLink className="h-3 w-3" />
+          </Link>{" "}
+          for full details.
         </p>
       </div>
 

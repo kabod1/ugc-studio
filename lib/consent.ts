@@ -2,6 +2,7 @@ export type ConsentCategories = {
   essential: true
   functional: boolean
   analytics: boolean
+  aiProcessing: boolean
 }
 
 const CONSENT_KEY = "townshub-cookie-consent"
@@ -11,7 +12,12 @@ export function getConsent(): ConsentCategories | null {
   const stored = localStorage.getItem(CONSENT_KEY)
   if (!stored) return null
   try {
-    return JSON.parse(stored) as ConsentCategories
+    const parsed = JSON.parse(stored)
+    // Backfill aiProcessing for older consent objects that predate this field
+    if (parsed && typeof parsed.aiProcessing === "undefined") {
+      parsed.aiProcessing = false
+    }
+    return parsed as ConsentCategories
   } catch {
     return null
   }
@@ -29,9 +35,13 @@ export function hasConsented(): boolean {
 }
 
 export function acceptAll(): ConsentCategories {
-  return setConsent({ functional: true, analytics: true })
+  return setConsent({ functional: true, analytics: true, aiProcessing: true })
 }
 
 export function rejectAll(): ConsentCategories {
-  return setConsent({ functional: false, analytics: false })
+  return setConsent({ functional: false, analytics: false, aiProcessing: false })
+}
+
+export function withdrawAll(): ConsentCategories {
+  return setConsent({ functional: false, analytics: false, aiProcessing: false })
 }

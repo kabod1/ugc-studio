@@ -10,6 +10,15 @@ function TierIcon({ tier }: { tier: string }) {
   return <Sparkles className="h-5 w-5 text-primary" />
 }
 
+const PLAN_KEYS: Record<string, string> = {
+  Starter: "starter",
+  Growth: "growth",
+  Scale: "scale",
+  Free: "",
+  Pro: "pro",
+  Elite: "elite",
+}
+
 interface Tier {
   name: string
   monthlyPrice: string
@@ -27,6 +36,14 @@ interface FAQ {
 
 function PricingCard({ tier, annual }: { tier: Tier; annual: boolean }) {
   const price = annual ? tier.annualPrice : tier.monthlyPrice
+  const planKey = PLAN_KEYS[tier.name]
+  const isFree = tier.monthlyPrice === "€0"
+  const checkoutHref = isFree
+    ? "/signup"
+    : planKey
+    ? `/checkout/${planKey}${annual ? "?billing=annual" : ""}`
+    : "/signup"
+
   return (
     <div
       className={`bg-card border rounded-xl p-6 relative flex flex-col ${
@@ -66,14 +83,14 @@ function PricingCard({ tier, annual }: { tier: Tier; annual: boolean }) {
         ))}
       </ul>
       <Link
-        href="/signup"
+        href={checkoutHref}
         className={`block text-center px-4 py-2.5 rounded-md text-sm font-medium ${
           tier.popular
             ? "bg-primary text-primary-foreground hover:bg-primary/90"
             : "border hover:bg-muted"
         }`}
       >
-        Get Started
+        {isFree ? "Get Started Free" : "Get Started →"}
       </Link>
     </div>
   )

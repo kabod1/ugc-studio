@@ -9,7 +9,7 @@ const tiers = [
   {
     key: "starter",
     name: "Starter",
-    price: "€67",
+    price: "€44",
     period: "/month",
     features: [
       "5 campaigns per month",
@@ -23,7 +23,7 @@ const tiers = [
   {
     key: "growth",
     name: "Growth",
-    price: "€187",
+    price: "€95",
     period: "/month",
     features: [
       "10 campaigns per month",
@@ -38,7 +38,7 @@ const tiers = [
   {
     key: "scale",
     name: "Scale",
-    price: "€387",
+    price: "€227",
     period: "/month",
     features: [
       "Unlimited campaigns",

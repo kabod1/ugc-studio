@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 const businessTiers = [
   {
     name: "Starter",
-    monthlyPrice: "€67",
-    annualPrice: "€50.50",
+    monthlyPrice: "€44",
+    annualPrice: "€28",
     period: "/mo",
     description: "For small businesses getting started with UGC.",
     features: [
@@ -27,8 +27,8 @@ const businessTiers = [
   },
   {
     name: "Growth",
-    monthlyPrice: "€187",
-    annualPrice: "€113",
+    monthlyPrice: "€95",
+    annualPrice: "€60",
     period: "/mo",
     description: "For growing businesses scaling their content.",
     features: [
@@ -43,8 +43,8 @@ const businessTiers = [
   },
   {
     name: "Scale",
-    monthlyPrice: "€387",
-    annualPrice: "€279.67",
+    monthlyPrice: "€227",
+    annualPrice: "€143",
     period: "/mo",
     description: "For enterprises with unlimited content needs.",
     features: [
@@ -77,8 +77,8 @@ const creatorTiers = [
   },
   {
     name: "Pro",
-    monthlyPrice: "€19.99",
-    annualPrice: "€11.99",
+    monthlyPrice: "€24.99",
+    annualPrice: "€15.75",
     period: "/mo",
     description: "For serious creators ready to grow.",
     features: [
@@ -94,8 +94,8 @@ const creatorTiers = [
   },
   {
     name: "Elite",
-    monthlyPrice: "€49.99",
-    annualPrice: "€29.99",
+    monthlyPrice: "€99",
+    annualPrice: "€62",
     period: "/mo",
     description: "Maximum visibility and premium perks.",
     features: [
