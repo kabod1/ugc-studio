@@ -4,7 +4,7 @@
 //   - API routes (/api/*): network-only (never stale)
 //   - Navigation (HTML): network-first, fallback to cache, then /offline
 
-const CACHE_VERSION = "townshub-v2"
+const CACHE_VERSION = "townshub-v3"
 const STATIC_CACHE = `${CACHE_VERSION}-static`
 const PAGES_CACHE = `${CACHE_VERSION}-pages`
 
