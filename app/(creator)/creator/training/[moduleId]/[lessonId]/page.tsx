@@ -55,7 +55,7 @@ export default function LessonPage({ params }: { params: { moduleId: string; les
           href="/creator/settings"
           className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
         >
-          Upgrade to Creator Pro — €19.99/mo
+          Upgrade to Creator Pro — €24.99/mo
         </Link>
         <div className="mt-2">
           <Link href="/creator/training" className="text-sm text-muted-foreground hover:underline">← Back to Training</Link>

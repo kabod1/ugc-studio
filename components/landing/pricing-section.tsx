@@ -9,7 +9,7 @@ const businessTiers = {
     {
       name: "Starter",
       description: "For small businesses getting started with UGC",
-      price: "€67",
+      price: "€44",
       period: "/month",
       features: [
         "5 campaigns per month",
@@ -24,7 +24,7 @@ const businessTiers = {
     {
       name: "Growth",
       description: "For growing businesses scaling their content",
-      price: "€187",
+      price: "€95",
       period: "/month",
       features: [
         "10 campaigns per month",
@@ -39,7 +39,7 @@ const businessTiers = {
     {
       name: "Scale",
       description: "For enterprises with unlimited content needs",
-      price: "€387",
+      price: "€227",
       period: "/month",
       features: [
         "Unlimited campaigns",
@@ -56,11 +56,11 @@ const businessTiers = {
     {
       name: "Starter",
       description: "For small businesses getting started with UGC",
-      price: "€50.50",
+      price: "€28",
       period: "/month",
-      savings: "Save €198 (25%) with annual billing",
-      billedYearly: "Billed €606 per year",
-      monthlyPrice: "€67",
+      savings: "Save €192 (36%) with annual billing",
+      billedYearly: "Billed €336 per year",
+      monthlyPrice: "€44",
       features: [
         "5 campaigns per month",
         "Up to 20 seats per campaign",
@@ -74,11 +74,11 @@ const businessTiers = {
     {
       name: "Growth",
       description: "For growing businesses scaling their content",
-      price: "€113",
+      price: "€60",
       period: "/month",
-      savings: "Save €888 (40%) with annual billing",
-      billedYearly: "Billed €1,356 per year",
-      monthlyPrice: "€187",
+      savings: "Save €420 (37%) with annual billing",
+      billedYearly: "Billed €720 per year",
+      monthlyPrice: "€95",
       features: [
         "10 campaigns per month",
         "Up to 50 seats per campaign",
@@ -92,11 +92,11 @@ const businessTiers = {
     {
       name: "Scale",
       description: "For enterprises with unlimited content needs",
-      price: "€279.67",
+      price: "€143",
       period: "/month",
-      savings: "Save €1,288 (28%) with annual billing",
-      billedYearly: "Billed €3,356 per year",
-      monthlyPrice: "€387",
+      savings: "Save €1,008 (37%) with annual billing",
+      billedYearly: "Billed €1,716 per year",
+      monthlyPrice: "€227",
       features: [
         "Unlimited campaigns",
         "Unlimited seats per campaign",
@@ -207,7 +207,7 @@ const creatorTiers = {
     {
       name: "Creator Pro",
       description: "For active creators seeking more opportunities",
-      price: "€19.99",
+      price: "€24.99",
       period: "/month",
       features: [
         "Everything in Free",
@@ -239,7 +239,7 @@ const creatorTiers = {
     {
       name: "Creator Pro",
       description: "For active creators seeking more opportunities",
-      price: "€11.99",
+      price: "€15.75",
       period: "/month",
       features: [
         "Everything in Free",

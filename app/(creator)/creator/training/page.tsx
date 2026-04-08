@@ -205,7 +205,7 @@ export default function TrainingPage() {
           className="shrink-0 h-10 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2"
         >
           <BookOpen className="h-4 w-4" />
-          Upgrade — €19.99/mo
+          Upgrade — €24.99/mo
         </Link>
       </div>
     </div>
