@@ -650,6 +650,7 @@ function AiSourceModal({
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
+  const [addedCount, setAddedCount] = useState(0)
   const [error, setError] = useState("")
 
   async function handleGenerate() {
@@ -692,14 +693,43 @@ function AiSourceModal({
     setAdding(true)
     setError("")
     try {
-      await Promise.all(toAdd.map(p =>
-        fetch("/api/admin/outreach", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(p),
+      const responses = await Promise.all(
+        toAdd.map(p => {
+          // Clean up AI-generated data before sending
+          const clean = {
+            ...p,
+            name: (p.name || "").trim(),
+            email: (p.email || "").trim().toLowerCase(),
+            company: (p.company || "").trim() || null,
+            website: (p.website || "").trim() || null,
+            instagram: (p.instagram || "").trim() || null,
+            tiktok: (p.tiktok || "").trim() || null,
+          }
+          return fetch("/api/admin/outreach", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(clean),
+          }).then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d })))
         })
-      ))
+      )
+
+      const failed = responses.filter(r => !r.ok)
+      const succeeded = responses.filter(r => r.ok).length
+
+      if (succeeded === 0 && failed.length > 0) {
+        // All failed — show error
+        const firstErr = failed[0].data?.error || "Failed to add prospects"
+        setError(`Could not add prospects: ${firstErr}`)
+        return
+      }
+
+      // At least some succeeded
+      setAddedCount(succeeded)
       setAdded(true)
+      if (failed.length > 0) {
+        // Some skipped (likely duplicates)
+        console.warn(`${failed.length} prospects skipped (likely duplicate emails)`)
+      }
       setTimeout(onAdded, 1200)
     } catch (e: any) {
       setError(e.message)
@@ -728,7 +758,7 @@ function AiSourceModal({
         {added ? (
           <div className="p-12 text-center">
             <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" />
-            <p className="font-semibold text-lg">{selected.size} prospect{selected.size !== 1 ? "s" : ""} added!</p>
+            <p className="font-semibold text-lg">{addedCount} prospect{addedCount !== 1 ? "s" : ""} added!</p>
             <p className="text-muted-foreground text-sm mt-1">Ready to send outreach emails</p>
           </div>
         ) : (
