@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Loader2, Save, Check, Crown, ShieldCheck, FileText, AlertTriangle, Banknote } from "lucide-react"
 import { toast } from "sonner"
 import { GdprRights } from "@/components/shared/gdpr-rights"
+import { TaxFormUpload } from "@/components/creator/tax-form-upload"
 
 const CATEGORIES = ["Beauty", "Fashion", "Tech", "Food", "Fitness", "Travel", "Lifestyle", "Gaming", "Education", "Finance"]
 
@@ -234,42 +235,7 @@ export default function CreatorSettingsPage() {
       </div>
 
       {/* Tax Form Section */}
-      <div className="bg-card border rounded-lg p-6 space-y-4">
-        <div className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-primary" />
-          <h2 className="font-semibold">Tax Information</h2>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Optionally select your tax form type for payment compliance. This is not required to receive payouts — creators from all countries can get paid.
-        </p>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Tax Form Type</label>
-          <select
-            value={profile.tax_form_type || ""}
-            onChange={(e) => updateField("tax_form_type", e.target.value || null)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="">Select form type...</option>
-            <option value="W-9">W-9 (US Person)</option>
-            <option value="W-8BEN">W-8BEN (Non-US Individual)</option>
-            <option value="W-8BEN-E">W-8BEN-E (Non-US Entity)</option>
-            <option value="EU-VAT">EU VAT Registration</option>
-          </select>
-        </div>
-        {profile.tax_form_type && (
-          <div className="flex items-center gap-2">
-            {profile.tax_form_submitted ? (
-              <span className="inline-flex items-center gap-1 text-sm text-green-600 font-medium">
-                <Check className="h-4 w-4" /> {profile.tax_form_type} submitted
-              </span>
-            ) : (
-              <span className="text-sm text-yellow-600 font-medium">
-                {profile.tax_form_type} selected — save settings to submit
-              </span>
-            )}
-          </div>
-        )}
-      </div>
+      <TaxFormUpload />
 
       {/* Payout Method Section */}
       <div className="bg-card border rounded-lg p-6 space-y-4">

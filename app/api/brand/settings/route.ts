@@ -11,7 +11,7 @@ export async function GET() {
 
     const { data: brand } = await supabase
       .from("brands")
-      .select("id, company_name, website, industry, description, brand_guidelines_url, brand_colors, brand_fonts, tone_of_voice")
+      .select("id, company_name, website, industry, description, brand_guidelines_url, brand_colors, brand_fonts, tone_of_voice, logo_url")
       .eq("user_id", user.id)
       .single()
 

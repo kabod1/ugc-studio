@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { canAddSeat } from "@/lib/subscription-limits"
+import { sendCampaignAcceptanceEmail, sendContractEmail } from "@/lib/email"
 
 export async function GET(
   _request: NextRequest,
@@ -78,7 +79,17 @@ export async function PATCH(
       const budgetCents = (data.campaigns as any)?.budget_per_creator_cents || 0
       const campaignTitle = (data.campaigns as any)?.title || "Campaign"
 
-      // Only create if one doesn't already exist for this campaign + creator
+      // Fetch brand name and campaign brief for emails
+      const [{ data: brand }, { data: campaign }, { data: creatorProfile }] = await Promise.all([
+        svc.from("brands").select("company_name").eq("id", brandId).single(),
+        svc.from("campaigns").select("description, deadline").eq("id", data.campaign_id).single(),
+        svc.from("creator_profiles").select("user_id, display_name").eq("id", data.creator_id).single(),
+      ])
+
+      const brandName = brand?.company_name || "Brand"
+      const brief = campaign?.description || ""
+
+      // Only create contract if one doesn't already exist
       const { data: existing } = await svc
         .from("contracts")
         .select("id")
@@ -87,25 +98,23 @@ export async function PATCH(
         .limit(1)
         .single()
 
+      const contractTerms = `Content creation agreement for the "${campaignTitle}" campaign. Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval by ${brandName}.`
+
+      let contractId = existing?.id
       if (!existing) {
-        await svc.from("contracts").insert({
+        const { data: newContract } = await svc.from("contracts").insert({
           campaign_id: data.campaign_id,
           creator_id: data.creator_id,
           brand_id: brandId,
-          terms: { summary: `Content creation agreement for the "${campaignTitle}" campaign. Creator agrees to deliver content as specified in the campaign brief. Payment will be released upon content approval.` },
+          terms: { summary: contractTerms },
           total_amount_cents: budgetCents,
           deliverables: [],
           status: "sent",
-        })
+        }).select("id").single()
+        contractId = newContract?.id
       }
 
-      // Notify creator their application was accepted
-      const { data: creatorProfile } = await svc
-        .from("creator_profiles")
-        .select("user_id")
-        .eq("id", data.creator_id)
-        .single()
-
+      // Notify creator in-app
       if (creatorProfile?.user_id) {
         await svc.from("notifications").insert({
           user_id: creatorProfile.user_id,
@@ -114,6 +123,34 @@ export async function PATCH(
           type: "application",
           link: "/creator",
         })
+
+        // Send acceptance + contract emails (fire-and-forget, don't block response)
+        const { data: creatorUser } = await svc.auth.admin.getUserById(creatorProfile.user_id)
+        const creatorEmail = creatorUser?.user?.email
+        const creatorName = creatorProfile.display_name || "Creator"
+
+        if (creatorEmail) {
+          Promise.all([
+            sendCampaignAcceptanceEmail({
+              creatorEmail,
+              creatorName,
+              campaignTitle,
+              brandName,
+              budgetCents,
+              contractId: contractId || "",
+              brief,
+            }),
+            contractId ? sendContractEmail({
+              creatorEmail,
+              creatorName,
+              campaignTitle,
+              brandName,
+              contractId,
+              totalAmountCents: budgetCents,
+              terms: contractTerms,
+            }) : Promise.resolve(),
+          ]).catch(err => console.error("Outreach email error:", err))
+        }
       }
     }
 
