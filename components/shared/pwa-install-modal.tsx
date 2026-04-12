@@ -41,7 +41,7 @@ const INSTRUCTIONS: Record<Browser, { title: string; steps: string[] }> = {
       'Click "Install" to confirm',
     ],
   },
-  safari_ios: {
+  "safari-ios": {
     title: "Add to Home Screen (iOS)",
     steps: [
       'Tap the Share button at the bottom of Safari',
@@ -49,7 +49,7 @@ const INSTRUCTIONS: Record<Browser, { title: string; steps: string[] }> = {
       'Tap "Add" in the top-right corner',
     ],
   },
-  safari_mac: {
+  "safari-mac": {
     title: "Add to Dock (Safari)",
     steps: [
       'Click "File" in the menu bar',
@@ -75,10 +75,7 @@ const INSTRUCTIONS: Record<Browser, { title: string; steps: string[] }> = {
   },
 }
 
-// Map safari-ios key to the instructions key
 function getInstructions(browser: Browser) {
-  if (browser === "safari-ios") return INSTRUCTIONS.safari_ios
-  if (browser === "safari-mac") return INSTRUCTIONS.safari_mac
   return INSTRUCTIONS[browser] ?? INSTRUCTIONS.other
 }
 
@@ -127,7 +124,7 @@ export function PWAInstallModal({
           <div className="space-y-4">
             <p className="text-sm font-medium">{title}</p>
             <ol className="space-y-2">
-              {steps.map((step, i) => (
+              {steps.map((step: string, i: number) => (
                 <li key={i} className="flex gap-3 text-sm text-muted-foreground">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
                     {i + 1}
