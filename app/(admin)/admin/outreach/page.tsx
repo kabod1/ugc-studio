@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from "react"
 import {
-  Mail, Plus, Search, Filter, X, Send, Edit2, Trash2,
-  Building2, User, CheckCircle2, Clock, XCircle, RefreshCw,
-  ChevronDown, ExternalLink, Instagram, Globe, Loader2,
-  UserPlus, MailOpen, AlertCircle
+  Mail, Plus, Search, X, Send, Edit2, Trash2,
+  Building2, User, CheckCircle2, XCircle,
+  Loader2, UserPlus, MailOpen, AlertCircle, Sparkles
 } from "lucide-react"
 
 type ProspectType = "brand" | "creator"
@@ -97,6 +96,7 @@ export default function AdminOutreachPage() {
   const [typeFilter, setTypeFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(false)
   const [editingProspect, setEditingProspect] = useState<Prospect | null>(null)
   const [sendingTo, setSendingTo] = useState<Prospect | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -150,12 +150,20 @@ export default function AdminOutreachPage() {
           <h1 className="text-2xl font-bold">Outreach</h1>
           <p className="text-muted-foreground text-sm">Source and contact brands &amp; creators to join the platform</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90"
-        >
-          <Plus className="h-4 w-4" /> Add Prospect
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowAiModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:opacity-90"
+          >
+            <Sparkles className="h-4 w-4" /> AI Source
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" /> Add Manually
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -239,7 +247,6 @@ export default function AdminOutreachPage() {
               <tbody className="divide-y">
                 {prospects.map(p => {
                   const s = STATUS_CONFIG[p.status]
-                  const SIcon = s.icon
                   return (
                     <tr key={p.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3">
@@ -314,6 +321,14 @@ export default function AdminOutreachPage() {
             </table>
           </div>
         </div>
+      )}
+
+      {/* AI Source Modal */}
+      {showAiModal && (
+        <AiSourceModal
+          onClose={() => setShowAiModal(false)}
+          onAdded={() => { setShowAiModal(false); fetchProspects() }}
+        />
       )}
 
       {/* Add/Edit Modal */}
@@ -587,6 +602,270 @@ function SendEmailModal({
                 Send Email
               </button>
             </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── AI Source Modal ───────────────────────────────────────────────────────
+
+const INDUSTRIES = [
+  "Beauty", "Fashion", "Tech", "Food & Beverage", "Fitness", "Travel",
+  "Lifestyle", "Gaming", "Education", "Finance", "Health", "Home & Garden",
+  "Pets", "Entertainment", "Automotive", "Sports",
+]
+
+interface AiProspect {
+  name: string
+  email: string
+  company: string | null
+  type: ProspectType
+  website: string | null
+  instagram: string | null
+  tiktok: string | null
+  industry: string | null
+  notes: string | null
+  source: string
+  why_good_fit?: string
+  estimated_budget?: string
+  content_types?: string
+}
+
+function AiSourceModal({
+  onClose,
+  onAdded,
+}: {
+  onClose: () => void
+  onAdded: () => void
+}) {
+  const [type, setType] = useState<ProspectType>("brand")
+  const [industry, setIndustry] = useState("")
+  const [location, setLocation] = useState("")
+  const [count, setCount] = useState(10)
+  const [extra, setExtra] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [results, setResults] = useState<AiProspect[]>([])
+  const [selected, setSelected] = useState<Set<number>>(new Set())
+  const [adding, setAdding] = useState(false)
+  const [added, setAdded] = useState(false)
+  const [error, setError] = useState("")
+
+  async function handleGenerate() {
+    setLoading(true)
+    setError("")
+    setResults([])
+    setSelected(new Set())
+    try {
+      const res = await fetch("/api/admin/outreach/ai-source", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, industry, location, count, extra_criteria: extra }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || "Failed to generate prospects"); return }
+      setResults(data.prospects || [])
+      // Select all by default
+      setSelected(new Set((data.prospects || []).map((_: any, i: number) => i)))
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function toggleSelect(i: number) {
+    setSelected(prev => {
+      const next = new Set(prev)
+      next.has(i) ? next.delete(i) : next.add(i)
+      return next
+    })
+  }
+
+  function selectAll() { setSelected(new Set(results.map((_, i) => i))) }
+  function selectNone() { setSelected(new Set()) }
+
+  async function handleAdd() {
+    const toAdd = results.filter((_, i) => selected.has(i))
+    if (!toAdd.length) return
+    setAdding(true)
+    setError("")
+    try {
+      await Promise.all(toAdd.map(p =>
+        fetch("/api/admin/outreach", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(p),
+        })
+      ))
+      setAdded(true)
+      setTimeout(onAdded, 1200)
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-card rounded-xl border shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-lg">AI Prospect Sourcing</h2>
+              <p className="text-xs text-muted-foreground">GPT-4 finds real-fit prospects — you pick the ones you want</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-muted"><X className="h-4 w-4" /></button>
+        </div>
+
+        {added ? (
+          <div className="p-12 text-center">
+            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" />
+            <p className="font-semibold text-lg">{selected.size} prospect{selected.size !== 1 ? "s" : ""} added!</p>
+            <p className="text-muted-foreground text-sm mt-1">Ready to send outreach emails</p>
+          </div>
+        ) : (
+          <div className="p-5 space-y-5">
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-md bg-red-50 text-red-700 text-sm">
+                <AlertCircle className="h-4 w-4 shrink-0" /> {error}
+              </div>
+            )}
+
+            {/* Criteria form */}
+            {results.length === 0 && !loading && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Source Type *</label>
+                    <select value={type} onChange={e => setType(e.target.value as ProspectType)}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-2.5 py-1 text-sm">
+                      <option value="brand">Brands</option>
+                      <option value="creator">Creators</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Industry / Niche</label>
+                    <select value={industry} onChange={e => setIndustry(e.target.value)}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-2.5 py-1 text-sm">
+                      <option value="">Any industry</option>
+                      {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Location / Market</label>
+                    <input value={location} onChange={e => setLocation(e.target.value)}
+                      placeholder="e.g. Ireland, UK, Europe..."
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-2.5 py-1 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Number to Generate</label>
+                    <select value={count} onChange={e => setCount(parseInt(e.target.value))}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-2.5 py-1 text-sm">
+                      {[5, 10, 15, 20].map(n => <option key={n} value={n}>{n} prospects</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Extra Criteria (optional)</label>
+                  <input value={extra} onChange={e => setExtra(e.target.value)}
+                    placeholder={type === "brand" ? "e.g. DTC brands, skincare, under 50 employees..." : "e.g. female creators, 18–30, lifestyle content..."}
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-2.5 py-1 text-sm" />
+                </div>
+                <button onClick={handleGenerate}
+                  className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-medium hover:opacity-90">
+                  <Sparkles className="h-4 w-4" />
+                  Generate {count} {type === "brand" ? "Brand" : "Creator"} Prospects with AI
+                </button>
+              </div>
+            )}
+
+            {/* Loading */}
+            {loading && (
+              <div className="py-16 text-center space-y-3">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center mx-auto animate-pulse">
+                  <Sparkles className="h-6 w-6 text-white" />
+                </div>
+                <p className="font-medium">AI is sourcing {count} {type === "brand" ? "brand" : "creator"} prospects...</p>
+                <p className="text-sm text-muted-foreground">This takes about 10–20 seconds</p>
+              </div>
+            )}
+
+            {/* Results */}
+            {results.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium text-sm">{results.length} prospects generated — select the ones you want to add</p>
+                  <div className="flex gap-2 text-xs">
+                    <button onClick={selectAll} className="text-primary hover:underline">Select all</button>
+                    <span className="text-muted-foreground">·</span>
+                    <button onClick={selectNone} className="text-muted-foreground hover:text-foreground">None</button>
+                    <span className="text-muted-foreground">·</span>
+                    <button onClick={() => { setResults([]); setSelected(new Set()) }}
+                      className="text-muted-foreground hover:text-foreground">
+                      Start over
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {results.map((p, i) => (
+                    <button key={i} type="button" onClick={() => toggleSelect(i)}
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                        selected.has(i)
+                          ? "border-primary bg-primary/5"
+                          : "border-border bg-card hover:border-muted-foreground/30"
+                      }`}>
+                      <div className="flex items-start gap-3">
+                        <div className={`mt-0.5 h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                          selected.has(i) ? "border-primary bg-primary" : "border-muted-foreground/40"
+                        }`}>
+                          {selected.has(i) && <CheckCircle2 className="h-3 w-3 text-white" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-sm">{p.name}</span>
+                            {p.company && (
+                              <span className="text-xs text-muted-foreground">· {p.company}</span>
+                            )}
+                            {p.industry && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs">{p.industry}</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">{p.email}</p>
+                          {p.notes && (
+                            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{p.notes}</p>
+                          )}
+                          <div className="flex flex-wrap gap-3 mt-1.5 text-xs text-muted-foreground">
+                            {p.website && <span>🌐 {p.website.replace("https://", "").replace("http://", "")}</span>}
+                            {p.instagram && <span>📸 {p.instagram}</span>}
+                            {p.tiktok && <span>🎵 {p.tiktok}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <p className="text-sm text-muted-foreground">{selected.size} of {results.length} selected</p>
+                  <button onClick={handleAdd} disabled={adding || selected.size === 0}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-medium hover:opacity-90 disabled:opacity-50">
+                    {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                    Add {selected.size} to Outreach List
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
