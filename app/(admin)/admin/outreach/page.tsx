@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import {
   Mail, Plus, Search, Filter, X, Send, Edit2, Trash2,
   Building2, User, CheckCircle2, Clock, XCircle, RefreshCw,
