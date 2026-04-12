@@ -19,7 +19,6 @@ export async function sendCampaignAcceptanceEmail({
   campaignTitle,
   brandName,
   budgetCents,
-  contractId,
   brief,
 }: {
   creatorEmail: string
@@ -27,7 +26,7 @@ export async function sendCampaignAcceptanceEmail({
   campaignTitle: string
   brandName: string
   budgetCents: number
-  contractId: string
+  contractId?: string
   brief?: string
 }) {
   const budgetFormatted = budgetCents > 0
@@ -236,3 +235,64 @@ export async function sendPayoutEmail({
     `,
   })
 }
+
+export async function sendOutreachEmail({
+  to,
+  name,
+  subject,
+  message,
+  type,
+}: {
+  to: string
+  name: string
+  subject: string
+  message: string
+  type: "brand" | "creator"
+}) {
+  const APP_URL_LOCAL = process.env.NEXT_PUBLIC_APP_URL || "https://ugc-studio-zeta.vercel.app"
+  const ctaHref = type === "brand"
+    ? `${APP_URL_LOCAL}/signup?role=brand`
+    : `${APP_URL_LOCAL}/signup?role=creator`
+  const ctaLabel = type === "brand" ? "Get Started as a Brand →" : "Join as a Creator →"
+  const accentColor = type === "brand" ? "#2563eb" : "#7c3aed"
+
+  // Convert plain-text message to paragraphs
+  const htmlMessage = message
+    .split("\n")
+    .filter(l => l.trim())
+    .map(l => `<p style="color:#444;line-height:1.6;margin:0 0 12px">${l}</p>`)
+    .join("")
+
+  const transporter = createTransporter()
+  await transporter.sendMail({
+    from: FROM,
+    to,
+    subject,
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111">
+        <div style="background:${accentColor};padding:24px 32px;border-radius:12px 12px 0 0">
+          <h1 style="color:#fff;margin:0;font-size:22px">UGC Studio</h1>
+          <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:14px">
+            ${type === "brand" ? "The UGC platform built for brands" : "Get paid for your content"}
+          </p>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-top:none;padding:32px;border-radius:0 0 12px 12px">
+          <p style="font-size:16px;margin:0 0 20px">Hi <strong>${name}</strong>,</p>
+          ${htmlMessage}
+          <div style="margin:32px 0;text-align:center">
+            <a href="${ctaHref}"
+               style="display:inline-block;padding:14px 36px;background:${accentColor};color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:15px">
+              ${ctaLabel}
+            </a>
+          </div>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+          <p style="color:#9ca3af;font-size:12px;text-align:center;margin:0">
+            You're receiving this because we think you'd be a great fit for UGC Studio.<br/>
+            Questions? Reply to this email and we'll get back to you.
+          </p>
+        </div>
+      </div>
+    `,
+  })
+}
+

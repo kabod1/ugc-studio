@@ -9,7 +9,7 @@ import {
   CreditCard, BarChart3, Settings, Menu,
   Bell, ChevronLeft, Video, LogOut, Building2, Palette,
   Shield, UserCheck, Eye, Sliders, MessageSquare, HelpCircle,
-  BookOpen, Briefcase, Share2
+  BookOpen, Briefcase, Share2, Mail
 } from "lucide-react"
 import { useUser } from "@/hooks/use-user"
 import { LogoIcon, LogoHorizontal } from "@/components/shared/logo"
@@ -54,6 +54,7 @@ const adminNavItems = [
   { label: "Content", href: "/admin/content", icon: Eye },
   { label: "Payments", href: "/admin/payments", icon: CreditCard },
   { label: "Subscriptions", href: "/admin/subscriptions", icon: Sliders },
+  { label: "Outreach", href: "/admin/outreach", icon: Mail },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Settings", href: "/admin/settings", icon: Shield },
 ]
