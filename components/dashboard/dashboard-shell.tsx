@@ -33,6 +33,7 @@ const creatorNavItems = [
   { label: "Overview", href: "/creator", icon: LayoutDashboard },
   { label: "My Profile", href: "/creator/profile", icon: Palette },
   { label: "Browse Campaigns", href: "/creator/campaigns", icon: Megaphone },
+  { label: "Brands", href: "/creator/brands", icon: Building2 },
   { label: "My Campaigns", href: "/creator/my-campaigns", icon: FileVideo },
   { label: "My Content", href: "/creator/content", icon: Video },
   { label: "Portfolio", href: "/creator/portfolio", icon: Briefcase },
