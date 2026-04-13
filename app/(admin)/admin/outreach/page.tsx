@@ -647,6 +647,7 @@ function AiSourceModal({
   const [extra, setExtra] = useState("")
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState<AiProspect[]>([])
+  const [emails, setEmails] = useState<Record<number, string>>({})
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
@@ -657,6 +658,7 @@ function AiSourceModal({
     setLoading(true)
     setError("")
     setResults([])
+    setEmails({})
     setSelected(new Set())
     try {
       const res = await fetch("/api/admin/outreach/ai-source", {
@@ -688,18 +690,28 @@ function AiSourceModal({
   function selectNone() { setSelected(new Set()) }
 
   async function handleAdd() {
-    const toAdd = results.filter((_, i) => selected.has(i))
+    const toAdd = results
+      .map((p, i) => ({ p, i }))
+      .filter(({ i }) => selected.has(i))
+
     if (!toAdd.length) return
+
+    // Validate that selected prospects have emails filled in
+    const missingEmail = toAdd.find(({ i }) => !(emails[i] || "").trim())
+    if (missingEmail) {
+      setError("Please fill in the email address for all selected prospects before adding.")
+      return
+    }
+
     setAdding(true)
     setError("")
     try {
       const responses = await Promise.all(
-        toAdd.map(p => {
-          // Clean up AI-generated data before sending
+        toAdd.map(({ p, i }) => {
           const clean = {
             ...p,
             name: (p.name || "").trim(),
-            email: (p.email || "").trim().toLowerCase(),
+            email: (emails[i] || "").trim().toLowerCase(),
             company: (p.company || "").trim() || null,
             website: (p.website || "").trim() || null,
             instagram: (p.instagram || "").trim() || null,
@@ -833,6 +845,10 @@ function AiSourceModal({
             {/* Results */}
             {results.length > 0 && (
               <div className="space-y-4">
+                <div className="flex items-center gap-2 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  AI does not generate real email addresses. Fill in each prospect's real email before adding them.
+                </div>
                 <div className="flex items-center justify-between">
                   <p className="font-medium text-sm">{results.length} prospects generated — select the ones you want to add</p>
                   <div className="flex gap-2 text-xs">
@@ -871,14 +887,27 @@ function AiSourceModal({
                               <span className="px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs">{p.industry}</span>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">{p.email}</p>
                           {p.notes && (
-                            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{p.notes}</p>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.notes}</p>
                           )}
                           <div className="flex flex-wrap gap-3 mt-1.5 text-xs text-muted-foreground">
                             {p.website && <span>🌐 {p.website.replace("https://", "").replace("http://", "")}</span>}
                             {p.instagram && <span>📸 {p.instagram}</span>}
                             {p.tiktok && <span>🎵 {p.tiktok}</span>}
+                          </div>
+                          {/* Real email input */}
+                          <div className="mt-2" onClick={e => e.stopPropagation()}>
+                            <input
+                              type="email"
+                              value={emails[i] || ""}
+                              onChange={e => setEmails(prev => ({ ...prev, [i]: e.target.value }))}
+                              placeholder="Enter real email address..."
+                              className={`flex h-8 w-full rounded-md border px-2.5 py-1 text-xs bg-background focus:outline-none focus:ring-1 focus:ring-ring ${
+                                selected.has(i) && !(emails[i] || "").trim()
+                                  ? "border-orange-400 placeholder:text-orange-400"
+                                  : "border-input"
+                              }`}
+                            />
                           </div>
                         </div>
                       </div>

@@ -30,11 +30,12 @@ export async function POST(request: NextRequest) {
        UGC Studio connects brands with content creators for user-generated content campaigns (product videos, reviews, reels, unboxings, etc).
        Generate realistic, specific brand prospects that would genuinely benefit from UGC marketing.
        Focus on brands that sell physical or digital products to consumers, have a social media presence, and would benefit from authentic creator content.
+       IMPORTANT: Do NOT invent or guess email addresses. Leave email as empty string "".
        Return a JSON array of exactly ${count} prospects. Each prospect must have these fields:
        - name: contact person's full name (realistic)
-       - email: realistic business email (firstname@companyname.com or marketing@companyname.com)
+       - email: always empty string ""
        - company: brand/company name
-       - website: realistic website URL
+       - website: real or realistic website URL (e.g. https://www.brandname.com)
        - instagram: Instagram handle starting with @
        - industry: one of Beauty, Fashion, Tech, Food & Beverage, Fitness, Travel, Lifestyle, Gaming, Education, Finance, Health, Home & Garden, Pets, Entertainment, Automotive, Sports
        - why_good_fit: 1-2 sentence explanation of why this brand would benefit from UGC campaigns
@@ -44,9 +45,10 @@ export async function POST(request: NextRequest) {
        UGC Studio pays creators to produce user-generated content (product videos, reviews, reels, unboxings, tutorials) for brands.
        No minimum follower count required — quality content matters more than audience size.
        Generate realistic, specific creator prospects who produce quality content and would want to earn money creating UGC for brands.
+       IMPORTANT: Do NOT invent or guess email addresses. Leave email as empty string "".
        Return a JSON array of exactly ${count} prospects. Each prospect must have these fields:
        - name: creator's full name (realistic, diverse)
-       - email: realistic personal email (firstname.lastname@gmail.com or similar)
+       - email: always empty string ""
        - company: their content niche/specialty (e.g. "Beauty & Skincare Creator", "Fitness & Lifestyle")
        - instagram: Instagram handle starting with @
        - tiktok: TikTok handle starting with @
