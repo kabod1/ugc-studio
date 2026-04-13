@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback } from "react"
 import {
   Mail, Plus, Search, X, Send, Edit2, Trash2,
   Building2, User, CheckCircle2, XCircle,
-  Loader2, UserPlus, MailOpen, AlertCircle, Sparkles
+  Loader2, UserPlus, MailOpen, AlertCircle, Sparkles,
+  ExternalLink, MessageCircle
 } from "lucide-react"
 
 type ProspectType = "brand" | "creator"
@@ -296,6 +297,7 @@ export default function AdminOutreachPage() {
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Emails</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Source</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Reach Out</th>
                   <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
@@ -335,6 +337,35 @@ export default function AdminOutreachPage() {
                             </button>
                           )}
                           {p.company && <p className="text-xs text-muted-foreground">{p.company}</p>}
+                          {/* Social links under name */}
+                          {(p.instagram || p.tiktok || p.website) && (
+                            <div className="flex items-center gap-2 mt-1">
+                              {p.instagram && (
+                                <a href={`https://instagram.com/${p.instagram.replace("@", "")}`}
+                                  target="_blank" rel="noopener noreferrer"
+                                  className="text-xs text-pink-500 hover:underline flex items-center gap-0.5"
+                                  title="Instagram profile">
+                                  📸 {p.instagram}
+                                </a>
+                              )}
+                              {p.tiktok && (
+                                <a href={`https://tiktok.com/${p.tiktok.replace("@", "") ? `@${p.tiktok.replace("@", "")}` : ""}`}
+                                  target="_blank" rel="noopener noreferrer"
+                                  className="text-xs text-black/70 hover:underline flex items-center gap-0.5"
+                                  title="TikTok profile">
+                                  🎵 {p.tiktok}
+                                </a>
+                              )}
+                              {p.website && (
+                                <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`}
+                                  target="_blank" rel="noopener noreferrer"
+                                  className="text-xs text-blue-500 hover:underline"
+                                  title="Website">
+                                  🌐
+                                </a>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -366,6 +397,40 @@ export default function AdminOutreachPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-xs text-muted-foreground">{p.source || "—"}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col gap-1.5">
+                          {p.instagram && (
+                            <a
+                              href={`https://ig.me/m/${p.instagram.replace("@", "")}`}
+                              target="_blank" rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-medium hover:opacity-90 whitespace-nowrap"
+                            >
+                              <MessageCircle className="h-3 w-3" /> DM on Instagram
+                            </a>
+                          )}
+                          {p.tiktok && (
+                            <a
+                              href={`https://tiktok.com/@${p.tiktok.replace("@", "")}`}
+                              target="_blank" rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black text-white text-xs font-medium hover:opacity-80 whitespace-nowrap"
+                            >
+                              <ExternalLink className="h-3 w-3" /> View TikTok
+                            </a>
+                          )}
+                          {!p.instagram && !p.tiktok && p.type === "creator" && (
+                            <span className="text-xs text-muted-foreground">No socials saved</span>
+                          )}
+                          {p.type === "brand" && p.website && (
+                            <a
+                              href={p.website.startsWith("http") ? p.website : `https://${p.website}`}
+                              target="_blank" rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium hover:bg-muted whitespace-nowrap"
+                            >
+                              <ExternalLink className="h-3 w-3" /> Visit Website
+                            </a>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
