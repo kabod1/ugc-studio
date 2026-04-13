@@ -628,9 +628,7 @@ interface AiProspect {
   industry: string | null
   notes: string | null
   source: string
-  why_good_fit?: string
-  estimated_budget?: string
-  content_types?: string
+  email_score: number | null
 }
 
 function AiSourceModal({
@@ -668,9 +666,14 @@ function AiSourceModal({
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || "Failed to generate prospects"); return }
-      setResults(data.prospects || [])
+      const list: AiProspect[] = data.prospects || []
+      setResults(list)
+      // Pre-fill emails from Hunter.io results
+      const prefilled: Record<number, string> = {}
+      list.forEach((p, i) => { if (p.email) prefilled[i] = p.email })
+      setEmails(prefilled)
       // Select all by default
-      setSelected(new Set((data.prospects || []).map((_: any, i: number) => i)))
+      setSelected(new Set(list.map((_: AiProspect, i: number) => i)))
     } catch (e: any) {
       setError(e.message)
     } finally {
@@ -845,9 +848,9 @@ function AiSourceModal({
             {/* Results */}
             {results.length > 0 && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                <div className="flex items-center gap-2 p-3 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-xs">
                   <AlertCircle className="h-4 w-4 shrink-0" />
-                  AI does not generate real email addresses. Fill in each prospect's real email before adding them.
+                  Emails were looked up via Hunter.io. Green = high confidence. Review any low-confidence or missing emails before sending.
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="font-medium text-sm">{results.length} prospects generated — select the ones you want to add</p>
@@ -895,19 +898,38 @@ function AiSourceModal({
                             {p.instagram && <span>📸 {p.instagram}</span>}
                             {p.tiktok && <span>🎵 {p.tiktok}</span>}
                           </div>
-                          {/* Real email input */}
-                          <div className="mt-2" onClick={e => e.stopPropagation()}>
-                            <input
-                              type="email"
-                              value={emails[i] || ""}
-                              onChange={e => setEmails(prev => ({ ...prev, [i]: e.target.value }))}
-                              placeholder="Enter real email address..."
-                              className={`flex h-8 w-full rounded-md border px-2.5 py-1 text-xs bg-background focus:outline-none focus:ring-1 focus:ring-ring ${
-                                selected.has(i) && !(emails[i] || "").trim()
-                                  ? "border-orange-400 placeholder:text-orange-400"
-                                  : "border-input"
-                              }`}
-                            />
+                          {/* Email input with Hunter.io score */}
+                          <div className="mt-2 space-y-1" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="email"
+                                value={emails[i] || ""}
+                                onChange={e => setEmails(prev => ({ ...prev, [i]: e.target.value }))}
+                                placeholder="Enter real email address..."
+                                className={`flex h-8 w-full rounded-md border px-2.5 py-1 text-xs bg-background focus:outline-none focus:ring-1 focus:ring-ring ${
+                                  selected.has(i) && !(emails[i] || "").trim()
+                                    ? "border-orange-400 placeholder:text-orange-400"
+                                    : (emails[i] && p.email_score) ? "border-green-400" : "border-input"
+                                }`}
+                              />
+                              {p.email_score !== null && emails[i] && (
+                                <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${
+                                  p.email_score >= 70 ? "bg-green-100 text-green-700"
+                                  : p.email_score >= 40 ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-red-100 text-red-700"
+                                }`}>
+                                  {p.email_score}% match
+                                </span>
+                              )}
+                            </div>
+                            {p.email_score !== null && emails[i] && (
+                              <p className="text-xs text-muted-foreground">
+                                {p.email_score >= 70 ? "✓ Found by Hunter.io" : p.email_score >= 40 ? "⚠ Low confidence — verify before sending" : "⚠ Very low confidence — replace manually"}
+                              </p>
+                            )}
+                            {!emails[i] && !p.email && (
+                              <p className="text-xs text-orange-500">Hunter.io couldn't find an email — enter manually</p>
+                            )}
                           </div>
                         </div>
                       </div>
