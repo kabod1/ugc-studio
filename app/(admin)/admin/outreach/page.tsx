@@ -100,6 +100,8 @@ export default function AdminOutreachPage() {
   const [editingProspect, setEditingProspect] = useState<Prospect | null>(null)
   const [sendingTo, setSendingTo] = useState<Prospect | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [editingEmail, setEditingEmail] = useState<string | null>(null) // prospect id being edited
+  const [emailDraft, setEmailDraft] = useState("")
 
   const fetchProspects = useCallback(async () => {
     setLoading(true)
@@ -123,6 +125,19 @@ export default function AdminOutreachPage() {
     setDeletingId(id)
     await fetch(`/api/admin/outreach/${id}`, { method: "DELETE" })
     setDeletingId(null)
+    fetchProspects()
+  }
+
+  async function handleEmailSave(id: string) {
+    const email = emailDraft.trim().toLowerCase()
+    if (!email) return
+    await fetch(`/api/admin/outreach/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    })
+    setEditingEmail(null)
+    setEmailDraft("")
     fetchProspects()
   }
 
@@ -252,7 +267,33 @@ export default function AdminOutreachPage() {
                       <td className="px-4 py-3">
                         <div>
                           <p className="font-medium">{p.name}</p>
-                          <p className="text-xs text-muted-foreground">{p.email}</p>
+                          {editingEmail === p.id ? (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <input
+                                type="email"
+                                autoFocus
+                                value={emailDraft}
+                                onChange={e => setEmailDraft(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === "Enter") handleEmailSave(p.id)
+                                  if (e.key === "Escape") { setEditingEmail(null); setEmailDraft("") }
+                                }}
+                                className="h-6 w-44 rounded border border-primary px-1.5 text-xs focus:outline-none"
+                              />
+                              <button onClick={() => handleEmailSave(p.id)}
+                                className="text-xs text-primary font-medium hover:underline">Save</button>
+                              <button onClick={() => { setEditingEmail(null); setEmailDraft("") }}
+                                className="text-xs text-muted-foreground hover:text-foreground">✕</button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => { setEditingEmail(p.id); setEmailDraft(p.email || "") }}
+                              className={`text-xs mt-0.5 text-left hover:underline ${p.email ? "text-muted-foreground" : "text-orange-500 font-medium"}`}
+                              title="Click to edit email"
+                            >
+                              {p.email || "⚠ No email — click to add"}
+                            </button>
+                          )}
                           {p.company && <p className="text-xs text-muted-foreground">{p.company}</p>}
                         </div>
                       </td>
