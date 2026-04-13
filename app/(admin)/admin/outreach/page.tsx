@@ -5,7 +5,7 @@ import {
   Mail, Plus, Search, X, Send, Edit2, Trash2,
   Building2, User, CheckCircle2, XCircle,
   Loader2, UserPlus, MailOpen, AlertCircle, Sparkles,
-  ExternalLink, MessageCircle
+  ExternalLink, Search
 } from "lucide-react"
 
 type ProspectType = "brand" | "creator"
@@ -402,24 +402,30 @@ export default function AdminOutreachPage() {
                         <div className="flex flex-col gap-1.5">
                           {p.instagram && (
                             <a
-                              href={`https://ig.me/m/${p.instagram.replace("@", "")}`}
+                              href={`https://www.instagram.com/${p.instagram.replace("@", "")}/`}
                               target="_blank" rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-medium hover:opacity-90 whitespace-nowrap"
                             >
-                              <MessageCircle className="h-3 w-3" /> DM on Instagram
+                              <ExternalLink className="h-3 w-3" /> Instagram Profile
                             </a>
                           )}
                           {p.tiktok && (
                             <a
-                              href={`https://tiktok.com/@${p.tiktok.replace("@", "")}`}
+                              href={`https://www.tiktok.com/@${p.tiktok.replace("@", "")}`}
                               target="_blank" rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black text-white text-xs font-medium hover:opacity-80 whitespace-nowrap"
                             >
-                              <ExternalLink className="h-3 w-3" /> View TikTok
+                              <ExternalLink className="h-3 w-3" /> TikTok Profile
                             </a>
                           )}
-                          {!p.instagram && !p.tiktok && p.type === "creator" && (
-                            <span className="text-xs text-muted-foreground">No socials saved</span>
+                          {p.type === "creator" && (
+                            <a
+                              href={`https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent((p.company || p.name) + " ugc creator")}`}
+                              target="_blank" rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium hover:bg-muted whitespace-nowrap"
+                            >
+                              <Search className="h-3 w-3" /> Search Instagram
+                            </a>
                           )}
                           {p.type === "brand" && p.website && (
                             <a
