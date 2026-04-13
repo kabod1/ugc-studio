@@ -100,8 +100,10 @@ export default function AdminOutreachPage() {
   const [editingProspect, setEditingProspect] = useState<Prospect | null>(null)
   const [sendingTo, setSendingTo] = useState<Prospect | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [editingEmail, setEditingEmail] = useState<string | null>(null) // prospect id being edited
+  const [editingEmail, setEditingEmail] = useState<string | null>(null)
   const [emailDraft, setEmailDraft] = useState("")
+  const [relooking, setRelooking] = useState(false)
+  const [relookResult, setRelookResult] = useState<string | null>(null)
 
   const fetchProspects = useCallback(async () => {
     setLoading(true)
@@ -141,6 +143,24 @@ export default function AdminOutreachPage() {
     fetchProspects()
   }
 
+  async function handleRelookupEmails(allProspects = false) {
+    setRelooking(true)
+    setRelookResult(null)
+    try {
+      const res = await fetch("/api/admin/outreach/relookup-emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ all: allProspects }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setRelookResult("Error: " + (data.error || "Failed")); return }
+      setRelookResult(data.message)
+      fetchProspects()
+    } finally {
+      setRelooking(false)
+    }
+  }
+
   async function handleStatusChange(id: string, status: ProspectStatus) {
     await fetch(`/api/admin/outreach/${id}`, {
       method: "PATCH",
@@ -165,12 +185,22 @@ export default function AdminOutreachPage() {
           <h1 className="text-2xl font-bold">Outreach</h1>
           <p className="text-muted-foreground text-sm">Source and contact brands &amp; creators to join the platform</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setShowAiModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:opacity-90"
           >
             <Sparkles className="h-4 w-4" /> AI Source
+          </button>
+          <button
+            onClick={() => handleRelookupEmails(true)}
+            disabled={relooking}
+            className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-medium hover:bg-muted disabled:opacity-50"
+            title="Re-run Hunter.io lookup for all prospects"
+          >
+            {relooking
+              ? <><Loader2 className="h-4 w-4 animate-spin" /> Looking up...</>
+              : <><Mail className="h-4 w-4" /> Re-lookup Emails</>}
           </button>
           <button
             onClick={() => setShowAddModal(true)}
@@ -180,6 +210,16 @@ export default function AdminOutreachPage() {
           </button>
         </div>
       </div>
+
+      {/* Re-lookup result banner */}
+      {relookResult && (
+        <div className={`flex items-center justify-between p-3 rounded-lg border text-sm ${
+          relookResult.startsWith("Error") ? "bg-red-50 border-red-200 text-red-700" : "bg-green-50 border-green-200 text-green-700"
+        }`}>
+          <span>{relookResult}</span>
+          <button onClick={() => setRelookResult(null)} className="ml-4 opacity-60 hover:opacity-100"><X className="h-4 w-4" /></button>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
