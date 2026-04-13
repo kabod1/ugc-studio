@@ -4,8 +4,7 @@ import React, { useState, useEffect, useCallback } from "react"
 import {
   Mail, Plus, Search, X, Send, Edit2, Trash2,
   Building2, User, CheckCircle2, XCircle,
-  Loader2, UserPlus, MailOpen, AlertCircle, Sparkles,
-  ExternalLink, Search
+  Loader2, UserPlus, MailOpen, AlertCircle, Sparkles, ExternalLink
 } from "lucide-react"
 
 type ProspectType = "brand" | "creator"
@@ -401,13 +400,7 @@ export default function AdminOutreachPage() {
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-1.5">
                           {p.instagram && (
-                            <a
-                              href={`https://www.instagram.com/${p.instagram.replace("@", "")}/`}
-                              target="_blank" rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-medium hover:opacity-90 whitespace-nowrap"
-                            >
-                              <ExternalLink className="h-3 w-3" /> Instagram Profile
-                            </a>
+                            <InstagramDMButton handle={p.instagram} />
                           )}
                           {p.tiktok && (
                             <a
@@ -1103,5 +1096,39 @@ function AiSourceModal({
         )}
       </div>
     </div>
+  )
+}
+
+// ─── Instagram DM Button ───────────────────────────────────────────────────
+// Mobile: opens Instagram app directly to the DM thread
+// Desktop: opens their profile where you click the Message button
+
+function InstagramDMButton({ handle }: { handle: string }) {
+  const username = handle.replace("@", "")
+
+  function handleClick(e: React.MouseEvent) {
+    e.preventDefault()
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    if (isMobile) {
+      window.location.href = `instagram://user?username=${username}`
+      setTimeout(() => {
+        window.open(`https://www.instagram.com/${username}/`, "_blank")
+      }, 1500)
+    } else {
+      window.open(`https://www.instagram.com/${username}/`, "_blank")
+    }
+  }
+
+  const isMobile = typeof navigator !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+  return (
+    <button
+      onClick={handleClick}
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-medium hover:opacity-90 whitespace-nowrap"
+      title={isMobile ? "Opens DM in Instagram app" : "Opens Instagram profile — click Message to DM"}
+    >
+      <ExternalLink className="h-3 w-3" />
+      {isMobile ? "DM on Instagram" : "Instagram → Message"}
+    </button>
   )
 }
