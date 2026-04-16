@@ -1,9 +1,12 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
 import {
   Users, FileVideo, CreditCard, Shield, BarChart3, ArrowRight,
   Zap, Globe, Video, Lock, CheckCircle2, Bell, RefreshCw,
   BadgeCheck, Clock, HeartHandshake, Star, Play, TrendingUp,
-  Sparkles, ChevronRight
+  Sparkles, ChevronRight, Menu, X
 } from "lucide-react"
 import { PricingSection } from "@/components/landing/pricing-section"
 import { FeaturedCreators } from "@/components/landing/featured-creators"
@@ -151,31 +154,61 @@ const stats = [
 ]
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <Link href="/">
+          <Link href="/" onClick={() => setMobileMenuOpen(false)}>
             <LogoHorizontal />
           </Link>
+          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors">Features</a>
             <a href="#how-it-works" className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors">How It Works</a>
             <a href="#trust" className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors">Payment Protection</a>
             <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors">Pricing</Link>
           </div>
-          <div className="flex items-center gap-3">
+          {/* Desktop CTAs */}
+          <div className="hidden md:flex items-center gap-3">
             <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-gray-900 px-3 py-2">Log In</Link>
             <Link href="/signup" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors">
               Start Free <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
+          {/* Mobile: CTA + hamburger */}
+          <div className="flex md:hidden items-center gap-2">
+            <Link href="/signup" className="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium">
+              Start Free
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-1">
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Features</a>
+            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">How It Works</a>
+            <a href="#trust" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Payment Protection</a>
+            <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Pricing</Link>
+            <div className="pt-2 border-t border-gray-100">
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Log In</Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-24 px-4 overflow-hidden">
+      <section className="relative pt-28 sm:pt-32 pb-16 sm:pb-24 px-4 overflow-hidden">
         {/* Background gradient blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/8 rounded-full blur-3xl" />
@@ -183,43 +216,43 @@ export default function LandingPage() {
         </div>
 
         <div className="relative max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 border border-primary/20">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 border border-primary/20">
             <Sparkles className="h-3.5 w-3.5" />
             GPT-4o Powered UGC Platform
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-gray-900 leading-[1.1]">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-5 text-gray-900 leading-[1.1]">
             The UGC Platform That{" "}
             <span className="relative inline-block">
               <span className="text-primary">Pays Creators</span>
-              <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 300 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M2 9C50 3 100 1 150 3C200 5 250 8 298 9" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
               </svg>
             </span>{" "}
             Automatically
           </h1>
 
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-base sm:text-xl text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed">
             Discover creators, manage UGC production, handle contracts, and
             release payments automatically — all in one platform.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link href="/signup" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-all text-base shadow-lg shadow-gray-900/20">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
+            <Link href="/signup" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-all text-base shadow-lg shadow-gray-900/20">
               Start Free Trial <ArrowRight className="h-5 w-5" />
             </Link>
-            <a href="#how-it-works" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50 transition-all text-base text-gray-700">
+            <a href="#how-it-works" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-gray-200 font-semibold hover:bg-gray-50 transition-all text-base text-gray-700">
               <Play className="h-4 w-4" />
               See How It Works
             </a>
           </div>
 
           {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto">
             {stats.map((s) => (
-              <div key={s.label} className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-                <p className="text-sm text-gray-500 mt-0.5">{s.label}</p>
+              <div key={s.label} className="bg-gray-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-gray-100">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{s.value}</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
@@ -247,7 +280,7 @@ export default function LandingPage() {
               <Zap className="h-3.5 w-3.5" />
               Everything in one place
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-gray-900">Scale your UGC without the chaos</h2>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-4 text-gray-900">Scale your UGC without the chaos</h2>
             <p className="text-lg text-gray-500 max-w-2xl mx-auto">
               Replace spreadsheets, email chains, and scattered tools with one powerful platform built for UGC production.
             </p>
@@ -274,7 +307,7 @@ export default function LandingPage() {
               <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
               Simple process
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-gray-900">From brief to results in 6 steps</h2>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-4 text-gray-900">From brief to results in 6 steps</h2>
             <p className="text-lg text-gray-500">The fastest path from idea to live UGC content</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -304,7 +337,7 @@ export default function LandingPage() {
               <Shield className="h-3.5 w-3.5" />
               Payment Protection
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-gray-900">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-4 text-gray-900">
               Brands pay on time.<br />Creators always get paid.
             </h2>
             <p className="text-lg text-gray-500 max-w-2xl mx-auto">
@@ -363,15 +396,15 @@ export default function LandingPage() {
           </div>
 
           {/* Stats */}
-          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
             {[
               { value: "100%", label: "Payments secured by escrow", icon: Lock },
               { value: "<5s", label: "Average payout after approval", icon: Zap },
               { value: "€0", label: "Fees for creators to receive", icon: BadgeCheck },
               { value: "15%", label: "Platform fee, taken at checkout", icon: CreditCard },
             ].map((s) => (
-              <div key={s.label} className="bg-gray-900 rounded-2xl p-6 text-center text-white">
-                <p className="text-3xl font-bold text-white mb-1">{s.value}</p>
+              <div key={s.label} className="bg-gray-900 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center text-white">
+                <p className="text-2xl sm:text-3xl font-bold text-white mb-1">{s.value}</p>
                 <p className="text-xs text-gray-400 leading-relaxed">{s.label}</p>
               </div>
             ))}
@@ -440,18 +473,18 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 px-4 mx-4 mb-8 bg-gray-900 rounded-3xl max-w-7xl lg:mx-auto">
+      <section className="py-16 sm:py-24 px-4 mx-3 sm:mx-4 mb-6 sm:mb-8 bg-gray-900 rounded-2xl sm:rounded-3xl max-w-7xl lg:mx-auto">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white/80 text-sm font-medium mb-8 border border-white/20">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white/80 text-xs sm:text-sm font-medium mb-6 sm:mb-8 border border-white/20">
             <Sparkles className="h-3.5 w-3.5" />
-            Join 500+ brands already scaling with UGC Studio
+            Join brands already scaling with UGC Studio
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-white leading-tight">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-4 text-white leading-tight">
             Ready to transform your UGC workflow?
           </h2>
-          <p className="text-lg text-gray-400 mb-2">Every payment protected. Every creator paid on time. Every time.</p>
-          <p className="text-sm text-gray-500 mb-10">No credit card required · Cancel any time · Escrow protection from day one</p>
-          <Link href="/signup" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-gray-900 font-semibold hover:bg-gray-100 transition-all text-base shadow-2xl">
+          <p className="text-base sm:text-lg text-gray-400 mb-2">Every payment protected. Every creator paid on time. Every time.</p>
+          <p className="text-xs sm:text-sm text-gray-500 mb-8 sm:mb-10">No credit card required · Cancel any time · Escrow protection from day one</p>
+          <Link href="/signup" className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-xl bg-white text-gray-900 font-semibold hover:bg-gray-100 transition-all text-base shadow-2xl">
             Start Your Free Trial <ArrowRight className="h-5 w-5" />
           </Link>
         </div>

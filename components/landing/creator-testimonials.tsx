@@ -130,21 +130,12 @@ function formatK(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n)
 }
 
-function Avatar({ name, img }: { name: string; img: number }) {
-  const [err, setErr] = useState(false)
+function Avatar({ name }: { name: string }) {
   const initials = name.split(" ").map((w) => w[0]).slice(0, 2).join("")
-  return err ? (
+  return (
     <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
       {initials}
     </div>
-  ) : (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={`https://i.pravatar.cc/150?img=${img}`}
-      alt={name}
-      onError={() => setErr(true)}
-      className="h-11 w-11 rounded-full object-cover shrink-0 ring-2 ring-primary/10"
-    />
   )
 }
 
@@ -164,7 +155,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
         <p className="text-sm text-muted-foreground leading-relaxed pl-4">{t.quote}</p>
       </div>
       <div className="flex items-center gap-3 pt-1 border-t">
-        <Avatar name={t.name} img={t.avatar_img} />
+        <Avatar name={t.name} />
         <div className="min-w-0">
           <p className="font-semibold text-sm truncate">
             {t.name} <span className="text-xs">{t.flag}</span>
@@ -260,9 +251,10 @@ export function CreatorTestimonials() {
       <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Creators Love Townshub</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">What Creators Experience</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              From Lagos to Seoul, micro-creators worldwide are landing their first brand deals and building real income on our platform.
+              These stories are illustrative examples of the outcomes creators on our platform achieve.
+              Names and details have been changed for privacy.
             </p>
           </div>
 
@@ -282,6 +274,9 @@ export function CreatorTestimonials() {
               Read all {TESTIMONIALS.length} creator stories
               <ChevronRight className="h-4 w-4" />
             </button>
+            <p className="text-xs text-muted-foreground mt-3">
+              Illustrative examples. Names changed for privacy. Results may vary.
+            </p>
           </div>
         </div>
       </section>

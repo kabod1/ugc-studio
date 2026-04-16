@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -9,7 +9,7 @@ import {
   CreditCard, BarChart3, Settings, Menu,
   Bell, ChevronLeft, Video, LogOut, Building2, Palette,
   Shield, UserCheck, Eye, Sliders, MessageSquare, HelpCircle,
-  BookOpen, Briefcase, Share2, Mail
+  BookOpen, Briefcase, Share2, Mail, X
 } from "lucide-react"
 import { useUser } from "@/hooks/use-user"
 import { LogoIcon, LogoHorizontal } from "@/components/shared/logo"
@@ -59,6 +59,26 @@ const adminNavItems = [
   { label: "Settings", href: "/admin/settings", icon: Shield },
 ]
 
+// The 4 most important items per role shown in the mobile bottom bar
+const brandBottomNav = [
+  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Campaigns", href: "/dashboard/campaigns", icon: Megaphone },
+  { label: "Content", href: "/dashboard/content", icon: FileVideo },
+  { label: "Payments", href: "/dashboard/payments", icon: CreditCard },
+]
+const creatorBottomNav = [
+  { label: "Overview", href: "/creator", icon: LayoutDashboard },
+  { label: "Campaigns", href: "/creator/campaigns", icon: Megaphone },
+  { label: "Content", href: "/creator/content", icon: Video },
+  { label: "Earnings", href: "/creator/earnings", icon: CreditCard },
+]
+const adminBottomNav = [
+  { label: "Overview", href: "/admin", icon: LayoutDashboard },
+  { label: "Users", href: "/admin/users", icon: Users },
+  { label: "Campaigns", href: "/admin/campaigns", icon: Megaphone },
+  { label: "Outreach", href: "/admin/outreach", icon: Mail },
+]
+
 interface DashboardShellProps {
   children: React.ReactNode
   user: any
@@ -71,8 +91,26 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
   const pathname = usePathname()
   const { signOut } = useUser()
 
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
+  // Prevent body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => { document.body.style.overflow = "" }
+  }, [mobileOpen])
+
   const navItems = role === "admin" ? adminNavItems :
     role === "creator" ? creatorNavItems : brandNavItems
+
+  const bottomNavItems = role === "admin" ? adminBottomNav :
+    role === "creator" ? creatorBottomNav : brandBottomNav
 
   const displayName = user?.full_name || user?.company_name || user?.email || "User"
 
@@ -94,12 +132,21 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Logo */}
+        {/* Logo + mobile close button */}
         <div className={cn(
           "flex items-center gap-2 p-4 border-b",
-          collapsed ? "justify-center" : ""
+          collapsed ? "justify-center" : "justify-between"
         )}>
           {collapsed ? <LogoIcon size={32} /> : <LogoHorizontal />}
+          {!collapsed && (
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="lg:hidden p-1 rounded-md hover:bg-muted"
+              aria-label="Close sidebar"
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
         </div>
 
         {/* Navigation */}
@@ -112,7 +159,6 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setMobileOpen(false)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                   isActive
@@ -165,7 +211,7 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
           </button>
         </div>
 
-        {/* Collapse toggle */}
+        {/* Collapse toggle — desktop only */}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="hidden lg:flex absolute -right-3 top-7 h-6 w-6 items-center justify-center rounded-full border bg-card shadow-sm hover:bg-muted"
@@ -176,19 +222,24 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
 
       {/* Main content */}
       <div className={cn(
-        "transition-all duration-300",
+        "transition-all duration-300 pb-16 lg:pb-0",
         collapsed ? "lg:pl-16" : "lg:pl-64"
       )}>
         {/* Top bar */}
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-card/80 backdrop-blur-sm px-4 lg:px-6">
           <button
             onClick={() => setMobileOpen(true)}
-            className="lg:hidden"
+            className="lg:hidden p-1 rounded-md hover:bg-muted"
+            aria-label="Open sidebar"
           >
             <Menu className="h-5 w-5" />
           </button>
 
-          <div className="flex-1" />
+          {/* Show logo on mobile top bar */}
+          <div className="lg:hidden flex-1">
+            <LogoHorizontal />
+          </div>
+          <div className="hidden lg:block flex-1" />
 
           <Link
             href={`/${role === "brand" ? "dashboard" : role}/notifications`}
@@ -203,6 +254,35 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
           {children}
         </main>
       </div>
+
+      {/* Mobile bottom navigation bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-card border-t flex items-center">
+        {bottomNavItems.map((item) => {
+          const isActive = pathname === item.href ||
+            (item.href !== `/${role === "brand" ? "dashboard" : role}` && pathname.startsWith(item.href))
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-xs font-medium transition-colors",
+                isActive ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+              <span className="text-[10px] leading-none">{item.label}</span>
+            </Link>
+          )
+        })}
+        {/* "More" button opens full sidebar */}
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-xs font-medium text-muted-foreground"
+        >
+          <Menu className="h-5 w-5" />
+          <span className="text-[10px] leading-none">More</span>
+        </button>
+      </nav>
     </div>
   )
 }
