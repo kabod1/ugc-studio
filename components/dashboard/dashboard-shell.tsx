@@ -256,7 +256,10 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
       </div>
 
       {/* Mobile bottom navigation bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-card border-t flex items-center">
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-card border-t flex items-center"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      >
         {bottomNavItems.map((item) => {
           const isActive = pathname === item.href ||
             (item.href !== `/${role === "brand" ? "dashboard" : role}` && pathname.startsWith(item.href))
@@ -265,7 +268,7 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-xs font-medium transition-colors",
+                "flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-medium transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground"
               )}
             >
@@ -277,7 +280,7 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
         {/* "More" button opens full sidebar */}
         <button
           onClick={() => setMobileOpen(true)}
-          className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-xs font-medium text-muted-foreground"
+          className="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-medium text-muted-foreground"
         >
           <Menu className="h-5 w-5" />
           <span className="text-[10px] leading-none">More</span>

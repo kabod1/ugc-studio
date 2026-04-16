@@ -57,3 +57,30 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* PWA / safe-area support */
+@supports (padding: env(safe-area-inset-bottom)) {
+  /* Prevent content from sitting behind iOS home indicator */
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+/* Standalone (installed PWA) — hide native browser UI */
+@media (display-mode: standalone) {
+  /* Push content below the iOS status bar */
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  /* Smooth momentum scrolling on iOS */
+  .overflow-y-auto,
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Prevent text size adjustment on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
