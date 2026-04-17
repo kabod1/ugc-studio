@@ -310,7 +310,7 @@ export default function PricingPage() {
             Creators start free &middot; Cancel anytime
           </p>
           <p className="text-sm opacity-70 mb-8">
-            Join 500+ brands and 10,000+ creators already using UGC Studio.
+            Join brands and creators already using UGC Studio.
           </p>
           <Link
             href="/signup"
@@ -369,7 +369,7 @@ export default function PricingPage() {
             </div>
           </div>
           <div className="border-t pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} UGC Studio. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Townshub Limited. All rights reserved.</p>
             <p>Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a></p>
           </div>
         </div>

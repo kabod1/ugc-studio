@@ -9,7 +9,6 @@ import {
   Sparkles, ChevronRight, Menu, X
 } from "lucide-react"
 import { PricingSection } from "@/components/landing/pricing-section"
-import { FeaturedCreators } from "@/components/landing/featured-creators"
 import { CreatorTestimonials } from "@/components/landing/creator-testimonials"
 import { LogoHorizontal } from "@/components/shared/logo"
 import { ManageCookiesButton } from "@/components/shared/manage-cookies-button"
@@ -115,7 +114,7 @@ const trustFeatures = [
     who: "For Creators",
     color: "text-amber-600",
     bg: "bg-amber-50",
-    description: "63% of freelancers experience late payments. On UGC Studio, that's impossible. The money is already there before you start filming.",
+    description: "Late payments are one of the biggest problems freelancers face. On UGC Studio, that's impossible. The money is already held in escrow before you start filming.",
   },
 ]
 
@@ -147,10 +146,10 @@ const brandQuotes = [
 ]
 
 const stats = [
-  { value: "500+", label: "Brands", icon: Globe },
-  { value: "10K+", label: "Creators", icon: Users },
-  { value: "50K+", label: "Content Pieces", icon: FileVideo },
-  { value: "€2M+", label: "Paid to Creators", icon: TrendingUp },
+  { value: "Global", label: "Brand reach", icon: Globe },
+  { value: "AI", label: "Creator matching", icon: Users },
+  { value: "Escrow", label: "Payment protection", icon: FileVideo },
+  { value: "Stripe", label: "Powered payouts", icon: TrendingUp },
 ]
 
 export default function LandingPage() {
@@ -268,7 +267,7 @@ export default function LandingPage() {
           <span className="text-gray-700">·</span>
           <span className="flex items-center gap-2 text-gray-300"><Bell className="h-4 w-4 text-yellow-400" /> Real-time notifications</span>
           <span className="text-gray-700">·</span>
-          <span className="flex items-center gap-2 text-gray-300"><CheckCircle2 className="h-4 w-4 text-purple-400" /> Powered by Stripe</span>
+          <span className="flex items-center gap-2 text-gray-300"><CheckCircle2 className="h-4 w-4 text-purple-400" /> Payments by Stripe</span>
         </div>
       </div>
 
@@ -418,10 +417,10 @@ export default function LandingPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-medium mb-4">
               <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-              Real reviews
+              What users say
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-gray-900">Real people. Real results.</h2>
-            <p className="text-gray-500">What brands and creators say about getting paid on UGC Studio</p>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-gray-900">Built for brands and creators.</h2>
+            <p className="text-gray-500">Illustrative experiences from our platform. Names changed for privacy.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {brandQuotes.map((q) => (
@@ -451,26 +450,6 @@ export default function LandingPage() {
       <PricingSection />
 
       <CreatorTestimonials />
-
-      {/* Featured Creators */}
-      <section className="py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm font-medium mb-4">
-              <Users className="h-3.5 w-3.5" />
-              Creator network
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-gray-900">Featured Creators</h2>
-            <p className="text-lg text-gray-500">Top-rated creators from around the world, ready to bring your brand to life</p>
-          </div>
-          <FeaturedCreators />
-          <div className="text-center mt-10">
-            <Link href="/signup" className="inline-flex items-center gap-2 text-primary font-semibold hover:underline">
-              Browse all creators <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* CTA */}
       <section className="py-16 sm:py-24 px-4 mx-3 sm:mx-4 mb-6 sm:mb-8 bg-gray-900 rounded-2xl sm:rounded-3xl max-w-7xl lg:mx-auto">

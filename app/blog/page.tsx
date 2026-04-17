@@ -159,7 +159,7 @@ export default function BlogPage() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} UGC Studio. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Townshub Limited. All rights reserved.</p>
           <p>Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a></p>
         </div>
       </footer>

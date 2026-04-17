@@ -16,10 +16,10 @@ const values = [
 ]
 
 const stats = [
-  { value: "500+", label: "Brands" },
-  { value: "10,000+", label: "Creators" },
-  { value: "50,000+", label: "Content Pieces Delivered" },
-  { value: "€2M+", label: "Paid to Creators" },
+  { value: "Global", label: "Brand & creator reach" },
+  { value: "AI", label: "Powered matching engine" },
+  { value: "Escrow", label: "Protected payments" },
+  { value: "15%", label: "Platform fee only" },
 ]
 
 const team = [
@@ -154,7 +154,7 @@ export default function AboutPage() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} UGC Studio. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Townshub Limited. All rights reserved.</p>
           <p>Need help? <a href="mailto:support@townshub.com" className="text-primary hover:underline">support@townshub.com</a></p>
         </div>
       </footer>
