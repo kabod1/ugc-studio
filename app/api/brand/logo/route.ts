@@ -1,5 +1,7 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { r2, R2_BUCKET, R2_PUBLIC_URL } from "@/lib/r2"
 
 // POST — upload brand logo
 export async function POST(request: NextRequest) {
@@ -26,20 +28,17 @@ export async function POST(request: NextRequest) {
     if (!brand) return NextResponse.json({ error: "Brand not found" }, { status: 404 })
 
     const ext = file.name.split(".").pop() || "png"
-    const fileName = `brand-logos/${brand.id}/logo-${Date.now()}.${ext}`
+    const key = `brand-logos/${brand.id}/logo-${Date.now()}.${ext}`
     const buffer = Buffer.from(await file.arrayBuffer())
 
-    const { error: uploadError } = await svc.storage
-      .from("brand-assets")
-      .upload(fileName, buffer, { contentType: file.type, upsert: true })
+    await r2.send(new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: file.type,
+    }))
 
-    if (uploadError) {
-      console.error("Logo upload error:", uploadError)
-      return NextResponse.json({ error: "Upload failed" }, { status: 500 })
-    }
-
-    const { data: { publicUrl } } = svc.storage.from("brand-assets").getPublicUrl(fileName)
-
+    const publicUrl = `${R2_PUBLIC_URL}/${key}`
     await svc.from("brands").update({ logo_url: publicUrl }).eq("id", brand.id)
 
     return NextResponse.json({ url: publicUrl })

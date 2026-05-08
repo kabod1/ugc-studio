@@ -1,5 +1,7 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { r2, R2_BUCKET, R2_PUBLIC_URL } from "@/lib/r2"
 
 // GET — fetch current tax form info
 export async function GET() {
@@ -60,26 +62,17 @@ export async function POST(request: NextRequest) {
 
     if (!profile) return NextResponse.json({ error: "Creator profile not found" }, { status: 404 })
 
-    // Upload to Supabase Storage
-    const fileName = `tax-forms/${profile.id}/${formType}-${Date.now()}.pdf`
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    const key = `tax-forms/${profile.id}/${formType}-${Date.now()}.pdf`
+    const buffer = Buffer.from(await file.arrayBuffer())
 
-    const { error: uploadError } = await svc.storage
-      .from("creator-documents")
-      .upload(fileName, buffer, {
-        contentType: "application/pdf",
-        upsert: true,
-      })
+    await r2.send(new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: "application/pdf",
+    }))
 
-    if (uploadError) {
-      console.error("Upload error:", uploadError)
-      return NextResponse.json({ error: "Failed to upload file" }, { status: 500 })
-    }
-
-    const { data: { publicUrl } } = svc.storage
-      .from("creator-documents")
-      .getPublicUrl(fileName)
+    const publicUrl = `${R2_PUBLIC_URL}/${key}`
 
     // Update profile
     const { error: updateError } = await svc
