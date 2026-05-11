@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { isAdminEmail } from "@/lib/constants"
 
 function getTeamSeatLimit(tier: string): number {
   switch (tier) {
@@ -85,8 +86,8 @@ export async function POST(request: NextRequest) {
     const tier = brand.subscription_tier || "free"
     const limit = getTeamSeatLimit(tier)
 
-    // Check seat limit (skip if unlimited)
-    if (limit !== -1) {
+    // Check seat limit (skip if unlimited or admin)
+    if (limit !== -1 && !isAdminEmail(user.email)) {
       const { count } = await supabase
         .from("team_members")
         .select("id", { count: "exact", head: true })

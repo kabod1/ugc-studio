@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
+import { isAdminEmail } from "@/lib/constants"
 
 export default async function DashboardLayout({
   children,
@@ -38,6 +39,11 @@ export default async function DashboardLayout({
       .select()
       .single()
     brand = newBrand
+  }
+
+  // Admin email gets full Scale-tier access across the entire dashboard
+  if (brand && isAdminEmail(user.email)) {
+    brand = { ...brand, subscription_tier: "scale" }
   }
 
   const userDisplay = {

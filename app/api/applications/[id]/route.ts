@@ -2,6 +2,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { canAddSeat } from "@/lib/subscription-limits"
 import { sendCampaignAcceptanceEmail, sendContractEmail } from "@/lib/email"
+import { isAdminEmail } from "@/lib/constants"
 
 export async function GET(
   _request: NextRequest,
@@ -49,7 +50,7 @@ export async function PATCH(
         .eq("id", params.id)
         .single()
 
-      if (application?.campaigns) {
+      if (application?.campaigns && !isAdminEmail(user.email)) {
         const brandId = (application.campaigns as any).brand_id
         const seatCheck = await canAddSeat(supabase, brandId, application.campaign_id)
         if (!seatCheck.allowed) {

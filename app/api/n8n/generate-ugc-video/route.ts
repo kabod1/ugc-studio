@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { generateUGCVideo } from "@/lib/n8n/workflows"
-import { SUBSCRIPTION_TIERS, type SubscriptionTier } from "@/lib/constants"
+import { SUBSCRIPTION_TIERS, type SubscriptionTier, isAdminEmail } from "@/lib/constants"
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     const tierConfig = SUBSCRIPTION_TIERS[tier] || SUBSCRIPTION_TIERS.free
     const limit = tierConfig.ugcVideosPerMonth as number
 
-    // Enforce standard video monthly limit
-    if (limit !== -1) {
+    // Enforce standard video monthly limit (admin bypasses all caps)
+    if (limit !== -1 && !isAdminEmail(user.email)) {
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
@@ -71,10 +71,10 @@ export async function POST(request: NextRequest) {
       }
 
       const effectiveQuality: "standard" | "premium" =
-        tier === "scale" && influencer.generation_quality === "premium" ? "premium" : "standard"
+        (tier === "scale" || isAdminEmail(user.email)) && influencer.generation_quality === "premium" ? "premium" : "standard"
 
-      // Enforce HeyGen monthly cap for premium
-      if (effectiveQuality === "premium") {
+      // Enforce Premium HD monthly cap (admin bypasses)
+      if (effectiveQuality === "premium" && !isAdminEmail(user.email)) {
         const heygenLimit = tierConfig.heygenVideosPerMonth as number
         if (heygenLimit > 0) {
           const now = new Date()

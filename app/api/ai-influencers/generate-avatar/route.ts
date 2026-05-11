@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 import { r2, R2_BUCKET, R2_PUBLIC_URL } from "@/lib/r2"
 import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { isAdminEmail } from "@/lib/constants"
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -20,8 +21,8 @@ export async function POST(request: NextRequest) {
 
     if (!brand) return NextResponse.json({ error: "Brand not found" }, { status: 404 })
 
-    // Free tier cannot generate virtual avatars
-    if (!brand.subscription_tier || brand.subscription_tier === "free") {
+    // Free tier cannot generate virtual avatars (admin bypasses)
+    if (!isAdminEmail(user.email) && (!brand.subscription_tier || brand.subscription_tier === "free")) {
       return NextResponse.json({
         error: "Virtual influencer generation requires a Starter plan or higher.",
         upgradeUrl: "/dashboard/settings/billing",

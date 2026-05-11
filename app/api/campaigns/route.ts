@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { campaignSchema } from "@/lib/validations/campaign"
 import { canCreateCampaign } from "@/lib/subscription-limits"
+import { isAdminEmail } from "@/lib/constants"
 
 export async function GET(request: NextRequest) {
   try {
@@ -91,15 +92,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Brand not found" }, { status: 404 })
     }
 
-    // Check subscription limit
-    const limitCheck = await canCreateCampaign(supabase, brand.id)
-    if (!limitCheck.allowed) {
-      return NextResponse.json({
-        error: limitCheck.reason,
-        current: limitCheck.current,
-        limit: limitCheck.limit,
-        upgradeUrl: "/dashboard/settings/billing",
-      }, { status: 403 })
+    // Check subscription limit (admin bypasses)
+    if (!isAdminEmail(user.email)) {
+      const limitCheck = await canCreateCampaign(supabase, brand.id)
+      if (!limitCheck.allowed) {
+        return NextResponse.json({
+          error: limitCheck.reason,
+          current: limitCheck.current,
+          limit: limitCheck.limit,
+          upgradeUrl: "/dashboard/settings/billing",
+        }, { status: 403 })
+      }
     }
 
     // Convert empty strings to null for timestamp fields

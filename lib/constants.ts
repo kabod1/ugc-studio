@@ -1,3 +1,9 @@
+export const ADMIN_EMAILS = new Set(["townshub1@gmail.com"])
+
+export function isAdminEmail(email: string | undefined | null): boolean {
+  return !!email && ADMIN_EMAILS.has(email.toLowerCase())
+}
+
 export const CONTENT_TYPES = [
   { value: "video", label: "Video" },
   { value: "image", label: "Image" },

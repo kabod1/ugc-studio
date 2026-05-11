@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { r2, R2_BUCKET, R2_PUBLIC_URL } from "@/lib/r2"
 import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { isAdminEmail } from "@/lib/constants"
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,8 +18,8 @@ export async function POST(request: NextRequest) {
 
     if (!brand) return NextResponse.json({ error: "Brand not found" }, { status: 404 })
 
-    // Free tier cannot create influencers at all (slot limit 0)
-    if (!brand.subscription_tier || brand.subscription_tier === "free") {
+    // Free tier cannot create influencers at all (admin bypasses)
+    if (!isAdminEmail(user.email) && (!brand.subscription_tier || brand.subscription_tier === "free")) {
       return NextResponse.json({
         error: "AI Influencers require a Starter plan or higher.",
         upgradeUrl: "/dashboard/settings/billing",

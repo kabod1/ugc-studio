@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
-import { SUBSCRIPTION_TIERS, type SubscriptionTier } from "@/lib/constants"
+import { SUBSCRIPTION_TIERS, type SubscriptionTier, isAdminEmail } from "@/lib/constants"
 
 export async function GET() {
   try {
@@ -44,19 +44,20 @@ export async function POST(request: NextRequest) {
 
     if (!brand) return NextResponse.json({ error: "Brand not found" }, { status: 404 })
 
-    // Enforce influencer slot limit
+    // Enforce influencer slot limit (admin bypasses all)
+    const admin = isAdminEmail(user.email)
     const tier = (brand.subscription_tier || "free") as SubscriptionTier
     const tierConfig = SUBSCRIPTION_TIERS[tier] || SUBSCRIPTION_TIERS.free
     const limit = tierConfig.aiInfluencers as number
 
-    if (limit === 0) {
+    if (!admin && limit === 0) {
       return NextResponse.json({
         error: "Your plan does not include AI Influencers. Upgrade to Starter or higher.",
         upgradeUrl: "/dashboard/settings/billing",
       }, { status: 403 })
     }
 
-    if (limit !== -1) {
+    if (!admin && limit !== -1) {
       const { count } = await supabase
         .from("ai_influencers")
         .select("id", { count: "exact", head: true })
@@ -80,8 +81,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "type must be 'uploaded' or 'virtual'" }, { status: 400 })
     }
 
-    // Only Scale can use premium quality
-    const effectiveQuality = tier === "scale" ? (generation_quality ?? "standard") : "standard"
+    // Scale or admin can use premium quality
+    const effectiveQuality = (tier === "scale" || admin) ? (generation_quality ?? "standard") : "standard"
 
     const { data: influencer, error } = await supabase
       .from("ai_influencers")
