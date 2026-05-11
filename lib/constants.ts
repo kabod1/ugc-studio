@@ -24,10 +24,10 @@ export const PLATFORMS = [
 ] as const
 
 export const SUBSCRIPTION_TIERS = {
-  free: { name: "Free", price: 0, campaigns: 2, seatsPerCampaign: 5, teamSeats: 1, ugcVideosPerMonth: 2 },
-  starter: { name: "Starter", price: 6700, campaigns: 5, seatsPerCampaign: 20, teamSeats: 1, ugcVideosPerMonth: 10 },
-  growth: { name: "Growth", price: 18700, campaigns: 10, seatsPerCampaign: 50, teamSeats: 3, ugcVideosPerMonth: 50 },
-  scale: { name: "Scale", price: 38700, campaigns: -1, seatsPerCampaign: -1, teamSeats: -1, ugcVideosPerMonth: -1 },
+  free:    { name: "Free",    price: 0,     campaigns: 2,  seatsPerCampaign: 5,  teamSeats: 1,  ugcVideosPerMonth: 2,  aiInfluencers: 0,  heygenVideosPerMonth: 0  },
+  starter: { name: "Starter", price: 1900,  campaigns: 5,  seatsPerCampaign: 20, teamSeats: 1,  ugcVideosPerMonth: 10, aiInfluencers: 1,  heygenVideosPerMonth: 0  },
+  growth:  { name: "Growth",  price: 8700,  campaigns: 10, seatsPerCampaign: 50, teamSeats: 3,  ugcVideosPerMonth: 50, aiInfluencers: 5,  heygenVideosPerMonth: 0  },
+  scale:   { name: "Scale",   price: 24300, campaigns: -1, seatsPerCampaign: -1, teamSeats: -1, ugcVideosPerMonth: -1, aiInfluencers: -1, heygenVideosPerMonth: 20 },
 } as const
 
 export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS
