@@ -47,6 +47,8 @@ export default function UGCVideosPage() {
   const [usage, setUsage] = useState<UGCVideoUsage | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [selectorKey, setSelectorKey] = useState(0)
+  const [editingCaptionId, setEditingCaptionId] = useState<string | null>(null)
+  const [editingCaptionValue, setEditingCaptionValue] = useState("")
 
   useEffect(() => {
     fetchJobs()
@@ -189,6 +191,23 @@ export default function UGCVideosPage() {
     setProductImageUrl(job.product_image_url)
     setActiveTab("generate")
     toast.info("Product image URL loaded. Click 'Generate Video' to retry.")
+  }
+
+  async function handleSaveCaption(jobId: string) {
+    try {
+      const res = await fetch("/api/ugc-videos", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ job_id: jobId, caption: editingCaptionValue }),
+      })
+      if (!res.ok) throw new Error("Failed to save")
+      setJobs((prev) => prev.map((j) => j.id === jobId ? { ...j, caption: editingCaptionValue } : j))
+      toast.success("Caption saved")
+    } catch {
+      toast.error("Failed to save caption")
+    } finally {
+      setEditingCaptionId(null)
+    }
   }
 
   function handleCopyUrl(url: string) {
@@ -416,6 +435,15 @@ export default function UGCVideosPage() {
                               <>
                                 <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
                                 <div className="absolute right-0 top-8 z-20 w-48 bg-popover border rounded-md shadow-lg py-1">
+                                  {job.status === "completed" && (
+                                    <button
+                                      onClick={() => { setEditingCaptionId(job.id); setEditingCaptionValue(job.caption ?? ""); setOpenMenuId(null) }}
+                                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted w-full text-left"
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                      Edit caption
+                                    </button>
+                                  )}
                                   {job.video_url && (
                                     <>
                                       <a
@@ -459,7 +487,47 @@ export default function UGCVideosPage() {
                           </div>
                         </div>
                       </div>
-                      {job.caption && <p className="text-sm text-muted-foreground line-clamp-2">{job.caption}</p>}
+                      {/* Editable caption */}
+                      {job.status === "completed" && (
+                        editingCaptionId === job.id ? (
+                          <div className="space-y-1.5">
+                            <textarea
+                              value={editingCaptionValue}
+                              onChange={(e) => setEditingCaptionValue(e.target.value)}
+                              rows={3}
+                              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleSaveCaption(job.id)}
+                                className="inline-flex items-center px-3 py-1 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setEditingCaptionId(null)}
+                                className="inline-flex items-center px-3 py-1 rounded-md border text-xs hover:bg-muted"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => { setEditingCaptionId(job.id); setEditingCaptionValue(job.caption ?? "") }}
+                            className="w-full text-left text-sm text-muted-foreground hover:text-foreground group"
+                          >
+                            {job.caption
+                              ? <span className="line-clamp-2 group-hover:line-clamp-none">{job.caption}</span>
+                              : <span className="italic opacity-50">Add caption…</span>
+                            }
+                          </button>
+                        )
+                      )}
+                      {job.status !== "completed" && job.caption && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">{job.caption}</p>
+                      )}
                       {job.error_message && <p className="text-sm text-destructive">{job.error_message}</p>}
                       {job.video_url && (
                         <div className="flex gap-2">
