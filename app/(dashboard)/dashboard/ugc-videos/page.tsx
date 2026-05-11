@@ -8,8 +8,7 @@ import {
   MoreVertical, Trash2, RotateCcw, Copy, ExternalLink, Bot
 } from "lucide-react"
 import { formatDate } from "@/lib/utils"
-import { SUBSCRIPTION_TIERS, type SubscriptionTier } from "@/lib/constants"
-import { createClient } from "@/lib/supabase/client"
+import { type SubscriptionTier } from "@/lib/constants"
 import { AIInfluencersTab } from "@/components/ugc/ai-influencers-tab"
 import { InfluencerSelector } from "@/components/ugc/influencer-selector"
 
@@ -52,45 +51,7 @@ export default function UGCVideosPage() {
 
   useEffect(() => {
     fetchJobs()
-    fetchUsage()
   }, [])
-
-  async function fetchUsage() {
-    try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data: brand } = await supabase
-        .from("brands")
-        .select("id, subscription_tier")
-        .eq("user_id", user.id)
-        .single()
-
-      if (!brand) return
-
-      const tierKey = (brand.subscription_tier || "free") as SubscriptionTier
-      const tierConfig = SUBSCRIPTION_TIERS[tierKey] || SUBSCRIPTION_TIERS.free
-
-      const now = new Date()
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-      const { count } = await supabase
-        .from("ugc_video_jobs")
-        .select("id", { count: "exact", head: true })
-        .eq("brand_id", brand.id)
-        .gte("created_at", startOfMonth)
-
-      setUsage({
-        used: count ?? 0,
-        limit: tierConfig.ugcVideosPerMonth,
-        tier: tierConfig.name,
-        tierKey,
-        aiInfluencers: tierConfig.aiInfluencers,
-      })
-    } catch {
-      // Silently fail
-    }
-  }
 
   useEffect(() => {
     if (!pollingJobId) return
@@ -120,6 +81,7 @@ export default function UGCVideosPage() {
       if (res.ok) {
         const data = await res.json()
         setJobs(data.jobs || [])
+        if (data.usage) setUsage(data.usage)
       }
     } catch (err) {
       console.error("Failed to fetch UGC jobs:", err)

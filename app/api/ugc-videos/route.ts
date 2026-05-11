@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { SUBSCRIPTION_TIERS, type SubscriptionTier, isAdminEmail } from "@/lib/constants"
 
 export async function GET() {
   try {
@@ -9,11 +10,25 @@ export async function GET() {
 
     const { data: brand } = await supabase
       .from("brands")
-      .select("id")
+      .select("id, subscription_tier")
       .eq("user_id", user.id)
       .single()
 
-    if (!brand) return NextResponse.json({ jobs: [] })
+    if (!brand) return NextResponse.json({ jobs: [], usage: null })
+
+    // Admin gets Scale-tier limits regardless of DB value
+    const effectiveTierKey = isAdminEmail(user.email)
+      ? "scale"
+      : ((brand.subscription_tier || "free") as SubscriptionTier)
+    const tierConfig = SUBSCRIPTION_TIERS[effectiveTierKey] || SUBSCRIPTION_TIERS.free
+
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const { count: usedCount } = await supabase
+      .from("ugc_video_jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("brand_id", brand.id)
+      .gte("created_at", startOfMonth)
 
     const { data: jobs } = await supabase
       .from("ugc_video_jobs")
@@ -21,7 +36,16 @@ export async function GET() {
       .eq("brand_id", brand.id)
       .order("created_at", { ascending: false })
 
-    return NextResponse.json({ jobs: jobs || [] })
+    return NextResponse.json({
+      jobs: jobs || [],
+      usage: {
+        used: usedCount ?? 0,
+        limit: tierConfig.ugcVideosPerMonth,
+        tier: tierConfig.name,
+        tierKey: effectiveTierKey,
+        aiInfluencers: tierConfig.aiInfluencers,
+      },
+    })
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
