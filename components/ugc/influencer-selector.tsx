@@ -48,7 +48,7 @@ export function InfluencerSelector({ value, onChange, disabled }: InfluencerSele
             />
             <span className="flex-1 truncate">{selected.name}</span>
             {selected.generation_quality === "premium" && (
-              <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">HeyGen</span>
+              <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Premium HD</span>
             )}
           </>
         ) : (
@@ -86,7 +86,7 @@ export function InfluencerSelector({ value, onChange, disabled }: InfluencerSele
                 />
                 <span className="flex-1 truncate">{inf.name}</span>
                 {inf.generation_quality === "premium" && (
-                  <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">HeyGen</span>
+                  <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Premium HD</span>
                 )}
               </button>
             ))}

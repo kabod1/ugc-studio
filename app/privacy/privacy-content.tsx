@@ -42,7 +42,7 @@ const content: Record<LegalLang, React.ReactNode> = {
         <li>Comply with legal obligations (tax reporting, GDPR requests)</li>
       </ul>
       <h2>3. AI-Powered Features</h2>
-      <p>Our platform uses OpenAI&apos;s GPT-4o to power creator-campaign matching and content quality scoring. These features require your explicit consent via the AI Processing preference in your account settings.</p>
+      <p>Our platform uses AI to power creator-campaign matching and content quality scoring. These features require your explicit consent via the AI Processing preference in your account settings.</p>
       <ul>
         <li>Creator profile data and campaign briefs are sent to OpenAI for analysis</li>
         <li>Content submissions may be analyzed for quality scoring</li>
@@ -114,7 +114,7 @@ const content: Record<LegalLang, React.ReactNode> = {
         <li>Erfüllung gesetzlicher Pflichten</li>
       </ul>
       <h2>3. KI-gestützte Funktionen</h2>
-      <p>Unsere Plattform nutzt OpenAIs GPT-4o für Creator-Matching und Content-Qualitätsbewertung. Diese Funktionen erfordern Ihre ausdrückliche Einwilligung über die KI-Verarbeitungseinstellung in Ihrem Konto.</p>
+      <p>Unsere Plattform nutzt KI für Creator-Matching und Content-Qualitätsbewertung. Diese Funktionen erfordern Ihre ausdrückliche Einwilligung über die KI-Verarbeitungseinstellung in Ihrem Konto.</p>
       <ul>
         <li>Wir verwenden Ihre Daten nicht zum Training von KI-Modellen Dritter</li>
         <li>KI-generierte Ergebnisse sind beratend, keine Garantien</li>
@@ -180,7 +180,7 @@ const content: Record<LegalLang, React.ReactNode> = {
         <li>Respecter les obligations légales</li>
       </ul>
       <h2>3. Fonctionnalités alimentées par IA</h2>
-      <p>Notre plateforme utilise GPT-4o d&apos;OpenAI pour la mise en correspondance créateurs-campagnes et la notation de la qualité du contenu. Ces fonctionnalités nécessitent votre consentement explicite.</p>
+      <p>Notre plateforme utilise l&apos;IA pour la mise en correspondance créateurs-campagnes et la notation de la qualité du contenu. Ces fonctionnalités nécessitent votre consentement explicite.</p>
       <ul>
         <li>Nous n&apos;utilisons pas vos données pour entraîner des modèles d&apos;IA tiers</li>
         <li>Les résultats générés par IA sont consultatifs, non garantis</li>

@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
           if ((heygenCount ?? 0) >= heygenLimit) {
             return NextResponse.json({
-              error: `You've used all ${heygenLimit} premium HeyGen videos this month. Contact sales for a custom enterprise plan.`,
+              error: `You've used all ${heygenLimit} Premium HD videos this month. Contact sales for a custom enterprise plan.`,
               upgradeUrl: "/dashboard/settings/billing",
             }, { status: 403 })
           }

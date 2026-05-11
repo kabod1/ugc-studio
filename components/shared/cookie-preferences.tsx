@@ -109,7 +109,7 @@ export function CookiePreferences({ open, onClose, onSave }: CookiePreferencesPr
             <div>
               <p className="text-sm font-semibold">AI-Powered Matching &amp; Scoring</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Allow your profile data and content to be processed by OpenAI (GPT-4o) for
+                Allow your profile data and content to be processed by AI for
                 creator-campaign matching and content quality scoring. Disabling this may limit
                 platform recommendations.
               </p>

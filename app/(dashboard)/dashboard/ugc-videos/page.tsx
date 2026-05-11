@@ -235,7 +235,7 @@ export default function UGCVideosPage() {
       <div>
         <h1 className="text-2xl font-bold">AI UGC Video Generator</h1>
         <p className="text-muted-foreground">
-          Powered by GPT-4o, ElevenLabs &amp; WaveSpeed · Premium: HeyGen
+          AI-powered video generation · Premium HD quality on Scale plan
         </p>
       </div>
 

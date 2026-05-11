@@ -17,7 +17,7 @@ const features = [
   {
     icon: Users,
     title: "AI Creator Matching",
-    description: "GPT-4o powered matching finds the perfect creators for every campaign. Filter by category, platform, location, and ratings.",
+    description: "AI-powered matching finds the perfect creators for every campaign. Filter by category, platform, location, and ratings.",
     color: "from-blue-500 to-blue-600",
     bg: "bg-blue-50",
   },
@@ -51,8 +51,8 @@ const features = [
   },
   {
     icon: Video,
-    title: "AI Video Generation",
-    description: "Generate authentic UGC-style video ads with AI. GPT-4o analysis, ElevenLabs voice, and WaveSpeed lip-sync.",
+    title: "AI Influencer Studio",
+    description: "Create custom AI personas with your brand's look and voice. Generate authentic UGC-style talking-head videos at scale, no filming required.",
     color: "from-indigo-500 to-indigo-600",
     bg: "bg-indigo-50",
   },
@@ -217,7 +217,7 @@ export default function LandingPage() {
         <div className="relative max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 border border-primary/20">
             <Sparkles className="h-3.5 w-3.5" />
-            GPT-4o Powered UGC Platform
+            AI-Powered UGC Platform
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-5 text-gray-900 leading-[1.1]">

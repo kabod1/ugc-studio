@@ -25,7 +25,7 @@ const subprocessors = [
   },
   {
     name: "OpenAI",
-    purpose: "AI-powered creator-campaign matching and content quality scoring (GPT-4o)",
+    purpose: "AI-powered creator-campaign matching and content quality scoring",
     dataTypes: "Creator profile excerpts, campaign briefs, content metadata (when AI processing consent is given)",
     location: "USA",
     dpa: "https://openai.com/policies/privacy-policy",

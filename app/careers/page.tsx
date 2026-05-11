@@ -49,7 +49,7 @@ const openings = [
     department: "Engineering",
     location: "Remote (Europe)",
     type: "Full-time",
-    description: "Improve our creator matching, quality scoring, and content analysis systems. You'll work with GPT-4o, embeddings, and custom ML models.",
+    description: "Improve our creator matching, quality scoring, and content analysis systems. You'll work with large language models, embeddings, and custom ML models.",
   },
 ]
 

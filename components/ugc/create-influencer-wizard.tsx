@@ -352,7 +352,7 @@ export function CreateInfluencerWizard({ onClose, onCreated, isScaleTier }: Crea
                     placeholder='e.g. "Enthusiastic tech reviewer who speaks simply and focuses on real-world benefits..."'
                     className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">GPT-4o uses this when writing the product review script</p>
+                  <p className="text-xs text-muted-foreground mt-1">AI uses this personality when writing the product review script</p>
                 </div>
                 {isScaleTier && (
                   <div>
@@ -365,11 +365,11 @@ export function CreateInfluencerWizard({ onClose, onCreated, isScaleTier }: Crea
                           onClick={() => setGenerationQuality(q)}
                           className={`flex-1 px-3 py-2 rounded-md text-sm border capitalize transition-colors ${generationQuality === q ? "border-primary bg-primary/5 font-medium" : "border-input hover:bg-muted"}`}
                         >
-                          {q === "premium" ? "Premium (HeyGen)" : "Standard"}
+                          {q === "premium" ? "Premium HD" : "Standard"}
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">Premium uses HeyGen for highest quality (20/mo included)</p>
+                    <p className="text-xs text-muted-foreground mt-1">Premium HD delivers highest quality talking-head videos (20/mo included on Scale)</p>
                   </div>
                 )}
               </div>
@@ -394,7 +394,7 @@ export function CreateInfluencerWizard({ onClose, onCreated, isScaleTier }: Crea
                 </p>
               )}
               <span className={`inline-block text-xs px-2 py-1 rounded font-medium ${generationQuality === "premium" ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}>
-                {generationQuality === "premium" ? "Premium (HeyGen)" : "Standard"}
+                {generationQuality === "premium" ? "Premium HD" : "Standard"}
               </span>
             </div>
           )}

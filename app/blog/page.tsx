@@ -21,7 +21,7 @@ const posts = [
   {
     slug: "ai-creator-matching",
     title: "How AI Matching Finds Your Perfect Creator in Seconds",
-    excerpt: "Our GPT-4o powered matching engine scores creators against your campaign brief. Here's how it works under the hood and why it outperforms manual search.",
+    excerpt: "Our AI matching engine scores creators against your campaign brief. Here's how it works under the hood and why it outperforms manual search.",
     author: "Kai M.",
     date: "Feb 5, 2026",
     readTime: "8 min read",
@@ -48,7 +48,7 @@ const posts = [
   {
     slug: "content-quality-scoring",
     title: "Inside Our AI Quality Scoring System",
-    excerpt: "We use GPT-4o to analyze content quality before brands even review it. Here's how our scoring system works and what it looks for.",
+    excerpt: "We use AI to analyze content quality before brands even review it. Here's how our scoring system works and what it looks for.",
     author: "Kai M.",
     date: "Jan 14, 2026",
     readTime: "6 min read",

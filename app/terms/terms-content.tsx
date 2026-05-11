@@ -70,7 +70,7 @@ const content: Record<LegalLang, React.ReactNode> = {
         <li>You may not upload content that infringes on third-party intellectual property</li>
       </ul>
       <h2>7. AI-Powered Features</h2>
-      <p>The Service uses AI (GPT-4o) for creator matching and content quality scoring. AI-generated results are advisory and do not constitute guarantees of creator performance or content quality.</p>
+      <p>The Service uses AI for creator matching and content quality scoring. AI-generated results are advisory and do not constitute guarantees of creator performance or content quality.</p>
       <h2>8. Prohibited Uses</h2>
       <p>You may not:</p>
       <ul>
@@ -144,7 +144,7 @@ const content: Record<LegalLang, React.ReactNode> = {
         <li>Sie dürfen keine Inhalte hochladen, die geistige Eigentumsrechte Dritter verletzen</li>
       </ul>
       <h2>7. KI-gestützte Funktionen</h2>
-      <p>Der Dienst nutzt KI (GPT-4o) für Creator-Matching und Content-Qualitätsbewertung. KI-Ergebnisse sind beratend und stellen keine Garantien dar.</p>
+      <p>Der Dienst nutzt KI für Creator-Matching und Content-Qualitätsbewertung. KI-Ergebnisse sind beratend und stellen keine Garantien dar.</p>
       <h2>8. Verbotene Nutzung</h2>
       <ul>
         <li>Den Dienst für illegale Zwecke nutzen</li>
@@ -212,7 +212,7 @@ const content: Record<LegalLang, React.ReactNode> = {
         <li>Vous ne pouvez pas télécharger du contenu qui enfreint les droits de propriété intellectuelle de tiers</li>
       </ul>
       <h2>7. Fonctionnalités alimentées par IA</h2>
-      <p>Le Service utilise l&apos;IA (GPT-4o) pour la mise en correspondance des créateurs et la notation de la qualité du contenu. Les résultats générés par l&apos;IA sont consultatifs.</p>
+      <p>Le Service utilise l&apos;IA pour la mise en correspondance des créateurs et la notation de la qualité du contenu. Les résultats générés par l&apos;IA sont consultatifs.</p>
       <h2>8. Utilisations interdites</h2>
       <ul>
         <li>Utiliser le Service à des fins illégales</li>
