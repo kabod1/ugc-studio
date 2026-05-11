@@ -72,6 +72,11 @@ export interface UGCVideoParams {
   callback_url: string
   campaign_id?: string
   brand_id?: string
+  avatar_image_url?: string
+  generation_quality?: "standard" | "premium"
+  heygen_avatar_id?: string
+  voice_id?: string
+  personality?: string
 }
 
 export interface UGCVideoResult {

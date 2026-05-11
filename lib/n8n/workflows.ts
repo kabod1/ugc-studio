@@ -67,7 +67,14 @@ export async function generateUGCVideo(
   jobId: string,
   callbackUrl: string,
   campaignId?: string,
-  brandId?: string
+  brandId?: string,
+  influencerParams?: {
+    avatar_image_url?: string
+    generation_quality?: "standard" | "premium"
+    heygen_avatar_id?: string
+    voice_id?: string
+    personality?: string
+  }
 ) {
   const params: UGCVideoParams = {
     product_image_url: productImageUrl,
@@ -75,6 +82,7 @@ export async function generateUGCVideo(
     callback_url: callbackUrl,
     campaign_id: campaignId,
     brand_id: brandId,
+    ...influencerParams,
   }
   return callN8nWebhook<UGCVideoResult>(
     "/ugc-generate-video",
