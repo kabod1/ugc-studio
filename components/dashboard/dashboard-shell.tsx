@@ -9,7 +9,7 @@ import {
   CreditCard, BarChart3, Settings, Menu,
   Bell, ChevronLeft, Video, LogOut, Building2, Palette,
   Shield, UserCheck, Eye, Sliders, MessageSquare, HelpCircle,
-  BookOpen, Briefcase, Share2, Mail, X
+  BookOpen, Briefcase, Share2, Mail, X, ArrowLeftRight, Loader2
 } from "lucide-react"
 import { useUser } from "@/hooks/use-user"
 import { LogoIcon, LogoHorizontal } from "@/components/shared/logo"
@@ -83,13 +83,39 @@ interface DashboardShellProps {
   children: React.ReactNode
   user: any
   role: "brand" | "creator" | "admin"
+  isAdmin?: boolean
 }
 
-export function DashboardShell({ children, user, role }: DashboardShellProps) {
+export function DashboardShell({ children, user, role, isAdmin }: DashboardShellProps) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [switching, setSwitching] = useState(false)
   const pathname = usePathname()
   const { signOut } = useUser()
+
+  async function handleRoleSwitch(targetRole: "brand" | "creator") {
+    setSwitching(true)
+    if (isAdmin) {
+      // Admin navigates directly — no role change needed, layouts accept admin role
+      window.location.href = targetRole === "brand" ? "/dashboard" : "/creator"
+      return
+    }
+    try {
+      const res = await fetch("/api/auth/switch-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: targetRole }),
+      })
+      const data = await res.json()
+      if (data.redirectTo) {
+        window.location.href = data.redirectTo
+      } else {
+        setSwitching(false)
+      }
+    } catch {
+      setSwitching(false)
+    }
+  }
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -187,6 +213,48 @@ export function DashboardShell({ children, user, role }: DashboardShellProps) {
                 <p className="text-xs text-muted-foreground capitalize">{role}</p>
               </div>
             </div>
+          )}
+          {/* Role switcher */}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors",
+                collapsed ? "justify-center px-2" : ""
+              )}
+              title={collapsed ? "Admin Panel" : undefined}
+            >
+              <Shield className="h-[18px] w-[18px] shrink-0" />
+              {!collapsed && <span>Admin Panel</span>}
+            </Link>
+          )}
+          {role !== "creator" && (
+            <button
+              onClick={() => handleRoleSwitch("creator")}
+              disabled={switching}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors disabled:opacity-50",
+                collapsed ? "justify-center px-2" : ""
+              )}
+              title={collapsed ? "Switch to Creator" : undefined}
+            >
+              {switching ? <Loader2 className="h-[18px] w-[18px] shrink-0 animate-spin" /> : <Palette className="h-[18px] w-[18px] shrink-0" />}
+              {!collapsed && <span>{switching ? "Switching…" : "Switch to Creator"}</span>}
+            </button>
+          )}
+          {role !== "brand" && (
+            <button
+              onClick={() => handleRoleSwitch("brand")}
+              disabled={switching}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors disabled:opacity-50",
+                collapsed ? "justify-center px-2" : ""
+              )}
+              title={collapsed ? "Switch to Brand" : undefined}
+            >
+              {switching ? <Loader2 className="h-[18px] w-[18px] shrink-0 animate-spin" /> : <Building2 className="h-[18px] w-[18px] shrink-0" />}
+              {!collapsed && <span>{switching ? "Switching…" : "Switch to Brand"}</span>}
+            </button>
           )}
           <a
             href="mailto:support@townshub.com"

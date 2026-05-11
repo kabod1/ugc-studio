@@ -1,5 +1,6 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { isAdminEmail } from "@/lib/constants"
 
@@ -14,10 +15,12 @@ export default async function DashboardLayout({
   if (!session) redirect("/login")
   const user = session.user
 
-  // Role is stored in user_metadata (set at signup) — profiles table is admin-only
-  const role = user.user_metadata?.role || "brand"
-  if (role !== "brand") {
-    redirect(role === "creator" ? "/creator" : role === "admin" ? "/admin" : "/login")
+  // Cookie is updated immediately on role switch; user_metadata lags until session refresh
+  const cookieStore = cookies()
+  const role = cookieStore.get("user-role")?.value || user.user_metadata?.role || "brand"
+  // Allow admin to access the brand dashboard without switching their role
+  if (role !== "brand" && role !== "admin") {
+    redirect(role === "creator" ? "/creator" : "/login")
   }
 
   const service = createServiceClient()
@@ -56,7 +59,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <DashboardShell user={userDisplay} role="brand">
+    <DashboardShell user={userDisplay} role="brand" isAdmin={isAdminEmail(user.email)}>
       {children}
     </DashboardShell>
   )
