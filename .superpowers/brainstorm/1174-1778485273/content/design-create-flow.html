@@ -1,0 +1,97 @@
+<h2>Design — Section 2: Create Influencer Flow</h2>
+<p class="subtitle">4-step wizard. Step 2 branches based on source type chosen.</p>
+
+<div style="display:flex;gap:8px;margin-bottom:20px;align-items:center;font-size:11px;color:#6b7280">
+  <span style="background:#7c3aed;color:white;padding:3px 10px;border-radius:20px;font-weight:600">1 Name & Source</span>
+  <span>→</span>
+  <span style="background:#e5e7eb;padding:3px 10px;border-radius:20px">2 Avatar</span>
+  <span>→</span>
+  <span style="background:#e5e7eb;padding:3px 10px;border-radius:20px">3 Voice & Personality</span>
+  <span>→</span>
+  <span style="background:#e5e7eb;padding:3px 10px;border-radius:20px">4 Review</span>
+</div>
+
+<div class="split">
+
+  <!-- Step 1 -->
+  <div class="mockup">
+    <div class="mockup-header">Step 1 — Name & Source Type</div>
+    <div class="mockup-body" style="font-size:12px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px">Influencer Name</div>
+        <div class="mock-input" style="font-size:12px">e.g. Sarah, Marcus, Luna...</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:6px">How do you want to create the avatar?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="border:2px solid #7c3aed;border-radius:8px;padding:10px;text-align:center;background:#f5f3ff">
+            <div style="font-size:18px">📷</div>
+            <div style="font-weight:600;font-size:11px;margin-top:4px">Upload Photo</div>
+            <div style="font-size:10px;color:#6b7280">Your brand ambassador</div>
+          </div>
+          <div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:18px">✨</div>
+            <div style="font-weight:600;font-size:11px;margin-top:4px">Create Virtual</div>
+            <div style="font-size:10px;color:#6b7280">AI-generated persona</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2 branches -->
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="mockup">
+      <div class="mockup-header">Step 2A — Upload Photo (real ambassador)</div>
+      <div class="mockup-body" style="font-size:12px">
+        <div style="border:2px dashed #d1d5db;border-radius:8px;padding:16px;text-align:center;color:#9ca3af">
+          <div style="font-size:20px;margin-bottom:4px">📁</div>
+          <div style="font-size:11px">Drag & drop or click to upload</div>
+          <div style="font-size:10px;margin-top:2px">JPG, PNG · Clear face photo recommended</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mockup">
+      <div class="mockup-header">Step 2B — Create Virtual (3 sub-options)</div>
+      <div class="mockup-body" style="font-size:11px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:6px">
+          <div style="border:1px solid #7c3aed;border-radius:6px;padding:6px 10px;background:#f5f3ff;font-size:10px;cursor:pointer;font-weight:600;color:#7c3aed">✏️ Text Prompt</div>
+          <div style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:10px;cursor:pointer">🎨 Style Picker</div>
+          <div style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:10px;cursor:pointer">🤖 AI Generate 4</div>
+        </div>
+        <div class="mock-input" style="font-size:11px">Describe your ideal influencer... (Text Prompt active)</div>
+        <button style="background:#7c3aed;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;align-self:flex-start">Generate →</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+          <div style="border:2px solid #7c3aed;border-radius:6px;aspect-ratio:1;background:linear-gradient(135deg,#e0d7ff,#c4b5fd);display:flex;align-items:center;justify-content:center;font-size:16px">👩 ✓</div>
+          <div style="border:1px solid #e5e7eb;border-radius:6px;aspect-ratio:1;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:16px">🧑</div>
+          <div style="border:1px solid #e5e7eb;border-radius:6px;aspect-ratio:1;background:linear-gradient(135deg,#dcfce7,#bbf7d0);display:flex;align-items:center;justify-content:center;font-size:16px">👨</div>
+          <div style="border:1px solid #e5e7eb;border-radius:6px;aspect-ratio:1;background:linear-gradient(135deg,#fee2e2,#fecaca);display:flex;align-items:center;justify-content:center;font-size:16px">👱</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top:12px">
+  <div class="mockup-header">Step 3 — Voice & Personality</div>
+  <div class="mockup-body" style="font-size:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div>
+      <div style="font-weight:600;font-size:11px;margin-bottom:6px">Voice Style</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="border:2px solid #7c3aed;border-radius:6px;padding:6px 10px;background:#f5f3ff;font-size:11px;display:flex;justify-content:space-between">Warm & Friendly <span>▶</span></div>
+        <div style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:11px;display:flex;justify-content:space-between">Deep & Authoritative <span>▶</span></div>
+        <div style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:11px;display:flex;justify-content:space-between">Energetic & Youthful <span>▶</span></div>
+        <div style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:11px;display:flex;justify-content:space-between">Professional & Calm <span>▶</span></div>
+        <div style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:11px;color:#6b7280">Use global default</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-weight:600;font-size:11px;margin-bottom:6px">Personality / Script Tone</div>
+      <div class="mock-input" style="font-size:11px;height:80px">e.g. "Enthusiastic tech reviewer who speaks simply and focuses on real-world benefits..."</div>
+      <div style="font-size:10px;color:#6b7280;margin-top:4px">GPT-4o uses this when writing the product review script for this influencer</div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:12px">Does this creation flow make sense? Any steps to add or remove?</p>

@@ -1,0 +1,73 @@
+<h2>Design — Section 1: UI Layout</h2>
+<p class="subtitle">UGC Videos page gains three tabs. AI Influencers is the hub for managing personas.</p>
+
+<div class="mockup">
+  <div class="mockup-header">UGC Videos Page — with AI Influencers tab</div>
+  <div class="mockup-body" style="padding:0;font-size:12px">
+
+    <!-- Page header -->
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb">
+      <div style="font-weight:700;font-size:16px">AI UGC Video Generator</div>
+      <div style="color:#6b7280;font-size:11px;margin-top:2px">Powered by GPT-4o, ElevenLabs & WaveSpeed · Premium: HeyGen</div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;border-bottom:2px solid #e5e7eb;padding:0 20px;background:#fafafa">
+      <div style="padding:10px 16px;color:#6b7280;font-size:12px;cursor:pointer">🎬 Generate Video</div>
+      <div style="padding:10px 16px;font-size:12px;font-weight:600;color:#7c3aed;border-bottom:2px solid #7c3aed;margin-bottom:-2px;cursor:pointer">🤖 AI Influencers</div>
+      <div style="padding:10px 16px;color:#6b7280;font-size:12px;cursor:pointer">📂 Past Videos</div>
+    </div>
+
+    <!-- AI Influencers tab content -->
+    <div style="padding:20px">
+
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div>
+          <div style="font-weight:600;font-size:13px">Your AI Influencers</div>
+          <div style="color:#6b7280;font-size:11px">Create and manage your brand's AI personas · 2/5 used</div>
+        </div>
+        <button style="background:#7c3aed;color:white;border:none;padding:7px 14px;border-radius:6px;font-size:12px;cursor:pointer">+ Create Influencer</button>
+      </div>
+
+      <!-- Influencer cards -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+
+        <!-- Card 1 - uploaded photo -->
+        <div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden">
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#e0d7ff,#c4b5fd);display:flex;align-items:center;justify-content:center;font-size:28px">👩</div>
+          <div style="padding:10px">
+            <div style="font-weight:600;font-size:12px">Sarah — Brand Rep</div>
+            <div style="font-size:10px;color:#6b7280;margin-top:2px">📷 Uploaded photo · Voice: Warm</div>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <span style="font-size:10px;background:#dcfce7;color:#16a34a;padding:2px 6px;border-radius:4px">Standard</span>
+              <button style="font-size:10px;color:#7c3aed;background:none;border:1px solid #7c3aed;padding:2px 8px;border-radius:4px;cursor:pointer">Use</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 - virtual / HeyGen premium -->
+        <div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden">
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:28px">🧑</div>
+          <div style="padding:10px">
+            <div style="font-weight:600;font-size:12px">Marcus — Tech Expert</div>
+            <div style="font-size:10px;color:#6b7280;margin-top:2px">✨ AI Generated · Voice: Deep</div>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <span style="font-size:10px;background:#fef3c7;color:#b45309;padding:2px 6px;border-radius:4px">⭐ Premium (HeyGen)</span>
+              <button style="font-size:10px;color:#7c3aed;background:none;border:1px solid #7c3aed;padding:2px 8px;border-radius:4px;cursor:pointer">Use</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 - add new -->
+        <div style="border:2px dashed #d1d5db;border-radius:10px;display:flex;align-items:center;justify-content:center;min-height:160px;cursor:pointer;color:#9ca3af;flex-direction:column;gap:6px">
+          <div style="font-size:24px">+</div>
+          <div style="font-size:11px">Add Influencer</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:12px">Standard badge = WaveSpeed pipeline (B). Premium HeyGen badge = Scale tier only (C). Does this layout look right?</p>

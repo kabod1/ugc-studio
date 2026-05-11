@@ -106,6 +106,7 @@ export function CreateInfluencerWizard({ onClose, onCreated, isScaleTier }: Crea
           voice_id: voiceId,
           personality: personality || null,
           generation_quality: generationQuality,
+          style_data: sourceType === "virtual" ? styleData : undefined,
         }),
       })
       const data = await res.json()

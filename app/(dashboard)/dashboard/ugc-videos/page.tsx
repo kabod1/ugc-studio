@@ -46,6 +46,7 @@ export default function UGCVideosPage() {
   const [pollingJobId, setPollingJobId] = useState<string | null>(null)
   const [usage, setUsage] = useState<UGCVideoUsage | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const [selectorKey, setSelectorKey] = useState(0)
 
   useEffect(() => {
     fetchJobs()
@@ -261,6 +262,7 @@ export default function UGCVideosPage() {
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">AI Influencer</label>
                   <InfluencerSelector
+                    key={selectorKey}
                     value={selectedInfluencerId}
                     onChange={(id) => setSelectedInfluencerId(id)}
                     disabled={generating}
@@ -333,6 +335,7 @@ export default function UGCVideosPage() {
         <AIInfluencersTab
           isScaleTier={usage.tierKey === "scale"}
           influencerLimit={usage.aiInfluencers}
+          onInfluencerCreated={() => setSelectorKey((k) => k + 1)}
         />
       )}
       {activeTab === "influencers" && !usage && (

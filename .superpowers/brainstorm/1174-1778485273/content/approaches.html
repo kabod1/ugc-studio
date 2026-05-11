@@ -1,0 +1,42 @@
+<h2>Three Implementation Approaches</h2>
+<p class="subtitle">How should AI Influencer video generation be powered under the hood?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Minimal — Extend existing stack only</h3>
+      <p>Store avatar photos/generated images in R2 (already used). Pass the avatar image URL into the existing n8n/WaveSpeed workflow as the presenter face. WaveSpeed animates the face with lip-sync.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>No new APIs</li><li>Fastest to build</li><li>Zero extra cost</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>WaveSpeed wasn't designed for custom face animation — results may be inconsistent</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>⭐ Recommended — Hybrid (OpenAI + existing stack)</h3>
+      <p>Use OpenAI DALL-E 3 (already configured) to generate virtual influencer images from prompts/style pickers — showing 4 options for the brand to choose. Store all avatars (uploaded + generated) in R2. Pass avatar to WaveSpeed pipeline. GPT-4o writes the script in the influencer's personality. ElevenLabs handles their chosen voice.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Reuses all existing services (OpenAI already paid for)</li><li>Personalized scripts per influencer</li><li>Full feature set — upload, prompt, style picker, 4-option picker</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>DALL-E costs per image generation</li><li>Face animation quality depends on WaveSpeed</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Premium — HeyGen API integration</h3>
+      <p>Replace WaveSpeed with HeyGen — a purpose-built AI avatar video platform. HeyGen natively supports custom avatar upload, text-to-avatar generation, and produces the highest-quality talking head videos. Requires new n8n workflow nodes.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Highest quality avatar videos</li><li>Industry-standard for AI presenters</li><li>Native face-swap & custom avatar</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>New paid service (~$29–80/month)</li><li>Significant n8n workflow rebuild</li><li>Longest to implement</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:16px">I recommend <strong>B</strong> — it delivers all the features you described using services already in your stack.</p>

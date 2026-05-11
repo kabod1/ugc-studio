@@ -19,6 +19,7 @@ interface AIInfluencer {
 interface AIInfluencersTabProps {
   isScaleTier: boolean
   influencerLimit: number
+  onInfluencerCreated?: () => void
 }
 
 const VOICE_LABEL: Record<string, string> = {
@@ -28,7 +29,7 @@ const VOICE_LABEL: Record<string, string> = {
   "MF3mGyEYCl7XYWbV9V6O": "Professional & Calm",
 }
 
-export function AIInfluencersTab({ isScaleTier, influencerLimit }: AIInfluencersTabProps) {
+export function AIInfluencersTab({ isScaleTier, influencerLimit, onInfluencerCreated }: AIInfluencersTabProps) {
   const [influencers, setInfluencers] = useState<AIInfluencer[]>([])
   const [loading, setLoading] = useState(true)
   const [showWizard, setShowWizard] = useState(false)
@@ -159,7 +160,7 @@ export function AIInfluencersTab({ isScaleTier, influencerLimit }: AIInfluencers
       {showWizard && (
         <CreateInfluencerWizard
           onClose={() => setShowWizard(false)}
-          onCreated={fetchInfluencers}
+          onCreated={() => { fetchInfluencers(); onInfluencerCreated?.() }}
           isScaleTier={isScaleTier}
         />
       )}
