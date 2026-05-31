@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Providers } from "@/components/shared/providers"
 import { GoogleAnalytics } from "@/components/shared/google-analytics"
+import MaintenanceGate from "@/components/MaintenanceGate"
 import { PWARegister } from "@/components/shared/pwa-register"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -99,7 +100,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <GoogleAnalytics />
         <PWARegister />
-        <Providers>{children}</Providers>
+        <MaintenanceGate><Providers>{children}</Providers></MaintenanceGate>
       </body>
     </html>
   )
