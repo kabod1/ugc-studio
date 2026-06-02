@@ -1,18 +1,20 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import {
   Video, Loader2, CheckCircle2, XCircle,
   Clock, Play, Download, RefreshCw, Sparkles, Image,
-  MoreVertical, Trash2, RotateCcw, Copy, ExternalLink, Bot
+  MoreVertical, Trash2, RotateCcw, Copy, ExternalLink, Bot, Zap,
+  Upload, Link, X
 } from "lucide-react"
 import { formatDate } from "@/lib/utils"
 import { type SubscriptionTier } from "@/lib/constants"
 import { AIInfluencersTab } from "@/components/ugc/ai-influencers-tab"
 import { InfluencerSelector } from "@/components/ugc/influencer-selector"
+import { ProductStudioTab } from "@/components/ugc/product-studio-tab"
 
-type ActiveTab = "generate" | "influencers" | "past"
+type ActiveTab = "generate" | "influencers" | "studio" | "past"
 
 interface UGCVideoUsage {
   used: number
@@ -38,7 +40,7 @@ interface UGCVideoJob {
 export default function UGCVideosPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("generate")
   const [jobs, setJobs] = useState<UGCVideoJob[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [productImageUrl, setProductImageUrl] = useState("")
   const [selectedInfluencerId, setSelectedInfluencerId] = useState<string | null>(null)
@@ -48,6 +50,12 @@ export default function UGCVideosPage() {
   const [selectorKey, setSelectorKey] = useState(0)
   const [editingCaptionId, setEditingCaptionId] = useState<string | null>(null)
   const [editingCaptionValue, setEditingCaptionValue] = useState("")
+  const [imageInputMode, setImageInputMode] = useState<"url" | "upload">("url")
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetchJobs()
@@ -78,15 +86,48 @@ export default function UGCVideosPage() {
   async function fetchJobs() {
     try {
       const res = await fetch("/api/ugc-videos")
+      const data = await res.json()
       if (res.ok) {
-        const data = await res.json()
         setJobs(data.jobs || [])
         if (data.usage) setUsage(data.usage)
+      } else {
+        toast.error(data.error || "Failed to load videos")
       }
-    } catch (err) {
-      console.error("Failed to fetch UGC jobs:", err)
+    } catch (err: any) {
+      toast.error("Failed to load videos: " + err.message)
     }
     setLoading(false)
+  }
+
+  async function handleFileSelect(file: File) {
+    const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
+    if (!allowed.includes(file.type)) { toast.error("Only JPG, PNG, and WebP images are supported"); return }
+    if (file.size > 10 * 1024 * 1024) { toast.error("File must be under 10 MB"); return }
+    setUploadedFile(file)
+    setUploadPreview(URL.createObjectURL(file))
+    setProductImageUrl("")
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      const res = await fetch("/api/product-transform/upload-image", { method: "POST", body: formData })
+      if (!res.ok) throw new Error((await res.json()).error || "Upload failed")
+      const { image_url } = await res.json()
+      setProductImageUrl(image_url)
+    } catch (err: any) {
+      toast.error(err.message)
+      setUploadedFile(null)
+      setUploadPreview(null)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  function clearUpload() {
+    setUploadedFile(null)
+    setUploadPreview(null)
+    setProductImageUrl("")
+    if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
   async function handleGenerate() {
@@ -118,9 +159,10 @@ export default function UGCVideosPage() {
       const { job_id } = await res.json()
       setPollingJobId(job_id)
       setProductImageUrl("")
+      setUploadedFile(null)
+      setUploadPreview(null)
       toast.success("UGC video generation started! This takes 3-5 minutes.")
       fetchJobs()
-      fetchUsage()
     } catch (err: any) {
       toast.error(err.message)
     } finally {
@@ -186,9 +228,10 @@ export default function UGCVideosPage() {
   }
 
   const tabs: { id: ActiveTab; label: string }[] = [
-    { id: "generate",    label: "Generate Video" },
-    { id: "influencers", label: "AI Influencers" },
-    { id: "past",        label: "Past Videos" },
+    { id: "generate",    label: "Generate Video"  },
+    { id: "influencers", label: "AI Influencers"  },
+    { id: "studio",      label: "Product Studio"  },
+    { id: "past",        label: "Past Videos"     },
   ]
 
   return (
@@ -214,9 +257,10 @@ export default function UGCVideosPage() {
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              {tab.id === "generate" && <Video className="h-3.5 w-3.5 inline mr-1.5 mb-0.5" />}
-              {tab.id === "influencers" && <Bot className="h-3.5 w-3.5 inline mr-1.5 mb-0.5" />}
-              {tab.id === "past" && <Clock className="h-3.5 w-3.5 inline mr-1.5 mb-0.5" />}
+              {tab.id === "generate"    && <Video className="h-3.5 w-3.5 inline mr-1.5 mb-0.5" />}
+              {tab.id === "influencers" && <Bot   className="h-3.5 w-3.5 inline mr-1.5 mb-0.5" />}
+              {tab.id === "studio"      && <Zap   className="h-3.5 w-3.5 inline mr-1.5 mb-0.5" />}
+              {tab.id === "past"        && <Clock className="h-3.5 w-3.5 inline mr-1.5 mb-0.5" />}
               {tab.label}
             </button>
           ))}
@@ -250,28 +294,82 @@ export default function UGCVideosPage() {
                   />
                 </div>
 
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <input
-                      type="url"
-                      value={productImageUrl}
-                      onChange={(e) => setProductImageUrl(e.target.value)}
-                      placeholder="Paste product image URL (e.g., https://example.com/product.jpg)"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      disabled={generating}
-                    />
+                {/* Input mode toggle */}
+                <div>
+                  <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit mb-3">
+                    <button
+                      onClick={() => { setImageInputMode("url"); clearUpload() }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${imageInputMode === "url" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      <Link className="h-3.5 w-3.5" /> Paste URL
+                    </button>
+                    <button
+                      onClick={() => { setImageInputMode("upload"); setProductImageUrl("") }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${imageInputMode === "upload" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      <Upload className="h-3.5 w-3.5" /> Upload Image
+                    </button>
                   </div>
-                  <button
-                    onClick={handleGenerate}
-                    disabled={generating || !productImageUrl.trim()}
-                    className="inline-flex items-center gap-2 px-6 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap"
-                  >
-                    {generating ? (
-                      <><Loader2 className="h-4 w-4 animate-spin" /> Starting...</>
-                    ) : (
-                      <><Video className="h-4 w-4" /> Generate Video</>
-                    )}
-                  </button>
+
+                  {imageInputMode === "url" ? (
+                    <div className="flex gap-3">
+                      <input
+                        type="url"
+                        value={productImageUrl}
+                        onChange={(e) => setProductImageUrl(e.target.value)}
+                        placeholder="Paste product image URL (e.g., https://example.com/product.jpg)"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        disabled={generating}
+                      />
+                      <button
+                        onClick={handleGenerate}
+                        disabled={generating || !productImageUrl.trim()}
+                        className="inline-flex items-center gap-2 px-6 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap"
+                      >
+                        {generating ? <><Loader2 className="h-4 w-4 animate-spin" /> Starting...</> : <><Video className="h-4 w-4" /> Generate Video</>}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {!uploadedFile ? (
+                        <div
+                          onDrop={(e) => { e.preventDefault(); setIsDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFileSelect(f) }}
+                          onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
+                          onDragLeave={() => setIsDragOver(false)}
+                          onClick={() => fileInputRef.current?.click()}
+                          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isDragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted/40"}`}
+                        >
+                          <Upload className="h-6 w-6 mx-auto mb-1.5 text-muted-foreground" />
+                          <p className="text-sm font-medium">Drop product image here</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, WebP · Max 10 MB</p>
+                          <input ref={fileInputRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp" className="hidden"
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f) }} />
+                        </div>
+                      ) : (
+                        <div className="border rounded-lg bg-muted/30 flex items-center gap-3 p-3">
+                          {uploadPreview && <img src={uploadPreview} alt="Product" className="h-14 w-14 object-cover rounded-md shrink-0" />}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{uploadedFile.name}</p>
+                            <p className="text-xs text-muted-foreground">{(uploadedFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              {uploading ? <><Loader2 className="h-3 w-3 animate-spin text-primary" /><span className="text-xs text-primary">Uploading…</span></>
+                              : productImageUrl ? <><CheckCircle2 className="h-3 w-3 text-green-600" /><span className="text-xs text-green-600">Ready</span></> : null}
+                            </div>
+                          </div>
+                          <button onClick={clearUpload} className="p-1.5 hover:bg-background rounded-md shrink-0">
+                            <X className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        </div>
+                      )}
+                      <button
+                        onClick={handleGenerate}
+                        disabled={generating || uploading || !productImageUrl}
+                        className="inline-flex items-center gap-2 px-6 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none"
+                      >
+                        {generating ? <><Loader2 className="h-4 w-4 animate-spin" /> Starting...</> : <><Video className="h-4 w-4" /> Generate Video</>}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -325,18 +423,45 @@ export default function UGCVideosPage() {
         </div>
       )}
 
+      {/* Product Studio Tab */}
+      {activeTab === "studio" && <ProductStudioTab />}
+
       {/* Past Videos Tab */}
       {activeTab === "past" && (
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-lg">Generated Videos</h2>
-            <button
-              onClick={fetchJobs}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm hover:bg-muted"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Refresh
-            </button>
+            <div className="flex gap-2">
+              {jobs.some(j => j.status === "processing" || j.status === "failed") && (
+                <button
+                  onClick={async () => {
+                    if (!confirm("Delete all stuck/failed jobs?")) return
+                    await Promise.all(
+                      jobs
+                        .filter(j => j.status === "processing" || j.status === "failed")
+                        .map(j => fetch("/api/ugc-videos", {
+                          method: "DELETE",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ job_id: j.id }),
+                        }))
+                    )
+                    setJobs(prev => prev.filter(j => j.status === "completed"))
+                    toast.success("Cleared stuck jobs")
+                  }}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive text-destructive text-sm hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Clear stuck
+                </button>
+              )}
+              <button
+                onClick={fetchJobs}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm hover:bg-muted"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                Refresh
+              </button>
+            </div>
           </div>
 
           {loading ? (
@@ -355,8 +480,8 @@ export default function UGCVideosPage() {
                 const status = statusConfig[job.status] || statusConfig.pending
                 const StatusIcon = status.icon
                 return (
-                  <div key={job.id} className="bg-card border rounded-lg overflow-hidden">
-                    <div className="aspect-video bg-muted relative">
+                  <div key={job.id} className="bg-card border rounded-lg">
+                    <div className="aspect-video bg-muted relative overflow-hidden rounded-t-lg">
                       {job.video_url ? (
                         <video
                           src={job.video_url}
@@ -395,8 +520,8 @@ export default function UGCVideosPage() {
                             </button>
                             {openMenuId === job.id && (
                               <>
-                                <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
-                                <div className="absolute right-0 top-8 z-20 w-48 bg-popover border rounded-md shadow-lg py-1">
+                                <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
+                                <div className="absolute right-0 top-8 z-50 w-48 bg-popover border rounded-md shadow-lg py-1">
                                   {job.status === "completed" && (
                                     <button
                                       onClick={() => { setEditingCaptionId(job.id); setEditingCaptionValue(job.caption ?? ""); setOpenMenuId(null) }}
@@ -427,7 +552,7 @@ export default function UGCVideosPage() {
                                       </button>
                                     </>
                                   )}
-                                  {(job.status === "failed" || job.status === "pending") && (
+                                  {(job.status === "failed" || job.status === "pending" || job.status === "processing") && (
                                     <button
                                       onClick={() => handleRetry(job)}
                                       className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted w-full text-left"

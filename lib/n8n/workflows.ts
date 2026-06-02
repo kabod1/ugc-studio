@@ -90,6 +90,26 @@ export async function generateUGCVideo(
   )
 }
 
+export async function generateProductAdVideo(
+  sourceImageUrl: string,
+  jobId: string,
+  callbackUrl: string,
+  brandId: string,
+  style: string,
+  ctaText?: string,
+  productAnalysis?: string
+) {
+  return callN8nWebhook<{ success: boolean }>("/ugc-generate-video", {
+    source_image_url: sourceImageUrl,
+    job_id: jobId,
+    callback_url: callbackUrl,
+    brand_id: brandId,
+    style,
+    cta_text: ctaText,
+    product_analysis: productAnalysis,
+  })
+}
+
 export async function triggerAnalytics(params: AnalyticsParams) {
   return callN8nWebhook<AnalyticsResult>("/analytics", params)
 }
