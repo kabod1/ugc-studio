@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { type NextRequest, NextResponse } from "next/server"
+import { isAdminEmail } from "@/lib/constants"
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
@@ -62,6 +63,8 @@ export async function updateSession(request: NextRequest) {
   let role = roleCookie || (session.user?.user_metadata?.role as string) || "brand"
   // Agencies are brands (signup gives them a brands row); "agency" is not a dashboard role
   if (role === "agency") role = "brand"
+  // Admin emails can open every dashboard, whatever the role cookie says
+  if (isAdminEmail(session.user?.email)) role = "admin"
 
   // Role-based access control
   if (path.startsWith("/admin") && role !== "admin") {

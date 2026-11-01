@@ -17,7 +17,10 @@ export default async function CreatorLayout({
 
   // Cookie is updated immediately on role switch; user_metadata lags until session refresh
   const cookieStore = cookies()
-  const role = cookieStore.get("user-role")?.value || user.user_metadata?.role || "brand"
+  // Admin emails can open every dashboard, whatever the role cookie says
+  const role = isAdminEmail(user.email)
+    ? "admin"
+    : cookieStore.get("user-role")?.value || user.user_metadata?.role || "brand"
   // Allow admin to access the creator dashboard without switching their role
   if (role !== "creator" && role !== "admin") {
     redirect(role === "brand" ? "/dashboard" : "/login")
