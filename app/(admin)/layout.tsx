@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { isAdminEmail } from "@/lib/constants"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 
 export default async function AdminLayout({
@@ -22,7 +23,8 @@ export default async function AdminLayout({
     .eq("id", user.id)
     .single()
 
-  if (!profile || profile.role !== "admin") {
+  // Admin emails (lib/constants ADMIN_EMAILS) are admins even if the profile row says otherwise
+  if (!profile || (profile.role !== "admin" && !isAdminEmail(user.email))) {
     redirect(profile?.role === "creator" ? "/creator" : "/dashboard")
   }
 

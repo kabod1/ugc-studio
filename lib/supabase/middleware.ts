@@ -60,6 +60,8 @@ export async function updateSession(request: NextRequest) {
   // Read role from cookie (set at login/signup) or fall back to session user_metadata
   const roleCookie = request.cookies.get("user-role")?.value
   let role = roleCookie || (session.user?.user_metadata?.role as string) || "brand"
+  // Agencies are brands (signup gives them a brands row); "agency" is not a dashboard role
+  if (role === "agency") role = "brand"
 
   // Role-based access control
   if (path.startsWith("/admin") && role !== "admin") {

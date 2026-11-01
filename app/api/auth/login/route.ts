@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server"
+import { createServiceClient } from "@/lib/supabase/server"
+import { isAdminEmail } from "@/lib/constants"
 
 export async function POST(request: Request) {
   try {
@@ -29,8 +31,17 @@ export async function POST(request: Request) {
 
     const userMeta = authData.user?.user_metadata || {}
 
-    // Role is stored in user_metadata (set at signup)
-    const role = (userMeta.role as string) || "brand"
+    // Role comes from the profiles table (users cannot change it). user_metadata
+    // is user-controlled and may say "agency", which no dashboard accepts and
+    // caused a redirect loop back to /login. Agencies are brands in the DB.
+    const { data: profile } = await createServiceClient()
+      .from("profiles")
+      .select("role")
+      .eq("id", authData.user?.id)
+      .single()
+    const dbRole = (profile?.role as string | undefined) || (userMeta.role as string | undefined)
+    let role: "brand" | "creator" | "admin" = dbRole === "creator" ? "creator" : "brand"
+    if (profile?.role === "admin" || isAdminEmail(authData.user?.email)) role = "admin"
 
     const destination =
       role === "creator" ? "/creator" : role === "admin" ? "/admin" : "/dashboard"
