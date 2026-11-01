@@ -6,13 +6,15 @@ import { sendPayoutEmail } from "@/lib/email"
 // Internal secret to secure this endpoint (called by Vercel cron or n8n)
 const CRON_SECRET = process.env.CRON_SECRET || ""
 
-// POST /api/payments/schedule-payouts
-// Automatically releases all approved-but-unpaid escrow payments older than X days.
-// Called by Vercel cron (vercel.json) or n8n on a schedule.
+// Moving money requires the secret to be configured, never fail open.
+function isAuthorized(request: NextRequest) {
+  return !!CRON_SECRET && request.headers.get("authorization") === `Bearer ${CRON_SECRET}`
+}
+
+// POST /api/payments/schedule-payouts  { auto_release_after_days?: number }
+// Called by n8n or manually. Vercel cron uses GET ?run=1 (see vercel.json).
 export async function POST(request: NextRequest) {
-  // Validate cron secret
-  const authHeader = request.headers.get("authorization")
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -22,26 +24,46 @@ export async function POST(request: NextRequest) {
     ? body.auto_release_after_days
     : 3
 
+  return releaseDuePayments(autoReleaseDays)
+}
+
+// Releases escrow payments whose content was APPROVED at least N days ago.
+// Approval normally pays out immediately (app/api/content/[id]); this catches
+// creators who connected Stripe after approval, or transfers that failed.
+// Escrow payments without approved content are never touched.
+async function releaseDuePayments(autoReleaseDays: number) {
   const svc = createServiceClient()
   const cutoff = new Date(Date.now() - autoReleaseDays * 24 * 60 * 60 * 1000).toISOString()
 
-  // Find all payments in escrow where content was approved more than N days ago
-  const { data: payments, error } = await svc
+  const { data: escrow, error } = await svc
     .from("payments")
     .select(`
-      id, amount_cents, platform_fee_cents, updated_at,
+      id, amount_cents, platform_fee_cents, updated_at, campaign_id, creator_id,
       campaigns(title),
       creator_profiles(user_id, display_name, stripe_connect_account_id, stripe_connect_onboarded)
     `)
     .eq("status", "escrow")
-    .lte("updated_at", cutoff)
 
   if (error) {
     console.error("Schedule payouts fetch error:", error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  if (!payments?.length) {
+  const { data: approved, error: approvedError } = await svc
+    .from("content_submissions")
+    .select("campaign_id, creator_id")
+    .eq("status", "approved")
+    .lte("approved_at", cutoff)
+
+  if (approvedError) {
+    console.error("Schedule payouts approval lookup error:", approvedError)
+    return NextResponse.json({ error: approvedError.message }, { status: 500 })
+  }
+
+  const approvedKeys = new Set((approved || []).map((s) => `${s.campaign_id}:${s.creator_id}`))
+  const payments = (escrow || []).filter((p) => approvedKeys.has(`${p.campaign_id}:${p.creator_id}`))
+
+  if (!payments.length) {
     return NextResponse.json({ processed: 0, message: "No payments due for release" })
   }
 
@@ -126,11 +148,15 @@ export async function POST(request: NextRequest) {
   })
 }
 
-// GET — returns pending payouts summary (for admin dashboard)
+// GET ?run=1 — daily Vercel cron (crons always use GET): release due payouts.
+// GET        — returns pending payouts summary (for admin dashboard)
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization")
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  if (request.nextUrl.searchParams.get("run") === "1") {
+    return releaseDuePayments(3)
   }
 
   const svc = createServiceClient()

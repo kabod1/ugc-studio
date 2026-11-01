@@ -3,7 +3,7 @@
   "buildCommand": "npm run build",
   "crons": [
     {
-      "path": "/api/payments/schedule-payouts",
+      "path": "/api/payments/schedule-payouts?run=1",
       "schedule": "0 9 * * *"
     },
     {
